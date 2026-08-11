@@ -83,6 +83,8 @@ export default function UniverseApp() {
       <div className="insight-stats"><span><b>{boards.length}</b>Collections</span><span><b>{memories.length}</b>Memories</span><span><b>42</b>Followers</span></div>
       <div className="insight-section"><div><h3>Pinned collections</h3><button onClick={() => setPage('profile')}>Reorder</button></div><div className="pinned-grid">{boards.slice(0,3).map(b => <button key={b.id} onClick={() => openBoard(b)}><img src={b.image} alt="" /><strong>{b.name}</strong><small>{b.count} memories</small></button>)}</div></div>
       <button className="insight-edit" onClick={() => setPage('profile')}><Pencil size={14} /> Edit profile</button>
+      <div className="board-preview"><div className="insight-section-title"><h3>Board preview</h3><MoreHorizontal size={15} /></div><button onClick={() => boards[0] && openBoard(boards[0])}><img src={boards[0]?.image} alt="" /><strong>{boards[0]?.name || 'New collection'}</strong><small>{boards[0]?.count || 0} memories · {boards[0]?.children?.length || 0} boards</small></button></div>
+      <div className="right-create"><div className="insight-section-title"><h3>Create</h3><X size={15} /></div><button onClick={() => setSheet('menu')}><LayoutGrid size={16} /> Board</button><button onClick={() => setSheet('memory')}><ImagePlus size={16} /> Memory</button><button onClick={() => setSheet('note')}><FileText size={16} /> Note</button></div>
     </aside>
     {sheet && <CreationSheet type={sheet} boards={boards} profile={profile} onClose={() => setSheet(null)} onBoard={addBoard} onMemory={addMemory} onNote={addNote} onProfile={p => { setProfile(p); setSheet(null); setToast('Profile updated') }} />}
     {toast && <div className="toast"><Sparkles size={15} /> {toast}</div>}
