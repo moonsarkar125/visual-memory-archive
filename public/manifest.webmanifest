@@ -1,0 +1,11 @@
+{
+  "name": "Little Universe",
+  "short_name": "Universe",
+  "description": "A private visual universe for memories and collections.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#070707",
+  "orientation": "portrait-primary",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
