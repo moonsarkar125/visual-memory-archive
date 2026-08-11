@@ -63,6 +63,12 @@ export default function UniverseApp() {
 
   return <div className="universe-shell">
     <div className="ambient ambient-one" /><div className="ambient ambient-two" />
+    <aside className="reference-panel" aria-label="Visual memory archive concept">
+      <span className="reference-kicker">VISUAL MEMORY ARCHIVE</span><h2>Concept ideas</h2>
+      <p className="reference-label">Mood / Aesthetic</p><ul><li>Glassmorphism</li><li>Neon lavender glow</li><li>Dark cinematic base</li><li>Soft gradients</li><li>Floating elements</li></ul>
+      <div className="reference-card"><span>Glassmorphism Card Style</span><div className="reference-swatch">Cafe Diaries<small>23 memories</small></div></div>
+      <div className="reference-card"><span>Neon Lavender Lines &amp; Twists</span><i className="neon-swoop" /></div>
+    </aside>
     <main className="app-frame">
       {page === 'home' && <Home profile={profile} boards={boards} memories={memories} notes={notes} onBoard={openBoard} onMemory={openMemory} onCreate={() => setSheet('menu')} />}
       {page === 'search' && <SearchPage boards={boards} memories={memories} onBoard={openBoard} onMemory={openMemory} />}
@@ -72,6 +78,12 @@ export default function UniverseApp() {
       {page === 'memory' && selectedMemory && <MemoryPage memory={selectedMemory} board={boards.find(b => b.id === selectedMemory.boardId)} onBack={() => setPage('home')} onDelete={deleteMemory} />}
       {page !== 'board' && page !== 'memory' && <Nav page={page} setPage={setPage} onCreate={() => setSheet('menu')} />}
     </main>
+    <aside className="insight-panel" aria-label="Archive profile summary">
+      <div className="insight-cover" style={{ backgroundImage: `url(${profile.cover})` }}><img src={profile.avatar} alt="" /><strong>@{profile.username}</strong><span>{profile.bio}</span><small><MapPin size={12} /> Jamshedpur</small></div>
+      <div className="insight-stats"><span><b>{boards.length}</b>Collections</span><span><b>{memories.length}</b>Memories</span><span><b>42</b>Followers</span></div>
+      <div className="insight-section"><div><h3>Pinned collections</h3><button onClick={() => setPage('profile')}>Reorder</button></div><div className="pinned-grid">{boards.slice(0,3).map(b => <button key={b.id} onClick={() => openBoard(b)}><img src={b.image} alt="" /><strong>{b.name}</strong><small>{b.count} memories</small></button>)}</div></div>
+      <button className="insight-edit" onClick={() => setPage('profile')}><Pencil size={14} /> Edit profile</button>
+    </aside>
     {sheet && <CreationSheet type={sheet} boards={boards} profile={profile} onClose={() => setSheet(null)} onBoard={addBoard} onMemory={addMemory} onNote={addNote} onProfile={p => { setProfile(p); setSheet(null); setToast('Profile updated') }} />}
     {toast && <div className="toast"><Sparkles size={15} /> {toast}</div>}
   </div>
