@@ -63,6 +63,7 @@ export default function UniverseApp() {
 
   return <div className="universe-shell">
     <div className="ambient ambient-one" /><div className="ambient ambient-two" />
+    <aside className="vma-rail" aria-label="Archive navigation"><button className="rail-active"><Archive size={20} /> Home</button><button><Search size={20} /> Search</button><button className="rail-create" onClick={() => setSheet('menu')}><Plus size={34} /></button><span className="rail-label">CREATE NEW</span><button onClick={() => setSheet('menu')}><LayoutGrid size={20} /> Board</button><button onClick={() => setSheet('memory')}><ImagePlus size={20} /> Memory</button><button onClick={() => setSheet('note')}><FileText size={20} /> Note</button><button onClick={() => setSheet('story')}><BookOpen size={20} /> Story</button></aside>
     <aside className="reference-panel" aria-label="Visual memory archive concept">
       <span className="reference-kicker">VISUAL MEMORY ARCHIVE</span><h2>Concept ideas</h2>
       <p className="reference-label">Mood / Aesthetic</p><ul><li>Glassmorphism</li><li>Neon lavender glow</li><li>Dark cinematic base</li><li>Soft gradients</li><li>Floating elements</li></ul>
