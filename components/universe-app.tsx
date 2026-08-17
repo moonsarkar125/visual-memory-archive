@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import {
   Archive, ArrowLeft, Bell, BookOpen, Camera, ChevronRight, CircleUserRound,
-  Compass, FileText, Globe2, ImagePlus, LockKeyhole, MapPin, Menu, MoreHorizontal,
+  FileText, Globe2, ImagePlus, LockKeyhole, MapPin, MoreHorizontal,
   Pencil, Plus, Search, Send, Settings, Sparkles, Trash2, X, Heart, LayoutGrid,
+  Shuffle, ArrowRight, Compass, Eye, Shield, Tag, Calendar, Layers
 } from 'lucide-react'
 
+// Standard visual assets
 const images = {
   cafe: 'https://images.unsplash.com/photo-1511081692775-05d0f180a065?auto=format&fit=crop&w=900&q=85',
   japan: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=85',
@@ -14,132 +16,1496 @@ const images = {
   rain: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=85',
   tea: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=85',
   hills: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=85',
+  tokyo: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=85',
+  library: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&q=85',
 }
 
-type Board = { id: string; name: string; description: string; image: string; count: number; location?: string; privacy: 'private' | 'public'; children?: string[] }
-type Memory = { id: string; title: string; description: string; image?: string; boardId: string; date: string; location?: string; privacy: 'private' | 'public'; tags: string[] }
-type Note = { id: string; text: string; date: string; privacy: 'private' | 'public' }
-type Profile = { username: string; displayName: string; bio: string; avatar: string; cover: string }
+export type PrivacyStatus = 'private' | 'public'
+
+export type Board = {
+  id: string
+  name: string
+  description: string
+  image: string
+  count: number
+  location?: string
+  privacy: PrivacyStatus
+  children?: string[]
+}
+
+export type Memory = {
+  id: string
+  title: string
+  description: string
+  image?: string
+  boardId: string
+  date: string
+  location?: string
+  privacy: PrivacyStatus
+  tags: string[]
+  mood?: string
+}
+
+export type Note = {
+  id: string
+  text: string
+  date: string
+  privacy: PrivacyStatus
+}
+
+export type Profile = {
+  username: string
+  displayName: string
+  bio: string
+  avatar: string
+  cover: string
+  location: string
+  currentEra: string[]
+}
 
 const starterBoards: Board[] = [
-  { id: 'cafes', name: 'Cafés in Jamshedpur', description: 'little tables, long conversations', image: images.cafe, count: 12, location: 'Jamshedpur', privacy: 'private', children: ['Favorite cafés', 'Study cafés'] },
-  { id: 'japan', name: 'Japan — someday', description: 'a soft itinerary for later', image: images.japan, count: 12, location: 'Japan', privacy: 'public', children: ['Tokyo', 'Kyoto'] },
-  { id: 'books', name: 'Books I have read', description: 'pages that stayed', image: images.books, count: 18, privacy: 'private' },
-  { id: 'anime', name: 'Anime universe', description: 'favorites and recommendations', image: images.hills, count: 43, privacy: 'private' },
+  {
+    id: 'cafes',
+    name: 'Cafés in Jamshedpur',
+    description: 'little tables, long conversations, and warm cups',
+    image: images.cafe,
+    count: 12,
+    location: 'Jamshedpur',
+    privacy: 'private',
+    children: ['Favorite cafés', 'Study cafés', 'Coffee shops', 'Places to visit'],
+  },
+  {
+    id: 'japan',
+    name: 'Japan — someday',
+    description: 'a soft itinerary for later',
+    image: images.japan,
+    count: 12,
+    location: 'Japan',
+    privacy: 'public',
+    children: ['Tokyo', 'Kyoto', 'Osaka', 'Shrines'],
+  },
+  {
+    id: 'books',
+    name: 'Books I have read',
+    description: 'pages that stayed long after finishing',
+    image: images.books,
+    count: 18,
+    privacy: 'private',
+    children: ['Favorites', 'Currently reading'],
+  },
+  {
+    id: 'anime',
+    name: 'Anime universe',
+    description: 'favorites and recommendations',
+    image: images.hills,
+    count: 43,
+    privacy: 'private',
+  },
 ]
+
 const starterMemories: Memory[] = [
-  { id: 'rain', title: 'Rainy evening', description: 'One of those evenings that felt quietly perfect.', image: images.rain, boardId: 'cafes', date: 'August 9, 2026', location: 'Jamshedpur', privacy: 'private', tags: ['rain', 'quiet'] },
-  { id: 'tea', title: 'A cup of calm', description: 'Some mornings are meant to be taken slowly.', image: images.tea, boardId: 'cafes', date: 'August 2, 2026', location: 'Home', privacy: 'private', tags: ['morning'] },
+  {
+    id: 'rain',
+    title: 'Rainy evening',
+    description: 'One of those evenings that felt quietly perfect. Rain tapping softly against the window.',
+    image: images.rain,
+    boardId: 'cafes',
+    date: 'August 2026',
+    location: 'Jamshedpur',
+    privacy: 'private',
+    mood: '☁ nostalgic',
+    tags: ['rain', 'quiet', 'café'],
+  },
+  {
+    id: 'tea',
+    title: 'A cup of calm',
+    description: 'Some mornings are meant to be taken slowly with green tea.',
+    image: images.tea,
+    boardId: 'cafes',
+    date: 'August 2026',
+    location: 'Home',
+    privacy: 'private',
+    mood: '☕ cozy',
+    tags: ['morning', 'tea'],
+  },
+  {
+    id: 'tokyo',
+    title: 'Tokyo alley lights',
+    description: 'Neon signs reflecting on wet pavement late at night in Shinjuku.',
+    image: images.tokyo,
+    boardId: 'japan',
+    date: 'July 2026',
+    location: 'Tokyo',
+    privacy: 'public',
+    mood: '✨ serene',
+    tags: ['japan', 'night', 'lights'],
+  },
+  {
+    id: 'library',
+    title: 'Quiet reading nook',
+    description: 'A hidden sanctuary where time slows down between wooden bookshelves.',
+    image: images.library,
+    boardId: 'books',
+    date: 'July 2026',
+    location: 'Library',
+    privacy: 'private',
+    mood: '📚 peaceful',
+    tags: ['books', 'quiet'],
+  },
 ]
+
+const starterNotes: Note[] = [
+  {
+    id: 'note-1',
+    text: 'Some places are worth remembering for reasons you can\'t explain.',
+    date: 'August 6, 2026',
+    privacy: 'private',
+  },
+  {
+    id: 'note-2',
+    text: 'Maybe the best part of today was doing absolutely nothing.',
+    date: 'August 12, 2026',
+    privacy: 'private',
+  },
+]
+
+const starterProfile: Profile = {
+  username: 'terribleracoon556',
+  displayName: 'Shreya',
+  bio: 'collecting little moments ✦',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  cover: images.japan,
+  location: 'Jamshedpur',
+  currentEra: ['late night coding', '☕ coffee', '💻 cybersecurity', '📚 books', '🌙 2am thoughts'],
+}
 
 const uid = () => Math.random().toString(36).slice(2, 9)
-const relativeDate = (date: string) => { const days = Math.max(0, Math.round((Date.now() - new Date(date).getTime()) / 86400000)); return days === 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days}d ago` }
 
 export default function UniverseApp() {
-  const [page, setPage] = useState('home')
+  const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'board' | 'memory'>('home')
   const [boards, setBoards] = useState<Board[]>(starterBoards)
   const [memories, setMemories] = useState<Memory[]>(starterMemories)
-  const [notes, setNotes] = useState<Note[]>([{ id: 'note-1', text: 'Some places are worth remembering for reasons you can\'t explain.', date: 'August 6, 2026', privacy: 'private' }])
-  const [profile, setProfile] = useState<Profile>({ username: 'terribleraccoon556', displayName: '', bio: 'collecting little moments ✦', avatar: 'https://i.pravatar.cc/160?img=47', cover: images.japan })
+  const [notes, setNotes] = useState<Note[]>(starterNotes)
+  const [profile, setProfile] = useState<Profile>(starterProfile)
+
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
   const [sheet, setSheet] = useState<string | null>(null)
   const [toast, setToast] = useState('')
+  const [shuffledMemory, setShuffledMemory] = useState<Memory | null>(null)
 
+  // Initialize from LocalStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('little-universe-v1')
-      if (saved) { const data = JSON.parse(saved); setBoards(data.boards); setMemories(data.memories); setNotes(data.notes); setProfile(data.profile) }
+      const saved = localStorage.getItem('little-universe-v2') || localStorage.getItem('little-universe-v1')
+      if (saved) {
+        const data = JSON.parse(saved)
+        if (data.boards) setBoards(data.boards)
+        if (data.memories) setMemories(data.memories)
+        if (data.notes) setNotes(data.notes)
+        if (data.profile) setProfile({ ...starterProfile, ...data.profile })
+      }
     } catch {}
   }, [])
-  useEffect(() => { localStorage.setItem('little-universe-v1', JSON.stringify({ boards, memories, notes, profile })) }, [boards, memories, notes, profile])
-  useEffect(() => { if (toast) { const t = setTimeout(() => setToast(''), 2400); return () => clearTimeout(t) } }, [toast])
 
-  const openBoard = (board: Board) => { setSelectedBoard(board); setPage('board') }
-  const openMemory = (memory: Memory) => { setSelectedMemory(memory); setPage('memory') }
-  const addBoard = (board: Omit<Board, 'id' | 'count'>) => { const next = { ...board, id: uid(), count: 0 }; setBoards(v => [next, ...v]); setSheet(null); setToast('Board added to your universe') }
-  const addMemory = (memory: Omit<Memory, 'id'>) => { setMemories(v => [{ ...memory, id: uid() }, ...v]); setBoards(v => v.map(b => b.id === memory.boardId ? { ...b, count: b.count + 1 } : b)); setSheet(null); setToast('Memory saved privately') }
-  const addNote = (text: string) => { setNotes(v => [{ id: uid(), text, date: 'August 11, 2026', privacy: 'private' }, ...v]); setSheet(null); setToast('Note tucked away') }
-  const deleteMemory = () => { if (!selectedMemory) return; setMemories(v => v.filter(m => m.id !== selectedMemory.id)); setSelectedMemory(null); setPage('home'); setToast('Memory deleted') }
+  // Sync to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('little-universe-v2', JSON.stringify({ boards, memories, notes, profile }))
+  }, [boards, memories, notes, profile])
 
-  return <div className="universe-shell">
-    <div className="ambient ambient-one" /><div className="ambient ambient-two" />
-    <aside className="vma-rail" aria-label="Archive navigation"><button className="rail-active"><Archive size={20} /> Home</button><button><Search size={20} /> Search</button><button className="rail-create" onClick={() => setSheet('menu')}><Plus size={34} /></button><span className="rail-label">CREATE NEW</span><button onClick={() => setSheet('menu')}><LayoutGrid size={20} /> Board</button><button onClick={() => setSheet('memory')}><ImagePlus size={20} /> Memory</button><button onClick={() => setSheet('note')}><FileText size={20} /> Note</button><button onClick={() => setSheet('story')}><BookOpen size={20} /> Story</button></aside>
-    <aside className="reference-panel" aria-label="Visual memory archive concept">
-      <span className="reference-kicker">VISUAL MEMORY ARCHIVE</span><h2>Concept ideas</h2>
-      <p className="reference-label">Mood / Aesthetic</p><ul><li>Glassmorphism</li><li>Neon lavender glow</li><li>Dark cinematic base</li><li>Soft gradients</li><li>Floating elements</li></ul>
-      <div className="reference-card"><span>Glassmorphism Card Style</span><div className="reference-swatch">Cafe Diaries<small>23 memories</small></div></div>
-      <div className="reference-card"><span>Neon Lavender Lines &amp; Twists</span><i className="neon-swoop" /></div>
-    </aside>
-    <main className="app-frame">
-      {page === 'home' && <Home profile={profile} boards={boards} memories={memories} notes={notes} onBoard={openBoard} onMemory={openMemory} onCreate={() => setSheet('menu')} />}
-      {page === 'search' && <SearchPage boards={boards} memories={memories} onBoard={openBoard} onMemory={openMemory} />}
-      {page === 'inbox' && <Inbox />}
-      {page === 'profile' && <ProfilePage profile={profile} boards={boards} memories={memories} notes={notes} onBoard={openBoard} onMemory={openMemory} onEdit={() => setSheet('profile')} />}
-      {page === 'board' && selectedBoard && <BoardPage board={selectedBoard} memories={memories.filter(m => m.boardId === selectedBoard.id)} onBack={() => setPage('home')} onMemory={openMemory} onCreate={() => setSheet('memory')} />}
-      {page === 'memory' && selectedMemory && <MemoryPage memory={selectedMemory} board={boards.find(b => b.id === selectedMemory.boardId)} onBack={() => setPage('home')} onDelete={deleteMemory} />}
-      {page !== 'board' && page !== 'memory' && <Nav page={page} setPage={setPage} onCreate={() => setSheet('menu')} />}
-    </main>
-    <aside className="insight-panel" aria-label="Archive profile summary">
-      <div className="insight-cover" style={{ backgroundImage: `url(${profile.cover})` }}><img src={profile.avatar} alt="" /><strong>@{profile.username}</strong><span>{profile.bio}</span><small><MapPin size={12} /> Jamshedpur</small></div>
-      <div className="insight-stats"><span><b>{boards.length}</b>Collections</span><span><b>{memories.length}</b>Memories</span><span><b>42</b>Followers</span></div>
-      <div className="insight-section"><div><h3>Pinned collections</h3><button onClick={() => setPage('profile')}>Reorder</button></div><div className="pinned-grid">{boards.slice(0,3).map(b => <button key={b.id} onClick={() => openBoard(b)}><img src={b.image} alt="" /><strong>{b.name}</strong><small>{b.count} memories</small></button>)}</div></div>
-      <button className="insight-edit" onClick={() => setPage('profile')}><Pencil size={14} /> Edit profile</button>
-      <div className="board-preview"><div className="insight-section-title"><h3>Board preview</h3><MoreHorizontal size={15} /></div><button onClick={() => boards[0] && openBoard(boards[0])}><img src={boards[0]?.image} alt="" /><strong>{boards[0]?.name || 'New collection'}</strong><small>{boards[0]?.count || 0} memories · {boards[0]?.children?.length || 0} boards</small></button></div>
-      <div className="right-create"><div className="insight-section-title"><h3>Create</h3><X size={15} /></div><button onClick={() => setSheet('menu')}><LayoutGrid size={16} /> Board</button><button onClick={() => setSheet('memory')}><ImagePlus size={16} /> Memory</button><button onClick={() => setSheet('note')}><FileText size={16} /> Note</button></div>
-    </aside>
-    {sheet && <CreationSheet type={sheet} boards={boards} profile={profile} onClose={() => setSheet(null)} onBoard={addBoard} onMemory={addMemory} onNote={addNote} onProfile={p => { setProfile(p); setSheet(null); setToast('Profile updated') }} />}
-    {toast && <div className="toast"><Sparkles size={15} /> {toast}</div>}
-  </div>
-}
+  // Clear toast automatically
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(''), 2400)
+      return () => clearTimeout(t)
+    }
+  }, [toast])
 
-function Header({ eyebrow, title, action }: { eyebrow?: string; title: string; action?: React.ReactNode }) { return <header className="topbar"><div><span className="eyebrow">{eyebrow || 'LITTLE UNIVERSE'}</span><h1>{title}</h1></div>{action}</header> }
-function Home({ profile, boards, memories, notes, onBoard, onMemory, onCreate }: any) {
-  return <section className="screen archive-home">
-    <div className="archive-header"><div><span className="eyebrow">VISUAL MEMORY ARCHIVE</span><h1>Good evening,<br /><b>@{profile.username}</b> <Sparkles size={18} /></h1><p className="lede">Your little universe, in pieces.</p></div><div className="archive-tools"><div className="desktop-search"><Search size={16} /><span>Search memories, boards, notes...</span></div><button className="icon-button"><Bell size={18} /></button></div></div>
-    <div className="archive-main-grid"><div>
-      <section className="hero-note"><div><span className="eyebrow">A SMALL REMINDER</span><p>Collecting is a way of paying attention.</p></div><Sparkles size={22} /></section>
-      <SectionTitle title="Recent memories" action="View all" /><div className="memory-row">{memories.slice(0, 3).map((m: Memory) => <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />)}</div>
-      <SectionTitle title="Your collections" action="See all" /><div className="board-grid">{boards.slice(0, 4).map((b: Board) => <BoardCard key={b.id} board={b} onClick={() => onBoard(b)} />)}</div>
-      <SectionTitle title="Notes from my universe" action="See all" /><div className="notes-row">{notes.slice(0, 3).map((n: Note) => <div className="note-card" key={n.id}><FileText size={15} /><p>{n.text}</p><span>{relativeDate(n.date)}</span></div>)}<button className="write-note" onClick={onCreate}><Plus size={18} /><span>Write a note</span></button></div>
-    </div><div className="home-create-panel"><SectionTitle title="Create" /><button onClick={onCreate}><LayoutGrid size={20} /><span>Board</span></button><button onClick={onCreate}><ImagePlus size={20} /><span>Memory</span></button><button onClick={onCreate}><FileText size={20} /><span>Note</span></button><button onClick={onCreate}><BookOpen size={20} /><span>Story</span></button></div></div>
-  </section>
-}
-function SectionTitle({ title, action }: { title: string; action?: string }) { return <div className="section-title"><h2>{title}</h2>{action && <button>{action}<ChevronRight size={14} /></button>}</div> }
-function GlassImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) { const [loaded, setLoaded] = useState(false); return <span className={`image-shell ${loaded ? 'is-loaded' : ''}`}><span className="image-skeleton" aria-hidden="true" /><img className={className} src={src} alt={alt} onLoad={() => setLoaded(true)} /></span> }
-function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) { return <button className="memory-card" onClick={onClick}>{memory.image && <GlassImage src={memory.image} alt="" className="memory-image" />}<div className="memory-overlay"><span>{memory.privacy === 'private' ? <LockKeyhole size={11} /> : <Globe2 size={11} />}</span><strong>{memory.title}</strong><small>{memory.location}</small></div></button> }
-function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) { return <button className="board-card" onClick={onClick}><GlassImage src={board.image} alt="" className="board-image" /><div><div className="card-kicker">{board.privacy === 'private' ? <LockKeyhole size={11} /> : <Globe2 size={11} />} {board.count} memories</div><strong>{board.name}</strong>{board.location && <small><MapPin size={11} /> {board.location}</small>}</div></button> }
-function Nav({ page, setPage, onCreate }: { page: string; setPage: (s: string) => void; onCreate: () => void }) { return <nav className="bottom-nav"><NavItem icon={<Archive />} label="Home" active={page === 'home'} onClick={() => setPage('home')} /><NavItem icon={<Search />} label="Search" active={page === 'search'} onClick={() => setPage('search')} /><button className="create-button" onClick={onCreate}><Plus /></button><NavItem icon={<Bell />} label="Inbox" active={page === 'inbox'} onClick={() => setPage('inbox')} /><NavItem icon={<CircleUserRound />} label="Profile" active={page === 'profile'} onClick={() => setPage('profile')} /></nav> }
-function NavItem({ icon, label, active, onClick }: any) { return <button className={`nav-item ${active ? 'active' : ''}`} onClick={onClick}>{icon}<span>{label}</span></button> }
-function SearchPage({ boards, memories, onBoard, onMemory }: any) { const [q, setQ] = useState(''); const [filter, setFilter] = useState('All'); const results = useMemo(() => [...boards.map((b: Board) => ({ ...b, kind: 'Board' })), ...memories.map((m: Memory) => ({ ...m, kind: 'Memory' }))].filter((x: any) => (filter === 'All' || x.kind === filter) && JSON.stringify(x).toLowerCase().includes(q.toLowerCase())), [q, filter, boards, memories]); return <section className="screen"><Header title="Search" action={<button className="icon-button"><Compass size={18} /></button>} /><div className="search-box"><Search size={18} /><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search your universe" /></div><div className="chips">{['All', 'Board', 'Memory', 'Places', 'Tags'].map(x => <button className={filter === x ? 'selected' : ''} key={x} onClick={() => setFilter(x)}>{x}</button>)}</div><p className="search-hint">{q ? `${results.length} things found` : 'Look for places, feelings, and little things.'}</p><div className="search-results">{results.map((x: any) => x.kind === 'Board' ? <BoardCard key={x.id} board={x} onClick={() => onBoard(x)} /> : <MemoryCard key={x.id} memory={x} onClick={() => onMemory(x)} />)}</div></section> }
-function Inbox() { return <section className="screen"><Header title="Inbox" action={<button className="icon-button"><Settings size={18} /></button>} /><div className="tabs"><button className="selected">Notifications</button><button>Messages</button></div><div className="inbox-list"><InboxItem icon={<Heart />} text="Someone saved your public board." time="2h ago" /><InboxItem icon={<CircleUserRound />} text="A new person found your universe." time="Yesterday" /><InboxItem icon={<BookOpen />} text="Your story is ready to be revisited." time="3d ago" /></div><div className="empty-inbox"><Send size={24} /><p>Messages will live here.</p><small>Keep your little universe quiet for now.</small></div></section> }
-function InboxItem({ icon, text, time }: any) { return <div className="inbox-item"><span className="inbox-icon">{icon}</span><div><p>{text}</p><small>{time}</small></div><ChevronRight size={16} /></div> }
-function ProfilePage({ profile, boards, memories, notes, onBoard, onMemory, onEdit }: any) { return <section className="screen profile-screen"><div className="profile-cover"><img src={profile.cover} alt="" /><button className="icon-button"><MoreHorizontal size={18} /></button></div><div className="profile-head"><img className="avatar" src={profile.avatar} alt="Profile avatar" /><div className="profile-copy"><h1>@{profile.username}</h1>{profile.displayName && <p>{profile.displayName}</p>}<span>{profile.bio}</span></div><button className="outline-button" onClick={onEdit}><Pencil size={14} /> Edit</button></div><div className="stats"><div><strong>{boards.length}</strong><span>collections</span></div><div><strong>{memories.length}</strong><span>memories</span></div><div><strong>17</strong><span>followers</span></div></div><SectionTitle title="Your archive" action="Arrange" /><div className="masonry">{boards.map((b: Board, i: number) => <BoardCard key={b.id} board={b} onClick={() => onBoard(b)} />)}{memories.map((m: Memory) => <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />)}{notes.map((n: Note) => <div className="note-card" key={n.id}><FileText size={17} /><p>{n.text}</p><span>{n.date}</span></div>)}</div></section> }
-function BoardPage({ board, memories, onBack, onMemory, onCreate }: any) { return <section className="screen detail-screen"><button className="back-button" onClick={onBack}><ArrowLeft size={18} /> Back to universe</button><div className="detail-cover"><img src={board.image} alt="" /><div><span className="eyebrow">COLLECTION · {board.privacy.toUpperCase()}</span><h1>{board.name}</h1><p>{board.description}</p><small>{board.location && <><MapPin size={12} /> {board.location} · </>}{board.count} memories</small></div></div>{board.children && <><SectionTitle title="Inside this collection" /><div className="child-row">{board.children.map(c => <button key={c}>{c}<ChevronRight size={15} /></button>)}</div></>}<SectionTitle title="Memories" action="Newest" /><div className="board-memory-grid">{memories.length ? memories.map((m: Memory) => <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />) : <EmptyState text="No memories here yet." action={onCreate} />}</div></section> }
-function MemoryPage({ memory, board, onBack, onDelete }: any) {
-  return <section className="screen detail-screen memory-detail">
-    <button className="back-button" onClick={onBack}><ArrowLeft size={18} /> Back</button>
-    {memory.image && <img className="cinema-image" src={memory.image} alt={memory.title} />}
-    <div className="memory-detail-copy">
-      <div className="detail-meta">
-        <span className="privacy-label">{memory.privacy === 'private' ? <LockKeyhole size={13} /> : <Globe2 size={13} />} {memory.privacy === 'private' ? 'Private memory' : 'Public memory'}</span>
-        <button className="icon-button"><MoreHorizontal size={18} /></button>
-      </div>
-      <h1>{memory.title}</h1><p className="long-copy">{memory.description}</p>
-      <div className="memory-facts">{memory.location && <span><MapPin size={14} />{memory.location}</span>}<span>{memory.date}</span></div>
-      <div className="chips">{memory.tags.map((t: string) => <span key={t}>{t}</span>)}</div>
-      <div className="related"><span className="eyebrow">RELATED COLLECTION</span><strong>{board?.name}</strong></div>
-      <button className="delete-button" onClick={onDelete}><Trash2 size={15} /> Delete memory</button>
+  // Pick initial shuffle memory
+  useEffect(() => {
+    if (memories.length > 0 && !shuffledMemory) {
+      const randomIdx = Math.floor(Math.random() * memories.length)
+      setShuffledMemory(memories[randomIdx])
+    }
+  }, [memories, shuffledMemory])
+
+  const handleShuffle = useCallback(() => {
+    if (memories.length === 0) return
+    const currentId = shuffledMemory?.id
+    const candidates = memories.filter(m => m.id !== currentId)
+    const pool = candidates.length > 0 ? candidates : memories
+    const randomIdx = Math.floor(Math.random() * pool.length)
+    setShuffledMemory(pool[randomIdx])
+    setToast('Surfaced a random memory ✦')
+  }, [memories, shuffledMemory])
+
+  const openBoard = (board: Board) => {
+    setSelectedBoard(board)
+    setPage('board')
+  }
+
+  const openMemory = (memory: Memory) => {
+    setSelectedMemory(memory)
+    setPage('memory')
+  }
+
+  const addBoard = (boardData: Omit<Board, 'id' | 'count'>) => {
+    const nextBoard: Board = { ...boardData, id: uid(), count: 0 }
+    setBoards(v => [nextBoard, ...v])
+    setSheet(null)
+    setToast('Collection created in your universe')
+  }
+
+  const addMemory = (memoryData: Omit<Memory, 'id'>) => {
+    const nextMemory: Memory = { ...memoryData, id: uid() }
+    setMemories(v => [nextMemory, ...v])
+    setBoards(v => v.map(b => b.id === memoryData.boardId ? { ...b, count: b.count + 1 } : b))
+    setSheet(null)
+    setToast('Moment saved safely 🔒')
+  }
+
+  const addNote = (text: string) => {
+    const nextNote: Note = { id: uid(), text, date: 'August 2026', privacy: 'private' }
+    setNotes(v => [nextNote, ...v])
+    setSheet(null)
+    setToast('Thought tucked away')
+  }
+
+  const deleteMemory = () => {
+    if (!selectedMemory) return
+    setMemories(v => v.filter(m => m.id !== selectedMemory.id))
+    setBoards(v => v.map(b => b.id === selectedMemory.boardId ? { ...b, count: Math.max(0, b.count - 1) } : b))
+    setSelectedMemory(null)
+    setPage('home')
+    setToast('Memory deleted')
+  }
+
+  const toggleMemoryPrivacy = (memoryId: string) => {
+    setMemories(v => v.map(m => {
+      if (m.id === memoryId) {
+        const nextPrivacy: PrivacyStatus = m.privacy === 'private' ? 'public' : 'private'
+        setToast(`Memory is now ${nextPrivacy.toUpperCase()}`)
+        return { ...m, privacy: nextPrivacy }
+      }
+      return m
+    }))
+    if (selectedMemory && selectedMemory.id === memoryId) {
+      setSelectedMemory(v => v ? { ...v, privacy: v.privacy === 'private' ? 'public' : 'private' } : null)
+    }
+  }
+
+  // Previous & Next memory navigation
+  const navigateMemory = (direction: 'prev' | 'next') => {
+    if (!selectedMemory || memories.length === 0) return
+    const currentIndex = memories.findIndex(m => m.id === selectedMemory.id)
+    if (currentIndex === -1) return
+    let nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
+    if (nextIndex >= memories.length) nextIndex = 0
+    if (nextIndex < 0) nextIndex = memories.length - 1
+    setSelectedMemory(memories[nextIndex])
+  }
+
+  return (
+    <div className="universe-shell">
+      <div className="ambient ambient-one" />
+      <div className="ambient ambient-two" />
+
+      <main className="app-frame">
+        {page === 'home' && (
+          <HomePage
+            profile={profile}
+            boards={boards}
+            memories={memories}
+            notes={notes}
+            shuffledMemory={shuffledMemory}
+            onShuffle={handleShuffle}
+            onBoard={openBoard}
+            onMemory={openMemory}
+            onCreate={() => setSheet('menu')}
+          />
+        )}
+
+        {page === 'search' && (
+          <SearchPage
+            boards={boards}
+            memories={memories}
+            notes={notes}
+            onBoard={openBoard}
+            onMemory={openMemory}
+          />
+        )}
+
+        {page === 'inbox' && <InboxPage />}
+
+        {page === 'profile' && (
+          <ProfilePage
+            profile={profile}
+            boards={boards}
+            memories={memories}
+            notes={notes}
+            onBoard={openBoard}
+            onMemory={openMemory}
+            onEditProfile={() => setSheet('profile')}
+          />
+        )}
+
+        {page === 'board' && selectedBoard && (
+          <BoardPage
+            board={selectedBoard}
+            memories={memories.filter(m => m.boardId === selectedBoard.id)}
+            onBack={() => setPage('home')}
+            onMemory={openMemory}
+            onCreate={() => setSheet('memory')}
+          />
+        )}
+
+        {page === 'memory' && selectedMemory && (
+          <MemoryPage
+            memory={selectedMemory}
+            board={boards.find(b => b.id === selectedMemory.boardId)}
+            onBack={() => setPage('home')}
+            onDelete={deleteMemory}
+            onTogglePrivacy={() => toggleMemoryPrivacy(selectedMemory.id)}
+            onNext={() => navigateMemory('next')}
+            onPrev={() => navigateMemory('prev')}
+          />
+        )}
+
+        {/* Fixed 5-Item Bottom Navigation */}
+        {page !== 'board' && page !== 'memory' && (
+          <BottomNav
+            activeTab={page}
+            onTabSelect={setPage}
+            onCreateSelect={() => setSheet('menu')}
+          />
+        )}
+      </main>
+
+      {/* Creation Bottom Sheet */}
+      {sheet && (
+        <CreationSheet
+          type={sheet}
+          boards={boards}
+          profile={profile}
+          onClose={() => setSheet(null)}
+          onBoard={addBoard}
+          onMemory={addMemory}
+          onNote={addNote}
+          onProfile={p => {
+            setProfile(p)
+            setSheet(null)
+            setToast('Profile updated')
+          }}
+        />
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="toast">
+          <Sparkles size={16} /> {toast}
+        </div>
+      )}
     </div>
-  </section>
+  )
 }
-function EmptyState({ text, action }: any) { return <div className="empty-state"><Archive size={22} /><p>{text}</p><button onClick={action}><Plus size={15} /> Add memory</button></div> }
-function CreationSheet({ type, boards, profile, onClose, onBoard, onMemory, onNote, onProfile }: any) { const [mode, setMode] = useState(type === 'menu' ? '' : type); return <div className="sheet-backdrop" onClick={onClose}><div className="creation-sheet" onClick={e => e.stopPropagation()}><div className="sheet-handle" /><div className="sheet-header"><div><span className="eyebrow">MAKE ROOM FOR IT</span><h2>{mode ? mode === 'profile' ? 'Edit profile' : mode === 'memory' ? 'Add a memory' : mode === 'note' ? 'Write a note' : 'Create a board' : 'Create something'}</h2></div><button className="icon-button" onClick={onClose}><X size={18} /></button></div>{!mode ? <div className="create-menu"><CreateOption icon={<LayoutGrid />} title="Create board" text="Start a new collection" onClick={() => setMode('board')} /><CreateOption icon={<ImagePlus />} title="Add memory" text="Save a moment from your camera roll" onClick={() => setMode('memory')} /><CreateOption icon={<FileText />} title="Write note" text="Put a thought somewhere safe" onClick={() => setMode('note')} /><CreateOption icon={<BookOpen />} title="Create story" text="Give a memory more room" onClick={() => setMode('board')} /></div> : mode === 'profile' ? <ProfileForm profile={profile} onSave={onProfile} /> : mode === 'board' ? <BoardForm onSave={onBoard} /> : mode === 'note' ? <NoteForm onSave={onNote} /> : <MemoryForm boards={boards} onSave={onMemory} />}</div></div> }
-function CreateOption({ icon, title, text, onClick }: any) { return <button className="create-option" onClick={onClick}><span>{icon}</span><div><strong>{title}</strong><small>{text}</small></div><ChevronRight size={17} /></button> }
-function ImageInput({ value, onChange }: { value: string; onChange: (s: string) => void }) { const ref = useRef<HTMLInputElement>(null); return <><input ref={ref} className="sr-only" type="file" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => onChange(String(reader.result)); reader.readAsDataURL(file) }} /><button className={`upload-box ${value ? 'has-image' : ''}`} onClick={() => ref.current?.click()}>{value ? <img src={value} alt="Selected upload preview" /> : <><Camera size={20} /><span>Choose from camera roll</span></>}</button></> }
-function BoardForm({ onSave }: any) { const [name, setName] = useState(''); const [description, setDescription] = useState(''); const [image, setImage] = useState(''); const [location, setLocation] = useState(''); const [privacy, setPrivacy] = useState<'private' | 'public'>('private'); return <form className="form" onSubmit={e => { e.preventDefault(); if (name.trim()) onSave({ name, description, image: image || images.cafe, location, privacy }) }}><label>Board name<input required value={name} onChange={e => setName(e.target.value)} placeholder="e.g. places worth returning to" /></label><label>Description<textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="What belongs here?" /></label><label>Cover image<ImageInput value={image} onChange={setImage} /></label><label>Location<input value={location} onChange={e => setLocation(e.target.value)} placeholder="Optional" /></label><Privacy value={privacy} onChange={setPrivacy} /><button className="primary-button">Create board</button></form> }
-function MemoryForm({ boards, onSave }: any) { const [title, setTitle] = useState(''); const [description, setDescription] = useState(''); const [image, setImage] = useState(''); const [boardId, setBoardId] = useState(boards[0]?.id || ''); const [location, setLocation] = useState(''); const [privacy, setPrivacy] = useState<'private' | 'public'>('private'); return <form className="form" onSubmit={e => { e.preventDefault(); if (title.trim() && boardId) onSave({ title, description, image: image || images.rain, boardId, date: 'August 11, 2026', location, privacy, tags: ['new'] }) }}><label>Image<ImageInput value={image} onChange={setImage} /></label><label>Title<input required value={title} onChange={e => setTitle(e.target.value)} placeholder="Name this moment" /></label><label>Description<textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="What do you want to remember?" /></label><label>Location<input value={location} onChange={e => setLocation(e.target.value)} placeholder="Optional" /></label><label>Collection<select value={boardId} onChange={e => setBoardId(e.target.value)}>{boards.map((b: Board) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></label><Privacy value={privacy} onChange={setPrivacy} /><button className="primary-button">Save memory</button></form> }
-function NoteForm({ onSave }: any) { const [text, setText] = useState(''); return <form className="form" onSubmit={e => { e.preventDefault(); if (text.trim()) onSave(text) }}><label>Your thought<textarea required autoFocus value={text} onChange={e => setText(e.target.value)} placeholder="Currently thinking about..." /></label><Privacy value="private" onChange={() => {}} /><button className="primary-button">Save note</button></form> }
-function ProfileForm({ profile, onSave }: any) { const [p, setP] = useState(profile); return <form className="form" onSubmit={e => { e.preventDefault(); onSave(p) }}><label>Avatar<ImageInput value={p.avatar} onChange={avatar => setP({ ...p, avatar })} /></label><label>Username<input value={p.username} onChange={e => setP({ ...p, username: e.target.value.replace('@', '') })} /></label><label>Display name<input value={p.displayName} onChange={e => setP({ ...p, displayName: e.target.value })} /></label><label>Bio<textarea value={p.bio} onChange={e => setP({ ...p, bio: e.target.value })} /></label><button className="primary-button">Update profile</button></form> }
-function Privacy({ value, onChange }: { value: string; onChange: (v: any) => void }) { return <div className="privacy"><span>Visibility</span><div>{(['private', 'public'] as const).map(x => <button type="button" key={x} className={value === x ? 'selected' : ''} onClick={() => onChange(x)}>{x === 'private' ? <LockKeyhole size={14} /> : <Globe2 size={14} />} {x}</button>)}</div></div> }
 
+/* Glassmorphic Image Shell Component */
+function GlassImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <span className={`image-shell ${loaded ? 'is-loaded' : ''}`}>
+      <span className="image-skeleton" aria-hidden="true" />
+      <img className={className} src={src} alt={alt} onLoad={() => setLoaded(true)} />
+    </span>
+  )
+}
+
+/* 5-Item Mobile-First Bottom Navigation */
+function BottomNav({
+  activeTab,
+  onTabSelect,
+  onCreateSelect,
+}: {
+  activeTab: string
+  onTabSelect: (tab: any) => void
+  onCreateSelect: () => void
+}) {
+  return (
+    <nav className="bottom-nav" aria-label="Bottom Navigation">
+      <button
+        className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+        onClick={() => onTabSelect('home')}
+      >
+        <Archive />
+        <span>HOME</span>
+        {activeTab === 'home' && <span className="nav-item-indicator" />}
+      </button>
+
+      <button
+        className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+        onClick={() => onTabSelect('search')}
+      >
+        <Search />
+        <span>SEARCH</span>
+        {activeTab === 'search' && <span className="nav-item-indicator" />}
+      </button>
+
+      <button
+        className="create-nav-button"
+        aria-label="Create something new"
+        onClick={onCreateSelect}
+      >
+        <Plus />
+      </button>
+
+      <button
+        className={`nav-item ${activeTab === 'inbox' ? 'active' : ''}`}
+        onClick={() => onTabSelect('inbox')}
+      >
+        <Bell />
+        <span>INBOX</span>
+        {activeTab === 'inbox' && <span className="nav-item-indicator" />}
+      </button>
+
+      <button
+        className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+        onClick={() => onTabSelect('profile')}
+      >
+        <CircleUserRound />
+        <span>PROFILE</span>
+        {activeTab === 'profile' && <span className="nav-item-indicator" />}
+      </button>
+    </nav>
+  )
+}
+
+/* HOME PAGE */
+function HomePage({
+  profile,
+  boards,
+  memories,
+  notes,
+  shuffledMemory,
+  onShuffle,
+  onBoard,
+  onMemory,
+  onCreate,
+}: {
+  profile: Profile
+  boards: Board[]
+  memories: Memory[]
+  notes: Note[]
+  shuffledMemory: Memory | null
+  onShuffle: () => void
+  onBoard: (b: Board) => void
+  onMemory: (m: Memory) => void
+  onCreate: () => void
+}) {
+  return (
+    <section className="screen">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <span className="eyebrow">MY UNIVERSE</span>
+          <h1 className="title-large">
+            Good evening,<br />
+            <span className="text-[#c8a2ff]">@{profile.username}</span>
+          </h1>
+          <p className="lede">Collecting little moments.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="p-2.5 rounded-full border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#c8a2ff]/40 transition-all">
+            <Sparkles size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Tonight's Little Discovery (Shuffle Feature) */}
+      {shuffledMemory && (
+        <div className="shuffle-card">
+          <div className="shuffle-card-content">
+            <span className="eyebrow flex items-center gap-1.5">
+              <Shuffle size={11} /> TONIGHT'S LITTLE DISCOVERY
+            </span>
+            <p>{shuffledMemory.title}</p>
+            <small>
+              {shuffledMemory.location && `${shuffledMemory.location} · `}
+              {shuffledMemory.date}
+            </small>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onMemory(shuffledMemory)}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1"
+            >
+              View <ArrowRight size={12} />
+            </button>
+            <button
+              onClick={onShuffle}
+              className="p-2 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-[#c8a2ff]/40 transition-all"
+              title="Shuffle another memory"
+            >
+              <Shuffle size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Moments */}
+      <div className="section-header">
+        <h2>RECENT MOMENTS</h2>
+        <button onClick={() => {}}>
+          View all <ChevronRight size={14} />
+        </button>
+      </div>
+      <div className="memory-row mb-6">
+        {memories.map(memory => (
+          <MemoryCard key={memory.id} memory={memory} onClick={() => onMemory(memory)} />
+        ))}
+      </div>
+
+      {/* Your Collections */}
+      <div className="section-header">
+        <h2>YOUR COLLECTIONS</h2>
+        <button onClick={() => {}}>
+          See all <ChevronRight size={14} />
+        </button>
+      </div>
+      <div className="board-grid mb-6">
+        {boards.map(board => (
+          <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+        ))}
+      </div>
+
+      {/* Notes from My Universe */}
+      <div className="section-header">
+        <h2>NOTES FROM MY UNIVERSE</h2>
+      </div>
+      <div className="notes-grid mb-6">
+        {notes.map(note => (
+          <div key={note.id} className="note-card">
+            <FileText size={16} className="text-[#c8a2ff] mb-2" />
+            <p>"{note.text}"</p>
+            <span>{note.date}</span>
+          </div>
+        ))}
+        <button
+          onClick={onCreate}
+          className="p-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#c8a2ff] text-xs font-semibold flex items-center justify-center gap-2 hover:border-[#c8a2ff]/40 transition-all"
+        >
+          <Plus size={16} /> Write a note
+        </button>
+      </div>
+    </section>
+  )
+}
+
+/* MEMORY CARD COMPONENT */
+function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) {
+  return (
+    <button className="memory-card" onClick={onClick}>
+      {memory.image ? (
+        <GlassImage src={memory.image} alt={memory.title} />
+      ) : (
+        <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/30">
+          <ImagePlus size={24} />
+        </div>
+      )}
+      <div className="memory-overlay">
+        <div className="flex items-center justify-between">
+          <span className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
+            {memory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+            {memory.privacy}
+          </span>
+          {memory.mood && (
+            <span className="text-[10px] bg-black/60 px-2 py-0.5 rounded-full border border-white/10 text-white/80">
+              {memory.mood}
+            </span>
+          )}
+        </div>
+        <strong>{memory.title}</strong>
+        <small>
+          {memory.location && <><MapPin size={10} /> {memory.location}</>}
+        </small>
+      </div>
+    </button>
+  )
+}
+
+/* BOARD / COLLECTION CARD COMPONENT */
+function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) {
+  return (
+    <button className="board-card glass-card" onClick={onClick}>
+      <div className="board-cover">
+        <GlassImage src={board.image} alt={board.name} />
+      </div>
+      <div className="board-card-body">
+        <div className="flex items-center justify-between text-[10px] text-white/50 uppercase tracking-wider">
+          <span className="flex items-center gap-1">
+            {board.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
+            {board.count} memories
+          </span>
+          {board.children && <span>{board.children.length} sub</span>}
+        </div>
+        <strong>{board.name}</strong>
+        {board.location && (
+          <small className="text-white/40 text-xs flex items-center gap-1">
+            <MapPin size={10} /> {board.location}
+          </small>
+        )}
+      </div>
+    </button>
+  )
+}
+
+/* SEARCH & DISCOVERY PAGE */
+function SearchPage({
+  boards,
+  memories,
+  notes,
+  onBoard,
+  onMemory,
+}: {
+  boards: Board[]
+  memories: Memory[]
+  notes: Note[]
+  onBoard: (b: Board) => void
+  onMemory: (m: Memory) => void
+}) {
+  const [query, setQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState<string>('ALL')
+
+  const filterOptions = ['ALL', 'BOARDS', 'MEMORIES', 'PLACES', 'NOTES', 'TAGS']
+
+  const filteredResults = useMemo(() => {
+    const q = query.toLowerCase().trim()
+
+    const matchingBoards = boards.filter(b =>
+      (activeFilter === 'ALL' || activeFilter === 'BOARDS') &&
+      (!q || b.name.toLowerCase().includes(q) || b.description.toLowerCase().includes(q) || b.location?.toLowerCase().includes(q))
+    )
+
+    const matchingMemories = memories.filter(m =>
+      (activeFilter === 'ALL' || activeFilter === 'MEMORIES' || activeFilter === 'PLACES' || activeFilter === 'TAGS') &&
+      (!q || m.title.toLowerCase().includes(q) || m.description.toLowerCase().includes(q) || m.location?.toLowerCase().includes(q) || m.tags.some(t => t.toLowerCase().includes(q)))
+    )
+
+    return { boards: matchingBoards, memories: matchingMemories }
+  }, [query, activeFilter, boards, memories])
+
+  return (
+    <section className="screen">
+      <span className="eyebrow">DISCOVERY</span>
+      <h1 className="title-large">Search Your Universe</h1>
+      <p className="lede">Look for places, feelings, and quiet thoughts.</p>
+
+      {/* Search Input */}
+      <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 mb-4 focus-within:border-[#c8a2ff]/40 transition-all">
+        <Search size={18} className="text-white/40" />
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Search memories, places, boards..."
+          className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-white/40"
+        />
+        {query && (
+          <button onClick={() => setQuery('')} className="text-white/40 hover:text-white">
+            <X size={16} />
+          </button>
+        )}
+      </div>
+
+      {/* Pill Filters */}
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+        {filterOptions.map(option => (
+          <button
+            key={option}
+            onClick={() => setActiveFilter(option)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+              activeFilter === option
+                ? 'bg-[#c8a2ff]/15 border-[#c8a2ff] text-[#c8a2ff]'
+                : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+
+      {/* Results Header */}
+      <div className="text-xs text-white/50 mb-4">
+        {filteredResults.boards.length + filteredResults.memories.length} items found
+      </div>
+
+      {/* Board Results */}
+      {filteredResults.boards.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider mb-3">Collections</h3>
+          <div className="board-grid">
+            {filteredResults.boards.map(b => (
+              <BoardCard key={b.id} board={b} onClick={() => onBoard(b)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Memory Results */}
+      {filteredResults.memories.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider mb-3">Memories</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {filteredResults.memories.map(m => (
+              <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && (
+        <div className="py-16 text-center text-white/40">
+          <Compass size={32} className="mx-auto mb-3 text-white/20" />
+          <p>No items matched your search.</p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/* INBOX / NOTIFICATIONS PAGE */
+function InboxPage() {
+  const notifications = [
+    { id: 1, text: 'Someone saved your public collection "Japan — someday"', time: '2h ago', icon: <Heart size={16} /> },
+    { id: 2, text: 'A new voyager found your visual memory archive', time: 'Yesterday', icon: <CircleUserRound size={16} /> },
+    { id: 3, text: 'Your story "Rainy Evening" is ready to be revisited', time: '3d ago', icon: <BookOpen size={16} /> },
+  ]
+
+  return (
+    <section className="screen">
+      <span className="eyebrow">NOTIFICATIONS</span>
+      <h1 className="title-large">Inbox</h1>
+      <p className="lede">Quiet updates from your visual archive.</p>
+
+      <div className="space-y-3 mb-8">
+        {notifications.map(n => (
+          <div key={n.id} className="glass-card p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+              {n.icon}
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-white/90 font-medium">{n.text}</p>
+              <span className="text-[10px] text-white/40">{n.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="py-12 text-center text-white/30 border border-dashed border-white/10 rounded-2xl">
+        <Send size={24} className="mx-auto mb-2 text-[#c8a2ff]/40" />
+        <p className="text-xs text-white/60">Messages will live here.</p>
+        <small className="text-[10px]">Keep your little universe quiet for now.</small>
+      </div>
+    </section>
+  )
+}
+
+/* PROFILE & CURRENT ERA PAGE */
+function ProfilePage({
+  profile,
+  boards,
+  memories,
+  notes,
+  onBoard,
+  onMemory,
+  onEditProfile,
+}: {
+  profile: Profile
+  boards: Board[]
+  memories: Memory[]
+  notes: Note[]
+  onBoard: (b: Board) => void
+  onMemory: (m: Memory) => void
+  onEditProfile: () => void
+}) {
+  return (
+    <section className="screen">
+      {/* Cover & Avatar Header */}
+      <div className="relative h-44 rounded-2xl overflow-hidden mb-12 border border-white/10">
+        <img src={profile.cover} alt="Profile Cover" className="w-full h-full object-cover opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+        <button
+          onClick={onEditProfile}
+          className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-white/80 hover:text-white text-xs font-semibold flex items-center gap-1.5 backdrop-blur-md"
+        >
+          <Pencil size={12} /> Edit Profile
+        </button>
+        <div className="absolute -bottom-8 left-6 flex items-end gap-4">
+          <img
+            src={profile.avatar}
+            alt="Avatar"
+            className="w-20 h-20 rounded-2xl object-cover border-4 border-black shadow-2xl"
+          />
+        </div>
+      </div>
+
+      {/* User Info */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          @{profile.username}
+          <span className="text-xs font-normal text-[#c8a2ff] border border-[#c8a2ff]/30 px-2 py-0.5 rounded-full bg-[#c8a2ff]/10">
+            {profile.displayName || 'Creator'}
+          </span>
+        </h1>
+        <p className="text-xs text-white/70 mt-1">{profile.bio}</p>
+        <small className="text-[11px] text-white/40 flex items-center gap-1 mt-2">
+          <MapPin size={12} /> {profile.location}
+        </small>
+      </div>
+
+      {/* Stats Counter */}
+      <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 text-center mb-6">
+        <div>
+          <strong className="text-lg text-white block">{memories.length}</strong>
+          <span className="text-[10px] text-white/50 uppercase tracking-wider">Memories</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block">{boards.length}</strong>
+          <span className="text-[10px] text-white/50 uppercase tracking-wider">Collections</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block">{notes.length}</strong>
+          <span className="text-[10px] text-white/50 uppercase tracking-wider">Notes</span>
+        </div>
+      </div>
+
+      {/* CURRENT ERA Section */}
+      <div className="era-card glass-card">
+        <span className="eyebrow flex items-center gap-1.5">
+          <Sparkles size={11} /> CURRENT ERA
+        </span>
+        <div className="era-tags">
+          {profile.currentEra.map((item, idx) => (
+            <span key={idx} className="era-tag">
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Pinned Collections */}
+      <div className="section-header">
+        <h2>PINNED COLLECTIONS</h2>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        {boards.slice(0, 2).map(board => (
+          <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+        ))}
+      </div>
+
+      {/* My Universe Archive Grid */}
+      <div className="section-header">
+        <h2>MY UNIVERSE</h2>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        {memories.map(m => (
+          <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* BOARD / COLLECTION DETAIL PAGE */
+function BoardPage({
+  board,
+  memories,
+  onBack,
+  onMemory,
+  onCreate,
+}: {
+  board: Board
+  memories: Memory[]
+  onBack: () => void
+  onMemory: (m: Memory) => void
+  onCreate: () => void
+}) {
+  return (
+    <section className="screen">
+      <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white mb-4">
+        <ArrowLeft size={16} /> Back to universe
+      </button>
+
+      {/* Collection Header */}
+      <div className="relative h-64 rounded-2xl overflow-hidden mb-6 border border-white/10">
+        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4">
+          <span className="eyebrow flex items-center gap-1.5">
+            COLLECTION · {board.privacy.toUpperCase()}
+          </span>
+          <h1 className="text-2xl font-semibold text-white mt-1">{board.name}</h1>
+          <p className="text-xs text-white/70 mt-1">{board.description}</p>
+          <small className="text-[11px] text-white/50 flex items-center gap-2 mt-2">
+            {board.location && <><MapPin size={12} /> {board.location} · </>}
+            {board.count} memories
+          </small>
+        </div>
+      </div>
+
+      {/* Child Collections */}
+      {board.children && board.children.length > 0 && (
+        <div className="mb-6">
+          <span className="eyebrow block mb-2">CHILD COLLECTIONS</span>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {board.children.map(childName => (
+              <span
+                key={childName}
+                className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/80 whitespace-nowrap flex items-center gap-1"
+              >
+                {childName} <ChevronRight size={12} className="text-[#c8a2ff]" />
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Memories inside Board */}
+      <div className="section-header">
+        <h2>MEMORIES ({memories.length})</h2>
+      </div>
+      {memories.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {memories.map(m => (
+            <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
+          <Archive size={28} className="mx-auto mb-2 text-white/30" />
+          <p className="text-xs text-white/50 mb-3">No memories in this collection yet.</p>
+          <button
+            onClick={onCreate}
+            className="px-4 py-2 rounded-xl bg-[#c8a2ff] text-black text-xs font-semibold"
+          >
+            + Add Memory
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/* FULL-SCREEN MEMORY VIEWER PAGE / MODAL */
+function MemoryPage({
+  memory,
+  board,
+  onBack,
+  onDelete,
+  onTogglePrivacy,
+  onNext,
+  onPrev,
+}: {
+  memory: Memory
+  board?: Board
+  onBack: () => void
+  onDelete: () => void
+  onTogglePrivacy: () => void
+  onNext: () => void
+  onPrev: () => void
+}) {
+  // Arrow key navigation listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') onNext()
+      if (e.key === 'ArrowLeft') onPrev()
+      if (e.key === 'Escape') onBack()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onNext, onPrev, onBack])
+
+  return (
+    <section className="screen min-h-svh flex flex-col">
+      {/* Top Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white">
+          <ArrowLeft size={16} /> Back
+        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onPrev}
+            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:text-white"
+          >
+            ← Prev
+          </button>
+          <button
+            onClick={onNext}
+            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:text-white"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Image */}
+      {memory.image && (
+        <div className="relative w-full h-[400px] rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black">
+          <img src={memory.image} alt={memory.title} className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      {/* Memory Content */}
+      <div className="flex-1 space-y-4">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onTogglePrivacy}
+            className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}
+          >
+            {memory.privacy === 'private' ? <LockKeyhole size={11} /> : <Globe2 size={11} />}
+            {memory.privacy.toUpperCase()}
+          </button>
+          {memory.mood && (
+            <span className="text-xs bg-[#c8a2ff]/10 text-[#c8a2ff] border border-[#c8a2ff]/30 px-3 py-1 rounded-full">
+              {memory.mood}
+            </span>
+          )}
+        </div>
+
+        <h1 className="text-3xl font-semibold text-white">{memory.title}</h1>
+        <p className="text-sm text-white/80 leading-relaxed">{memory.description}</p>
+
+        {/* Metadata */}
+        <div className="flex items-center gap-4 text-xs text-white/50 border-t border-b border-white/10 py-3">
+          {memory.location && (
+            <span className="flex items-center gap-1">
+              <MapPin size={13} /> {memory.location}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Calendar size={13} /> {memory.date}
+          </span>
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
+          {memory.tags.map(t => (
+            <span key={t} className="text-xs bg-white/5 border border-white/10 text-white/70 px-2.5 py-1 rounded-full">
+              #{t}
+            </span>
+          ))}
+        </div>
+
+        {/* Associated Board */}
+        {board && (
+          <div className="glass-card p-3 flex items-center justify-between">
+            <span className="text-xs text-white/50">COLLECTION</span>
+            <strong className="text-xs text-white">{board.name}</strong>
+          </div>
+        )}
+
+        {/* Delete Option */}
+        <button
+          onClick={onDelete}
+          className="flex items-center gap-2 text-xs text-rose-400/70 hover:text-rose-400 pt-4"
+        >
+          <Trash2 size={14} /> Delete memory from archive
+        </button>
+      </div>
+    </section>
+  )
+}
+
+/* CREATION BOTTOM SHEET */
+function CreationSheet({
+  type,
+  boards,
+  profile,
+  onClose,
+  onBoard,
+  onMemory,
+  onNote,
+  onProfile,
+}: {
+  type: string
+  boards: Board[]
+  profile: Profile
+  onClose: () => void
+  onBoard: (b: any) => void
+  onMemory: (m: any) => void
+  onNote: (n: string) => void
+  onProfile: (p: Profile) => void
+}) {
+  const [mode, setMode] = useState<string>(type === 'menu' ? '' : type)
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="creation-sheet glass-card" onClick={e => e.stopPropagation()}>
+        <div className="sheet-handle" />
+
+        <div className="flex justify-between items-center mb-4">
+          <span className="eyebrow">
+            {mode ? (mode === 'profile' ? 'EDIT PROFILE' : mode === 'memory' ? 'ADD MOMENT' : mode === 'note' ? 'WRITE NOTE' : 'CREATE COLLECTION') : 'MAKE ROOM FOR IT'}
+          </span>
+          <button onClick={onClose} className="text-white/60 hover:text-white">
+            <X size={18} />
+          </button>
+        </div>
+
+        {!mode ? (
+          <div className="space-y-3">
+            <button
+              onClick={() => setMode('memory')}
+              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+            >
+              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+                <ImagePlus size={20} />
+              </div>
+              <div className="flex-1">
+                <strong className="text-sm text-white block">Add Moment</strong>
+                <small className="text-xs text-white/50">Save a visual photo or memory</small>
+              </div>
+              <ChevronRight size={16} className="text-white/40" />
+            </button>
+
+            <button
+              onClick={() => setMode('board')}
+              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+            >
+              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+                <LayoutGrid size={20} />
+              </div>
+              <div className="flex-1">
+                <strong className="text-sm text-white block">Create Collection</strong>
+                <small className="text-xs text-white/50">Start a new visual board</small>
+              </div>
+              <ChevronRight size={16} className="text-white/40" />
+            </button>
+
+            <button
+              onClick={() => setMode('note')}
+              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+            >
+              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+                <FileText size={20} />
+              </div>
+              <div className="flex-1">
+                <strong className="text-sm text-white block">Write Note</strong>
+                <small className="text-xs text-white/50">Tuck away a personal thought</small>
+              </div>
+              <ChevronRight size={16} className="text-white/40" />
+            </button>
+          </div>
+        ) : mode === 'memory' ? (
+          <MemoryForm boards={boards} onSave={onMemory} />
+        ) : mode === 'board' ? (
+          <BoardForm onSave={onBoard} />
+        ) : mode === 'note' ? (
+          <NoteForm onSave={onNote} />
+        ) : (
+          <ProfileForm profile={profile} onSave={onProfile} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* Image Upload Input helper */
+function ImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  return (
+    <div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => {
+          const file = e.target.files?.[0]
+          if (!file) return
+          const reader = new FileReader()
+          reader.onload = () => onChange(String(reader.result))
+          reader.readAsDataURL(file)
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className="w-full h-32 rounded-2xl border border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center gap-2 text-white/60 hover:border-[#c8a2ff]/40 transition-all overflow-hidden"
+      >
+        {value ? (
+          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+        ) : (
+          <>
+            <Camera size={22} className="text-[#c8a2ff]" />
+            <span className="text-xs">Choose photo from camera roll</span>
+          </>
+        )}
+      </button>
+    </div>
+  )
+}
+
+/* Memory Creation Form */
+function MemoryForm({ boards, onSave }: { boards: Board[]; onSave: (m: any) => void }) {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [image, setImage] = useState('')
+  const [boardId, setBoardId] = useState(boards[0]?.id || '')
+  const [location, setLocation] = useState('')
+  const [mood, setMood] = useState('☁ nostalgic')
+  const [tags, setTags] = useState('memory, quiet')
+  const [privacy, setPrivacy] = useState<PrivacyStatus>('private')
+
+  const moods = ['☁ nostalgic', '☕ cozy', '✨ serene', '📚 peaceful', '🌙 quiet', '🍃 fresh']
+
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        if (title.trim() && boardId) {
+          onSave({
+            title,
+            description,
+            image: image || images.rain,
+            boardId,
+            date: 'August 2026',
+            location,
+            mood,
+            privacy,
+            tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+          })
+        }
+      }}
+      className="space-y-4"
+    >
+      <div className="form-group">
+        <label>Photo</label>
+        <ImageUpload value={image} onChange={setImage} />
+      </div>
+
+      <div className="form-group">
+        <label>Title</label>
+        <input
+          required
+          type="text"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          placeholder="Name this moment"
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Description</label>
+        <textarea
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          placeholder="What do you want to remember?"
+          className="form-textarea"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="form-group">
+          <label>Collection</label>
+          <select value={boardId} onChange={e => setBoardId(e.target.value)} className="form-select">
+            {boards.map(b => (
+              <option key={b.id} value={b.id} className="bg-black text-white">
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Location</label>
+          <input
+            type="text"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            placeholder="e.g. Jamshedpur"
+            className="form-input"
+          />
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label>Mood</label>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {moods.map(m => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMood(m)}
+              className={`px-3 py-1 rounded-full text-xs transition-all border ${
+                mood === m
+                  ? 'bg-[#c8a2ff]/15 border-[#c8a2ff] text-[#c8a2ff]'
+                  : 'bg-white/5 border-white/10 text-white/60'
+              }`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Privacy Selector */}
+      <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+        <span className="text-xs text-white/70">Visibility</span>
+        <div className="flex gap-2">
+          {(['private', 'public'] as const).map(p => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPrivacy(p)}
+              className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 border transition-all ${
+                privacy === p
+                  ? 'bg-[#c8a2ff]/20 border-[#c8a2ff] text-[#c8a2ff]'
+                  : 'bg-transparent border-white/10 text-white/50'
+              }`}
+            >
+              {p === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
+              {p.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button type="submit" className="btn-primary mt-2">
+        Save Moment
+      </button>
+    </form>
+  )
+}
+
+/* Collection Creation Form */
+function BoardForm({ onSave }: { onSave: (b: any) => void }) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [image, setImage] = useState('')
+  const [location, setLocation] = useState('')
+  const [privacy, setPrivacy] = useState<PrivacyStatus>('private')
+
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        if (name.trim()) {
+          onSave({
+            name,
+            description,
+            image: image || images.cafe,
+            location,
+            privacy,
+          })
+        }
+      }}
+      className="space-y-4"
+    >
+      <div className="form-group">
+        <label>Collection Name</label>
+        <input
+          required
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="e.g. Places worth returning to"
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Description</label>
+        <textarea
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          placeholder="What belongs here?"
+          className="form-textarea"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Cover Photo</label>
+        <ImageUpload value={image} onChange={setImage} />
+      </div>
+
+      <button type="submit" className="btn-primary mt-2">
+        Create Collection
+      </button>
+    </form>
+  )
+}
+
+/* Note Creation Form */
+function NoteForm({ onSave }: { onSave: (text: string) => void }) {
+  const [text, setText] = useState('')
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        if (text.trim()) onSave(text)
+      }}
+      className="space-y-4"
+    >
+      <div className="form-group">
+        <label>Personal Thought</label>
+        <textarea
+          required
+          autoFocus
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="Currently thinking about..."
+          className="form-textarea min-h-[120px]"
+        />
+      </div>
+      <button type="submit" className="btn-primary">
+        Save Note
+      </button>
+    </form>
+  )
+}
+
+/* Profile Form */
+function ProfileForm({ profile, onSave }: { profile: Profile; onSave: (p: Profile) => void }) {
+  const [p, setP] = useState(profile)
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        onSave(p)
+      }}
+      className="space-y-4"
+    >
+      <div className="form-group">
+        <label>Username</label>
+        <input
+          type="text"
+          value={p.username}
+          onChange={e => setP({ ...p, username: e.target.value.replace('@', '') })}
+          className="form-input"
+        />
+      </div>
+      <div className="form-group">
+        <label>Display Name</label>
+        <input
+          type="text"
+          value={p.displayName}
+          onChange={e => setP({ ...p, displayName: e.target.value })}
+          className="form-input"
+        />
+      </div>
+      <div className="form-group">
+        <label>Bio</label>
+        <textarea
+          value={p.bio}
+          onChange={e => setP({ ...p, bio: e.target.value })}
+          className="form-textarea"
+        />
+      </div>
+      <button type="submit" className="btn-primary">
+        Update Profile
+      </button>
+    </form>
+  )
+}
