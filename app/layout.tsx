@@ -3,9 +3,11 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Little Universe — a place for what matters',
-  description: 'A private visual universe for memories, collections, notes, and stories.',
-  generator: 'v0.app',
+  title: 'Visual Memory Archive — Your private visual universe',
+  description: 'A dark visual universe for collecting memories, places, interests, stories, notes, and moments.',
+  applicationName: 'Visual Memory Archive',
+  keywords: ['visual memory archive', 'digital universe', 'private archive', 'memories', 'collections', 'places', 'notes'],
+  authors: [{ name: 'Shreya Sarkar' }],
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
@@ -24,11 +26,17 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+  openGraph: {
+    title: 'Visual Memory Archive — Your private visual universe',
+    description: 'A dark visual universe for collecting memories, places, interests, stories, notes, and moments.',
+    type: 'website',
+    siteName: 'Visual Memory Archive',
+  },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
-  themeColor: '#070707',
+  themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -41,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className="antialiased">
+      <body className="antialiased bg-black text-white selection:bg-[#c8a2ff]/30 selection:text-white">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
