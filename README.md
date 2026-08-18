@@ -1,65 +1,159 @@
-# Visual Memory Archive
+# ✦ Visual Memory Archive
 
-> *"Your little universe, in pieces."*
+> *Your little universe, in pieces.*
 
-**Visual Memory Archive (VMA)** is a private-first visual universe where individuals collect and arrange memories, photos, cafés, travel, books, anime, personal notes, and stories into a personalized, dark cinematic digital archive.
-
----
-
-## ✦ Core Vision
-
-Visual Memory Archive is built to feel like **opening your own private digital universe**. It combines visual memory collection, personal journaling, and quiet visual discovery into a mobile-first, dark glassmorphism interface.
-
-* **90% Deep Black (`#000000`, `#030305`, `#050507`)** dominant atmosphere with subtle constellation light trails.
-* **8% Soft White & Gray (`#F5F5F7`, `#A0A0AA`)** readable modern typography.
-* **2% Neon Lavender (`#C8A2FF`)** focused accents for active navigation, glowing nodes, and subtle highlights.
-* **Moonlight Glassmorphic Surfaces**: Translucent black glass frames (`rgba(255,255,255,0.035)`) surrounding high-contrast photography.
+**Visual Memory Archive (VMA)** is a dark, visual-first personal archive for collecting memories, places, interests, thoughts, notes, collections, and moments in a way that feels personal rather than like a conventional social network.
 
 ---
 
-## 🌟 Key Features
+### 🌐 Live Demo & Repository
 
-### 1. 📱 Mobile-First 5-Item Bottom Navigation
-* **`HOME`**: Personal universe dashboard with recent moments, collections, Threads-style personal notes, and quick search.
-* **`SEARCH`**: Visual discovery engine with multi-tag pill filters (`ALL`, `BOARDS`, `MEMORIES`, `PLACES`, `NOTES`, `TAGS`).
-* **`CREATE`**: Sliding glass bottom sheet for adding Moments, Collections, and Notes.
-* **`INBOX`**: Quiet notification overview for saved collections, likes, and voyager activity.
-* **`PROFILE`**: Personal digital archive, stats, pinned collections, and identity snapshots.
-
-### 2. ✦ Shuffle ("Tonight's Little Discovery")
-Randomly surfaces a cherished memory from your visual archive with a single tap, bringing old moments back into light.
-
-### 3. 🔒 Private-First Architecture
-All content is **PRIVATE BY DEFAULT** (`🔒 Private`), ensuring your memories remain completely private unless explicitly set to `◉ Public`.
-
-### 4. 🎞️ Full-Screen Memory Viewer
-Immersive modal and page view for high-res hero images, detailed notes, location pins, mood badges (`☁ nostalgic`, `☕ cozy`, `✨ serene`), and keyboard arrow key navigation (`← Prev`, `Next →`).
-
-### 5. 📁 Collections & Child Collections
-Hierarchical grouping for memories (e.g. *Cafés in Jamshedpur* → *Favorite cafés*, *Study cafés*, *Coffee shops*).
-
-### 6. ✨ Current Era Identity Snapshot
-Profile section capturing your present phase (*late night coding*, *☕ coffee*, *💻 cybersecurity*, *📚 books*, *🌙 2am thoughts*).
+* **Live Demo**: [https://visual-memory-archive.vercel.app](https://visual-memory-archive.vercel.app)
+* **GitHub Repository**: [https://github.com/moonsarkar125/visual-memory-archive](https://github.com/moonsarkar125/visual-memory-archive)
 
 ---
 
-## 🛠️ Technology Stack
+## ✦ What is Visual Memory Archive?
 
-* **Framework**: Next.js 16 (App Router with Turbopack)
-* **UI Library**: React 19 & TypeScript
-* **Styling**: Tailwind CSS v4 & Vanilla Glassmorphism CSS
-* **Icons**: Lucide React
-* **Persistence**: LocalStorage state syncing (`little-universe-v2`)
+Visual Memory Archive is designed around the concept of a **private digital universe**. Rather than broadcasting content to an endless algorithmic social feed, VMA gives individuals a personal space to preserve what matters—photographs, cozy cafés, favorite anime, books read, late-night thoughts, and travel itineraries.
+
+### Product Philosophy
+* **Memories First**: Photography and visual moments sit at the center of the experience.
+* **Personal Organization**: Group memories into visual collections and nested child collections.
+* **Private by Default**: Every memory and collection defaults to `🔒 Private`.
+* **Optional Discovery**: Share public collections when you want others to explore your universe.
+* **Anonymous & Funky Identities**: Express your current phase using custom handles like `@terribleracoon556`.
+* **Quiet & Cinematic**: Free of ads, intrusive notifications, or social pressure.
+
+> *Visual Memory Archive is intentionally NOT designed to be a direct Pinterest, Instagram, or Threads clone. It is a quiet, personal visual archive.*
 
 ---
 
-## 🚀 Getting Started
+## ✦ Preview
+
+### Key Experience Highlights
+
+* **Home Screen**: Personal greeting (`Good evening, @terribleracoon556`), recent moments, collection cards, Threads-style personal notes, and the *✦ Shuffle* discovery card.
+* **Memory Viewer**: Full-screen cinema viewer with hero images, location pins, dates, mood tags (`☁ nostalgic`, `☕ cozy`, `✨ serene`), and keyboard arrow navigation (`← Prev`, `Next →`).
+* **Collections & Sub-Collections**: Image-heavy collection covers with nested child collections (e.g. *Cafés in Jamshedpur* → *Study Cafés*, *Coffee Shops*, *Places To Visit*).
+* **Search & Discovery**: Pill-filtered search engine (`ALL`, `BOARDS`, `MEMORIES`, `PLACES`, `NOTES`, `TAGS`).
+* **Profile & Current Era**: Personal visual archive with memory stats, pinned collections, and a **Current Era** identity snapshot (*late night coding*, *☕ coffee*, *💻 cybersecurity*, *📚 books*, *🌙 2am thoughts*).
+
+---
+
+## ✦ Features
+
+### ▦ Collections
+Visual boards for organizing memories, interests, books, and travel plans with cover photos, descriptions, and locations.
+
+### 📸 Moments
+Fast visual memory entries containing photos, descriptions, dates, locations, mood badges, tags, and privacy controls.
+
+### ✎ Notes
+Short-form personal thoughts inspired by Threads-style writing, attached to collections or saved independently.
+
+### 📂 Child Collections
+Nested collection organization allowing multi-level structure without complex folder trees.
+
+### 🔒 Privacy Controls
+Visibility options (`🔒 Private` vs `◉ Public`) for every moment and collection, ensuring private content never appears in public search or discovery.
+
+### 🔍 Search & Filter
+Visual multi-entity search supporting real-time filtering across memories, locations, boards, and tags.
+
+### 👤 Profile Archive
+A personal identity profile featuring avatar, cover banner, memory counters, pinned collections, and a *Current Era* snapshot.
+
+### 📱 Mobile-First Product Design
+Designed specifically for mobile viewports with a 5-item bottom glass navigation bar (`HOME`, `SEARCH`, `CREATE`, `INBOX`, `PROFILE`), touch-friendly bottom sheets, and safe-area spacing.
+
+---
+
+## 🛠 Tech Stack
+
+* **Framework**: Next.js 16.3.0 (App Router with Turbopack)
+* **UI Engine**: React 19 & TypeScript 5.7
+* **Styling**: Tailwind CSS v4 & Custom Glassmorphic Design System
+* **Icons**: Lucide React (`lucide-react`)
+* **Analytics & Hosting**: Vercel Analytics & Vercel Platform
+
+---
+
+## 🎨 Design Direction
+
+The visual language of Visual Memory Archive is defined by restraint:
+
+* **90% Deep Black (`#000000`, `#030305`, `#050507`)**: Dominant dark background with faint constellation light trails.
+* **8% White & Gray (`#F5F5F7`, `#A0A0AA`)**: High-contrast, clean modern sans-serif typography.
+* **2% Neon Lavender (`#C8A2FF`)**: Restrained accent color used exclusively for active navigation, glowing nodes, and selected filters.
+* **Moonlight Glassmorphism**: Cards feature `rgba(255, 255, 255, 0.035)` black glass with subtle borders (`rgba(255, 255, 255, 0.08)`) and `backdrop-filter: blur(20px)`.
+
+---
+
+## 🧩 Product Structure
+
+```
+User
+└── Profile (@terribleracoon556)
+    ├── Collections (e.g. Cafés in Jamshedpur)
+    │   ├── Child Collections (e.g. Study Cafés, Coffee Shops)
+    │   └── Moments / Memories (e.g. Rainy Evening)
+    └── Notes ("Maybe the best part of today was doing nothing.")
+```
+
+### 5 Primary Navigation Areas
+1. **HOME**: Main universe overview & recent activity
+2. **SEARCH**: Visual discovery & multi-tag search
+3. **CREATE**: Bottom sheet for adding Moments, Collections, or Notes
+4. **INBOX**: Activity notifications
+5. **PROFILE**: Personal digital archive & Current Era snapshot
+
+---
+
+## 🔐 Privacy
+
+Visual Memory Archive prioritizes private-first personal archiving.
+
+* All new moments and collections default to **PRIVATE**.
+* Private content is isolated and never exposed to public search or discovery.
+* Public visibility is strictly opt-in for moments you wish to share.
+
+---
+
+## 🛣 Roadmap
+
+### Current Focus
+* [x] Visual collections & child collections
+* [x] Moments & photo upload preview
+* [x] Threads-style personal notes
+* [x] Profile & Current Era identity snapshot
+* [x] Mobile-first 5-item bottom glass navigation
+* [x] Deep black cinematic visual system
+* [x] LocalStorage persistence (`little-universe-v2`)
+
+### Planned
+* [ ] Interactive Timeline View (Grouped by Year & Month)
+* [ ] Memory Shuffle ("Tonight's Little Discovery") audio soundscapes
+* [ ] Story drafts & rich markdown articles
+* [ ] Interactive Map-based memory pins
+* [ ] AI-assisted visual memory organization
+
+---
+
+## 📌 Project Status
+
+**Status**: *Active Development*  
+Visual Memory Archive is an evolving personal visual archive and product prototype.
+
+---
+
+## 💻 Local Development
 
 ### Prerequisites
-* **Node.js**: `v18.0.0` or higher
-* **npm** / **pnpm** / **yarn**
+* Node.js v18.0.0+
+* npm or pnpm
 
-### Installation
+### Getting Started
 
 ```bash
 # 1. Clone the repository
@@ -75,37 +169,27 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. Toggle mobile view (`Ctrl+Shift+M` in Chrome DevTools) for the best native app experience.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📂 Project Architecture
+## 🚀 Deployment
 
-```
-visual-memory-archive/
-├── app/
-│   ├── globals.css         # Deep black atmospheric background & glass tokens
-│   ├── layout.tsx          # Root layout & PWA/SEO metadata
-│   └── page.tsx            # Entry point rendering UniverseApp
-├── components/
-│   ├── universe-app.tsx    # Core Visual Memory Archive application
-│   └── ui/                 # Reusable UI primitives
-├── public/                 # PWA icons & static assets
-├── package.json            # Project dependencies
-└── README.md               # Repository documentation
-```
+Visual Memory Archive is deployed on Vercel:
+[https://visual-memory-archive.vercel.app](https://visual-memory-archive.vercel.app)
 
 ---
 
-## 🔒 Privacy Philosophy
+## 📄 License
 
-Your memories belong to you. Visual Memory Archive stores your data locally by default. Private memories and private collections are never exposed to public search or discovery endpoints.
+This project currently does not include an open-source license.
 
 ---
 
-## 👤 Maintainer & Creator
+## 👤 Creator
 
-Developed & maintained by **Shreya Sarkar** ([@moonsarkar125](https://github.com/moonsarkar125)).
+**Shreya Sarkar**  
+*Cyber Security Student & Developer*
 
-* **Repository**: [https://github.com/moonsarkar125/visual-memory-archive](https://github.com/moonsarkar125/visual-memory-archive)
-* **License**: MIT
+* **GitHub**: [https://github.com/moonsarkar125](https://github.com/moonsarkar125)
+* **Portfolio**: [https://moonsarkar125.github.io/she_can_foundation.html/](https://moonsarkar125.github.io/she_can_foundation.html/)
