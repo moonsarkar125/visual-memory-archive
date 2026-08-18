@@ -503,7 +503,7 @@ function BottomNav({
   )
 }
 
-/* HOME PAGE */
+/* HOME PAGE — EDITORIAL RECOMPOSITION */
 function HomePage({
   profile,
   boards,
@@ -525,39 +525,104 @@ function HomePage({
   onMemory: (m: Memory) => void
   onCreate: () => void
 }) {
+  const featuredMemory = memories[0]
+  const recentMoments = memories.slice(1)
+  const mainBoard = boards[0]
+  const otherBoards = boards.slice(1)
+
   return (
     <section className="screen">
-      {/* Header */}
+      {/* Header — Spacious Editorial Greeting */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <span className="eyebrow">MY UNIVERSE</span>
+          <span className="eyebrow flex items-center gap-1.5 mb-1">
+            <Sparkles size={11} className="text-[#c8a2ff]" /> MY UNIVERSE
+          </span>
           <h1 className="title-large">
             Good evening,<br />
-            <span className="text-[#c8a2ff]">@{profile.username}</span>
+            <span className="text-[#c8a2ff] font-semibold">@{profile.username}</span>
           </h1>
-          <p className="lede">Your little universe, in pieces ✦</p>
+          <p className="lede mt-1">Your little universe, in pieces ✦</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="p-2.5 rounded-full border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#c8a2ff]/40 transition-all">
-            <Sparkles size={18} />
+          <button
+            onClick={onCreate}
+            className="p-2.5 rounded-full border border-white/12 bg-white/5 text-white/70 hover:text-white hover:border-[#c8a2ff]/40 transition-all"
+            title="Create new memory"
+          >
+            <Plus size={18} />
           </button>
         </div>
       </div>
 
-      {/* Tonight's Little Discovery (Shuffle Feature) */}
+      {/* FEATURED HERO MEMORY (The Hero of the Viewport) */}
+      {featuredMemory && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="eyebrow flex items-center gap-1">
+              <Sparkles size={11} className="text-[#c8a2ff]" /> FEATURED MEMORY
+            </span>
+            <span className="text-[11px] text-white/40">Opening Scene</span>
+          </div>
+          <div
+            onClick={() => onMemory(featuredMemory)}
+            className="glass-card relative h-[340px] rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl transition-all hover:border-[#c8a2ff]/40"
+          >
+            {featuredMemory.image ? (
+              <GlassImage src={featuredMemory.image} alt={featuredMemory.title} />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <span className="text-[10px] bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 text-white/90 font-medium">
+                {featuredMemory.mood || '✨ featured'}
+              </span>
+              <span className={`badge-privacy ${featuredMemory.privacy === 'public' ? 'is-public' : ''}`}>
+                {featuredMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+                {featuredMemory.privacy}
+              </span>
+            </div>
+            <div className="absolute bottom-5 left-5 right-5 space-y-1">
+              <h2 className="text-2xl font-bold text-white group-hover:text-[#c8a2ff] transition-colors leading-tight">
+                {featuredMemory.title}
+              </h2>
+              <p className="text-xs text-white/70 line-clamp-1">{featuredMemory.description}</p>
+              <div className="flex items-center gap-3 text-[11px] text-white/50 pt-1">
+                {featuredMemory.location && (
+                  <span className="flex items-center gap-1">
+                    <MapPin size={10} className="text-[#c8a2ff]" /> {featuredMemory.location}
+                  </span>
+                )}
+                <span>· {featuredMemory.date}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING EDITORIAL QUOTE NOTE (Floating directly on page background) */}
+      <div className="my-7 pl-4 border-l-2 border-l-[#c8a2ff] py-1">
+        <p className="text-sm italic font-serif text-white/85 leading-relaxed">
+          "Maybe memories are just places we decided not to forget."
+        </p>
+        <span className="text-[10px] text-white/40 block mt-1 uppercase tracking-wider">— Archive Reflection</span>
+      </div>
+
+      {/* TONIGHT'S LITTLE DISCOVERY (Secondary Feature Reveal) */}
       {shuffledMemory && (
-        <div className="shuffle-card">
+        <div className="shuffle-card mb-8">
           {shuffledMemory.image && (
-            <div className="w-16 h-16 rounded-xl overflow-hidden mr-4 flex-shrink-0 border border-white/15">
+            <div className="w-14 h-14 rounded-xl overflow-hidden mr-3.5 flex-shrink-0 border border-white/15">
               <GlassImage src={shuffledMemory.image} alt={shuffledMemory.title} />
             </div>
           )}
           <div className="shuffle-card-content">
-            <span className="eyebrow flex items-center gap-1.5">
-              <Shuffle size={11} /> TONIGHT'S LITTLE DISCOVERY
+            <span className="eyebrow flex items-center gap-1.5 text-[10px]">
+              <Shuffle size={10} /> TONIGHT'S DISCOVERY
             </span>
-            <p>{shuffledMemory.title}</p>
-            <small>
+            <p className="text-xs font-medium text-white">{shuffledMemory.title}</p>
+            <small className="text-[10px] text-white/50">
               {shuffledMemory.location && `${shuffledMemory.location} · `}
               {shuffledMemory.date}
             </small>
@@ -565,65 +630,98 @@ function HomePage({
           <div className="flex items-center gap-2 ml-2">
             <button
               onClick={() => onMemory(shuffledMemory)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-lg shadow-[#c8a2ff]/20"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-md shadow-[#c8a2ff]/15"
             >
-              View <ArrowRight size={12} />
-            </button>
-            <button
-              onClick={onShuffle}
-              className="p-2 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-[#c8a2ff]/40 transition-all"
-              title="Shuffle another memory"
-            >
-              <Shuffle size={14} />
+              View <ArrowRight size={11} />
             </button>
           </div>
         </div>
       )}
 
-      {/* Recent Moments */}
-      <div className="section-header">
-        <h2>RECENT MOMENTS</h2>
-        <button onClick={() => {}}>
-          View all <ChevronRight size={14} />
-        </button>
-      </div>
-      <div className="memory-row mb-6">
-        {memories.map(memory => (
-          <MemoryCard key={memory.id} memory={memory} onClick={() => onMemory(memory)} />
-        ))}
+      {/* ASYMMETRIC CURATED COLLECTIONS (YOUR COLLECTIONS) */}
+      <div className="mb-8">
+        <div className="section-header">
+          <h2>YOUR COLLECTIONS</h2>
+          <button onClick={() => {}}>
+            See all <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {/* Asymmetric Editorial Grid: 1 Large Hero Collection + Staggered Cards */}
+        <div className="space-y-3">
+          {mainBoard && (
+            <div
+              onClick={() => onBoard(mainBoard)}
+              className="glass-card relative h-48 rounded-3xl overflow-hidden group cursor-pointer border border-white/12 p-5 flex flex-col justify-between"
+            >
+              <GlassImage src={mainBoard.image} alt={mainBoard.name} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+              <div className="relative z-10 flex justify-between items-start">
+                <span className="text-[10px] bg-black/60 px-2.5 py-1 rounded-full border border-white/15 text-[#c8a2ff] uppercase tracking-wider font-semibold">
+                  FEATURED COLLECTION
+                </span>
+                <span className={`badge-privacy ${mainBoard.privacy === 'public' ? 'is-public' : ''}`}>
+                  {mainBoard.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+                  {mainBoard.privacy}
+                </span>
+              </div>
+              <div className="relative z-10 space-y-1">
+                <strong className="text-xl text-white font-semibold block group-hover:text-[#c8a2ff] transition-colors">
+                  {mainBoard.name}
+                </strong>
+                <p className="text-xs text-white/70 line-clamp-1">{mainBoard.description}</p>
+                <small className="text-[11px] text-white/50 flex items-center gap-2">
+                  {mainBoard.count} memories · {mainBoard.location}
+                </small>
+              </div>
+            </div>
+          )}
+
+          {otherBoards.length > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              {otherBoards.map(board => (
+                <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Your Collections */}
-      <div className="section-header">
-        <h2>YOUR COLLECTIONS</h2>
-        <button onClick={() => {}}>
-          See all <ChevronRight size={14} />
-        </button>
-      </div>
-      <div className="board-grid mb-6">
-        {boards.map(board => (
-          <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
-        ))}
+      {/* DYNAMIC RECENT MOMENTS COLLAGE RAIL */}
+      <div className="mb-8">
+        <div className="section-header">
+          <h2>RECENT MOMENTS</h2>
+          <button onClick={() => {}}>
+            View all <ChevronRight size={14} />
+          </button>
+        </div>
+        <div className="memory-row pb-2">
+          {recentMoments.map(memory => (
+            <MemoryCard key={memory.id} memory={memory} onClick={() => onMemory(memory)} />
+          ))}
+        </div>
       </div>
 
-      {/* Notes from My Universe */}
-      <div className="section-header">
-        <h2>NOTES FROM MY UNIVERSE</h2>
-      </div>
-      <div className="notes-grid mb-6">
-        {notes.map(note => (
-          <div key={note.id} className="note-card">
-            <FileText size={16} className="text-[#c8a2ff] mb-2" />
-            <p>"{note.text}"</p>
-            <span>{note.date}</span>
-          </div>
-        ))}
-        <button
-          onClick={onCreate}
-          className="p-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#c8a2ff] text-xs font-semibold flex items-center justify-center gap-2 hover:border-[#c8a2ff]/40 transition-all"
-        >
-          <Plus size={16} /> Write a note
-        </button>
+      {/* ARCHIVE NOTES */}
+      <div>
+        <div className="section-header">
+          <h2>NOTES FROM MY UNIVERSE</h2>
+        </div>
+        <div className="notes-grid mb-6">
+          {notes.map(note => (
+            <div key={note.id} className="note-card">
+              <FileText size={16} className="text-[#c8a2ff] mb-2" />
+              <p>"{note.text}"</p>
+              <span>{note.date}</span>
+            </div>
+          ))}
+          <button
+            onClick={onCreate}
+            className="p-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#c8a2ff] text-xs font-semibold flex items-center justify-center gap-2 hover:border-[#c8a2ff]/40 transition-all"
+          >
+            <Plus size={16} /> Write a note
+          </button>
+        </div>
       </div>
     </section>
   )
