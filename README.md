@@ -2,72 +2,38 @@
 
 > **Your little universe, in pieces.**
 
-**Visual Memory Archive (VMA)** is a dark, visual-first personal archive for collecting memories, places, interests, thoughts, notes, and moments.
+Visual Memory Archive (VMA) is a dark, visual-first space for
+collecting memories, places, interests, thoughts, notes, and
+personal collections.
 
-Instead of an endless social-media feed, VMA gives you a personal space where you can collect, organize, revisit, and optionally share the things worth remembering.
+Instead of an endless social feed, VMA is designed as a
+personal visual universe — a place where the things you love,
+experience, and want to remember can live together.
 
----
-
-## 🌐 Live Demo
-
-**[Visit Visual Memory Archive →](https://visual-memory-archive.vercel.app)**
-
-**[View Source →](https://github.com/moonsarkar125/visual-memory-archive)**
-
----
-
-## ✦ What is VMA?
-
-VMA is built around a simple idea:
-
-> **Your memories deserve their own universe.**
-
-Create visual collections for things such as:
-
-- 📸 Everyday memories
-- ☕ Cafés and favorite places
-- 📚 Books
-- ✈️ Travel
-- 🎌 Anime and interests
-- 🌙 Personal thoughts
-- 📝 Notes
-- 🖼️ Photo collections
-- ✦ Current phases of life
-
-A collection can contain individual memories and, where supported, nested child collections.
-
-VMA is inspired by the visual discovery of platforms like Pinterest and the personal expression of apps like Threads, but it is **not intended to be a direct clone of either**.
-
-The goal is to create something quieter:
-
-> **A personal visual universe with optional social discovery.**
+<p align="center">
+  <a href="https://visual-memory-archive.vercel.app">
+    <strong>✦ Open Live Demo →</strong>
+  </a>
+</p>
 
 ---
 
-# ✦ Core Features
+## 🌙 The Idea
 
-### 📂 Visual Collections
+> **Your memories deserve more than a camera roll.**
 
-Create image-first collections with:
+VMA combines visual collections, personal memories, short notes,
+and nested boards into one flexible digital archive.
 
-- Cover images
-- Titles
-- Descriptions
-- Locations
-- Memories
-- Child collections
+You can create collections around almost anything:
 
-Example:
-
-JAPAN ✦
-
-├── Tokyo Nights
-
-├── Kyoto Dreams
-
-├── Osaka Eats
-
-└── Places on My List
-
-├── Coffee Shops
-└── Places To Visit
+```text
+☕ Cafés
+✈️ Travel
+📚 Books
+🎌 Anime
+📸 Photography
+🌙 Everyday Moments
+🏫 College Memories
+💭 Personal Thoughts
+✦ Things I Want To Remember
