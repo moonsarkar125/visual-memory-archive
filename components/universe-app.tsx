@@ -152,6 +152,30 @@ const starterMemories: Memory[] = [
     mood: '📚 peaceful',
     tags: ['books', 'quiet'],
   },
+  {
+    id: 'espresso',
+    title: 'Late night espresso',
+    description: 'The aroma of freshly roasted beans in a dimly lit corner café.',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85',
+    boardId: 'cafes',
+    date: 'August 2026',
+    location: 'Jamshedpur',
+    privacy: 'private',
+    mood: '☕ cozy',
+    tags: ['coffee', 'night'],
+  },
+  {
+    id: 'sky',
+    title: 'Constellation view',
+    description: 'Looking up at a clear night sky full of distant stars.',
+    image: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=800&q=85',
+    boardId: 'japan',
+    date: 'August 2026',
+    location: 'Observatory',
+    privacy: 'public',
+    mood: '✨ serene',
+    tags: ['night', 'stars'],
+  },
 ]
 
 const starterNotes: Note[] = [
@@ -523,6 +547,11 @@ function HomePage({
       {/* Tonight's Little Discovery (Shuffle Feature) */}
       {shuffledMemory && (
         <div className="shuffle-card">
+          {shuffledMemory.image && (
+            <div className="w-16 h-16 rounded-xl overflow-hidden mr-4 flex-shrink-0 border border-white/15">
+              <GlassImage src={shuffledMemory.image} alt={shuffledMemory.title} />
+            </div>
+          )}
           <div className="shuffle-card-content">
             <span className="eyebrow flex items-center gap-1.5">
               <Shuffle size={11} /> TONIGHT'S LITTLE DISCOVERY
@@ -533,10 +562,10 @@ function HomePage({
               {shuffledMemory.date}
             </small>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-2">
             <button
               onClick={() => onMemory(shuffledMemory)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-lg shadow-[#c8a2ff]/20"
             >
               View <ArrowRight size={12} />
             </button>
@@ -603,30 +632,33 @@ function HomePage({
 /* MEMORY CARD COMPONENT */
 function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) {
   return (
-    <button className="memory-card" onClick={onClick}>
+    <button className="memory-card group relative" onClick={onClick}>
       {memory.image ? (
         <GlassImage src={memory.image} alt={memory.title} />
       ) : (
-        <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/30">
+        <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/80 flex items-center justify-center text-white/30">
           <ImagePlus size={24} />
         </div>
       )}
       <div className="memory-overlay">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-1">
+          {memory.mood ? (
+            <span className="text-[10px] bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/15 text-white/90 font-medium">
+              {memory.mood}
+            </span>
+          ) : <span />}
           <span className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
             {memory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
             {memory.privacy}
           </span>
-          {memory.mood && (
-            <span className="text-[10px] bg-black/60 px-2 py-0.5 rounded-full border border-white/10 text-white/80">
-              {memory.mood}
-            </span>
-          )}
         </div>
-        <strong>{memory.title}</strong>
-        <small>
-          {memory.location && <><MapPin size={10} /> {memory.location}</>}
-        </small>
+        <div className="space-y-0.5">
+          <strong className="block text-sm text-white font-semibold group-hover:text-[#c8a2ff] transition-colors">{memory.title}</strong>
+          <small className="text-white/60 text-[11px] flex items-center gap-1">
+            {memory.location && <><MapPin size={10} className="text-[#c8a2ff]" /> {memory.location} · </>}
+            {memory.date}
+          </small>
+        </div>
       </div>
     </button>
   )
@@ -635,22 +667,26 @@ function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }
 /* BOARD / COLLECTION CARD COMPONENT */
 function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) {
   return (
-    <button className="board-card glass-card" onClick={onClick}>
-      <div className="board-cover">
+    <button className="board-card glass-card group text-left" onClick={onClick}>
+      <div className="board-cover relative overflow-hidden">
         <GlassImage src={board.image} alt={board.name} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div className="absolute top-2.5 right-2.5">
+          <span className={`badge-privacy ${board.privacy === 'public' ? 'is-public' : ''}`}>
+            {board.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+            {board.privacy}
+          </span>
+        </div>
       </div>
       <div className="board-card-body">
         <div className="flex items-center justify-between text-[10px] text-white/50 uppercase tracking-wider">
-          <span className="flex items-center gap-1">
-            {board.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
-            {board.count} memories
-          </span>
+          <span>{board.count} memories</span>
           {board.children && <span>{board.children.length} sub</span>}
         </div>
-        <strong>{board.name}</strong>
+        <strong className="group-hover:text-[#c8a2ff] transition-colors">{board.name}</strong>
         {board.location && (
-          <small className="text-white/40 text-xs flex items-center gap-1">
-            <MapPin size={10} /> {board.location}
+          <small className="text-white/40 text-xs flex items-center gap-1 mt-0.5">
+            <MapPin size={10} className="text-[#c8a2ff]" /> {board.location}
           </small>
         )}
       </div>
