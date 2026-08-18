@@ -1109,6 +1109,23 @@ function BoardPage({
             <span className="text-[11px] text-white/40 block mt-3">— Archive Thought · {board.name}</span>
           </div>
 
+          {/* PLACE & LANDMARK BLOCK */}
+          {board.location && (
+            <div className="glass-card p-5 flex items-center justify-between group hover:border-[#c8a2ff]/40 transition-all">
+              <div className="flex items-center gap-3.5">
+                <div className="p-3 rounded-2xl bg-[#c8a2ff]/10 text-[#c8a2ff] border border-[#c8a2ff]/20">
+                  <MapPin size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#c8a2ff] uppercase tracking-wider font-semibold block">FEATURED PLACE</span>
+                  <h4 className="text-sm font-semibold text-white group-hover:text-[#c8a2ff] transition-colors">{board.location}</h4>
+                  <p className="text-xs text-white/60 mt-0.5">Primary landmark for this collection</p>
+                </div>
+              </div>
+              <span className="text-xs text-white/40 group-hover:text-white transition-colors">Explore →</span>
+            </div>
+          )}
+
           {/* REMAINING MEMORIES MASONRY GRID */}
           {remainingMemories.length > 0 && (
             <div className="grid grid-cols-2 gap-3">
@@ -1117,6 +1134,17 @@ function BoardPage({
               ))}
             </div>
           )}
+
+          {/* STORY / ESSAY SECTION BLOCK */}
+          <div className="glass-card p-6 border border-white/10 space-y-2">
+            <span className="eyebrow flex items-center gap-1">
+              <FileText size={11} /> ARCHIVE STORY
+            </span>
+            <h4 className="text-base font-semibold text-white">Quiet Moments in {board.name}</h4>
+            <p className="text-xs text-white/70 leading-relaxed">
+              Every detail stored here carries a quiet memory. From rainy evenings to dim café corners, this curated moodboard serves as a permanent digital capsule.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="py-14 text-center border border-dashed border-white/12 rounded-3xl glass-card">
