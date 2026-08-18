@@ -130,6 +130,8 @@ button {
   position: relative;
   z-index: 1;
   padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Responsive Desktop Expansion */
@@ -155,6 +157,9 @@ button {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   position: relative;
   z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes fadeIn {
