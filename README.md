@@ -2,9 +2,9 @@
 
 > **Your little universe, in pieces.**
 
-Visual Memory Archive (VMA) is a dark, visual-first personal archive for collecting memories, places, interests, thoughts, notes, collections, and moments.
+**Visual Memory Archive (VMA)** is a dark, visual-first personal archive for collecting memories, places, interests, thoughts, notes, and moments.
 
-Instead of an endless social feed, VMA gives you a quiet digital space where your memories can be organized, revisited, and optionally shared.
+Instead of an endless social-media feed, VMA gives you a personal space where you can collect, organize, revisit, and optionally share the things worth remembering.
 
 ---
 
@@ -12,33 +12,35 @@ Instead of an endless social feed, VMA gives you a quiet digital space where you
 
 **[Visit Visual Memory Archive →](https://visual-memory-archive.vercel.app)**
 
-**[View Source Code →](https://github.com/moonsarkar125/visual-memory-archive)**
+**[View Source →](https://github.com/moonsarkar125/visual-memory-archive)**
 
 ---
 
-## ✦ What is Visual Memory Archive?
+## ✦ What is VMA?
 
-VMA is built around one simple idea:
+VMA is built around a simple idea:
 
 > **Your memories deserve their own universe.**
 
-Create visual collections for the things that matter to you:
+Create visual collections for things such as:
 
 - 📸 Everyday memories
 - ☕ Cafés and favorite places
 - 📚 Books
-- ✈️ Travel plans and experiences
+- ✈️ Travel
 - 🎌 Anime and interests
 - 🌙 Personal thoughts
-- 📝 Short notes
+- 📝 Notes
 - 🖼️ Photo collections
-- ✦ Personal eras and phases of life
+- ✦ Current phases of life
 
-Collections can contain individual memories and nested child collections, allowing users to organize their personal archive in a way that feels natural to them.
+A collection can contain individual memories and, where supported, nested child collections.
 
-VMA is intentionally **not designed as a direct Pinterest, Instagram, or Threads clone**.
+VMA is inspired by the visual discovery of platforms like Pinterest and the personal expression of apps like Threads, but it is **not intended to be a direct clone of either**.
 
-It is designed to feel more like a **personal visual universe with optional social discovery**.
+The goal is to create something quieter:
+
+> **A personal visual universe with optional social discovery.**
 
 ---
 
