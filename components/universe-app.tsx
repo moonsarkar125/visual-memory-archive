@@ -792,7 +792,7 @@ function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) {
   )
 }
 
-/* SEARCH & DISCOVERY PAGE */
+/* SEARCH & DISCOVERY PAGE — PREMIUM COMMERCIAL REDESIGN */
 function SearchPage({
   boards,
   memories,
@@ -808,8 +808,10 @@ function SearchPage({
 }) {
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('ALL')
+  const [isFocused, setIsFocused] = useState(false)
 
   const filterOptions = ['ALL', 'BOARDS', 'MEMORIES', 'PLACES', 'NOTES', 'TAGS']
+  const feelingTags = ['nostalgic', 'cozy', 'dreamy', 'rainy', 'peaceful', 'late night', 'wanderlust']
 
   const filteredResults = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -827,55 +829,134 @@ function SearchPage({
     return { boards: matchingBoards, memories: matchingMemories }
   }, [query, activeFilter, boards, memories])
 
+  const totalResultsCount = filteredResults.boards.length + filteredResults.memories.length
+
   return (
     <section className="screen">
-      <span className="eyebrow">DISCOVERY</span>
-      <h1 className="title-large">Search Your Universe</h1>
-      <p className="lede">Look for places, feelings, and quiet thoughts.</p>
+      {/* Editorial Search Hero */}
+      <div className="mb-6">
+        <span className="eyebrow flex items-center gap-1.5 mb-1">
+          <Sparkles size={11} className="text-[#c8a2ff]" /> YOUR UNIVERSE
+        </span>
+        <h1 className="text-3xl font-light text-white tracking-tight">
+          Search your <span className="text-[#c8a2ff] font-medium">universe.</span>
+        </h1>
+        <p className="text-xs text-white/60 mt-1">Look for places, feelings, memories and little things.</p>
+      </div>
 
-      {/* Search Input */}
-      <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 mb-4 focus-within:border-[#c8a2ff]/40 transition-all">
-        <Search size={18} className="text-white/40" />
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Search memories, places, boards..."
-          className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-white/40"
-        />
-        {query && (
-          <button onClick={() => setQuery('')} className="text-white/40 hover:text-white">
-            <X size={16} />
-          </button>
+      {/* Floating Smoked Glass Search Surface */}
+      <div className="relative mb-5 z-20">
+        <div className={`flex items-center gap-3.5 bg-white/[0.035] border rounded-2xl px-4 py-3.5 transition-all backdrop-blur-xl shadow-2xl ${
+          isFocused ? 'border-[#c8a2ff]/60 shadow-[#c8a2ff]/10 ring-1 ring-[#c8a2ff]/20' : 'border-white/12'
+        }`}>
+          <Search size={18} className={`transition-colors ${isFocused ? 'text-[#c8a2ff]' : 'text-white/40'}`} />
+          <input
+            type="text"
+            value={query}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search memories, places, feelings..."
+            className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-white/40"
+          />
+          {query ? (
+            <button onClick={() => setQuery('')} className="text-white/40 hover:text-white transition-colors">
+              <X size={16} />
+            </button>
+          ) : (
+            <span className="text-[10px] text-white/40 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md font-mono flex-shrink-0">
+              ⌘ K
+            </span>
+          )}
+        </div>
+
+        {/* Visual Search Suggestions Dropdown (On Focus) */}
+        {isFocused && !query && (
+          <div className="absolute top-full left-0 right-0 mt-2 glass-card p-4 rounded-2xl border border-white/15 backdrop-blur-2xl shadow-2xl z-30 animate-fadeIn space-y-4">
+            <div>
+              <span className="text-[10px] text-white/40 font-semibold uppercase tracking-wider block mb-2">RECENT SEARCHES</span>
+              <div className="flex flex-wrap gap-2">
+                {['Tokyo', 'Cafés', 'Japan', 'Books'].map(item => (
+                  <button
+                    key={item}
+                    onClick={() => setQuery(item)}
+                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 hover:text-white transition-all"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="text-[10px] text-[#c8a2ff] font-semibold uppercase tracking-wider block mb-2">TRY SEARCHING</span>
+              <div className="space-y-1.5 text-xs text-white/70">
+                <p onClick={() => setQuery('places I want to visit')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+                  "places I want to visit"
+                </p>
+                <p onClick={() => setQuery('rainy memories')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+                  "rainy memories"
+                </p>
+                <p onClick={() => setQuery('late night cafés')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+                  "late night cafés"
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Pill Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+      {/* Minimal Editorial Filters */}
+      <div className="flex gap-4 overflow-x-auto pb-2 mb-6 scrollbar-none border-b border-white/10">
         {filterOptions.map(option => (
           <button
             key={option}
             onClick={() => setActiveFilter(option)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
-              activeFilter === option
-                ? 'bg-[#c8a2ff]/15 border-[#c8a2ff] text-[#c8a2ff]'
-                : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
+            className={`pb-2 text-xs font-semibold tracking-wider transition-all relative ${
+              activeFilter === option ? 'text-white' : 'text-white/40 hover:text-white/70'
             }`}
           >
             {option}
+            {activeFilter === option && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#c8a2ff] rounded-full" />
+            )}
           </button>
         ))}
       </div>
 
-      {/* Results Header */}
-      <div className="text-xs text-white/50 mb-4">
-        {filteredResults.boards.length + filteredResults.memories.length} items found
-      </div>
+      {/* "Search By Feeling" Discovery Section */}
+      {!query && (
+        <div className="mb-8">
+          <span className="eyebrow block mb-2.5">SEARCH BY FEELING</span>
+          <div className="flex flex-wrap gap-2">
+            {feelingTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setQuery(tag)}
+                className="px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 hover:text-white transition-all flex items-center gap-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#c8a2ff]" />
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search Results Header */}
+      {query && (
+        <div className="flex items-center justify-between text-xs text-white/50 mb-4">
+          <span>RESULTS FOR "{query}"</span>
+          <span>{totalResultsCount} items found</span>
+        </div>
+      )}
 
       {/* Board Results */}
       {filteredResults.boards.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider mb-3">Collections</h3>
+        <div className="mb-8">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+            <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider">Collections</h3>
+            <span className="text-[10px] text-white/40">{filteredResults.boards.length} results</span>
+          </div>
           <div className="board-grid">
             {filteredResults.boards.map(b => (
               <BoardCard key={b.id} board={b} onClick={() => onBoard(b)} />
@@ -886,8 +967,11 @@ function SearchPage({
 
       {/* Memory Results */}
       {filteredResults.memories.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider mb-3">Memories</h3>
+        <div className="mb-8">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+            <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider">Memories</h3>
+            <span className="text-[10px] text-white/40">{filteredResults.memories.length} results</span>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {filteredResults.memories.map(m => (
               <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
@@ -896,10 +980,23 @@ function SearchPage({
         </div>
       )}
 
+      {/* Clean Empty State */}
       {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && (
-        <div className="py-16 text-center text-white/40">
-          <Compass size={32} className="mx-auto mb-3 text-white/20" />
-          <p>No items matched your search.</p>
+        <div className="py-16 text-center glass-card border border-white/10 rounded-3xl p-6">
+          <Compass size={32} className="mx-auto mb-3 text-[#c8a2ff]/50" />
+          <h3 className="text-sm font-semibold text-white mb-1">NOTHING HERE YET</h3>
+          <p className="text-xs text-white/50 mb-4">Try another memory, place or feeling.</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {['☕ cafés', '🌙 late nights', '📚 books', '✈️ Japan'].map(item => (
+              <button
+                key={item}
+                onClick={() => setQuery(item.replace(/[^a-zA-Z]/g, '').toLowerCase())}
+                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 transition-all"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </section>
