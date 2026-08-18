@@ -951,7 +951,7 @@ function ProfilePage({
   )
 }
 
-/* BOARD / COLLECTION DETAIL PAGE */
+/* BOARD / CURATED EDITORIAL COLLECTION PAGE */
 function BoardPage({
   board,
   memories,
@@ -965,66 +965,230 @@ function BoardPage({
   onMemory: (m: Memory) => void
   onCreate: () => void
 }) {
+  const [boardSheet, setBoardSheet] = useState<string | null>(null)
+
+  const childBoards = board.children || []
+  const heroMemory = memories[0]
+  const remainingMemories = memories.slice(1)
+
   return (
     <section className="screen">
-      <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white mb-4">
-        <ArrowLeft size={16} /> Back to universe
-      </button>
+      {/* Header Back Bar */}
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to universe
+        </button>
+        <button
+          onClick={() => setBoardSheet('add')}
+          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-lg shadow-[#c8a2ff]/15"
+        >
+          <Plus size={13} /> Add Block
+        </button>
+      </div>
 
-      {/* Collection Header */}
-      <div className="relative h-64 rounded-2xl overflow-hidden mb-6 border border-white/10">
-        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-80" />
+      {/* Cinematic Post-Style Board Header */}
+      <div className="relative h-72 rounded-3xl overflow-hidden mb-6 border border-white/10 glass-card">
+        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-75" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4">
-          <span className="eyebrow flex items-center gap-1.5">
-            COLLECTION · {board.privacy.toUpperCase()}
+        <div className="absolute top-4 right-4">
+          <span className={`badge-privacy ${board.privacy === 'public' ? 'is-public' : ''}`}>
+            {board.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
+            {board.privacy.toUpperCase()}
           </span>
-          <h1 className="text-2xl font-semibold text-white mt-1">{board.name}</h1>
-          <p className="text-xs text-white/70 mt-1">{board.description}</p>
-          <small className="text-[11px] text-white/50 flex items-center gap-2 mt-2">
-            {board.location && <><MapPin size={12} /> {board.location} · </>}
-            {board.count} memories
-          </small>
+        </div>
+        <div className="absolute bottom-5 left-5 right-5">
+          <span className="eyebrow flex items-center gap-1.5 mb-1">
+            <Sparkles size={11} /> CURATED COLLECTION
+          </span>
+          <h1 className="text-3xl font-semibold text-white tracking-tight">{board.name}</h1>
+          {board.description && (
+            <p className="text-sm text-white/80 mt-1.5 max-w-xl font-normal leading-relaxed">
+              "{board.description}"
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-white/50">
+            <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md">
+              {memories.length} pins
+            </span>
+            {childBoards.length > 0 && (
+              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md">
+                {childBoards.length} sub-boards
+              </span>
+            )}
+            {board.location && (
+              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md flex items-center gap-1">
+                <MapPin size={10} className="text-[#c8a2ff]" /> {board.location}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Child Collections */}
-      {board.children && board.children.length > 0 && (
-        <div className="mb-6">
-          <span className="eyebrow block mb-2">CHILD COLLECTIONS</span>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {board.children.map(childName => (
-              <span
-                key={childName}
-                className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/80 whitespace-nowrap flex items-center gap-1"
+      {/* Sub-Boards Visual Section */}
+      {childBoards.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <span className="eyebrow flex items-center gap-1">
+              <Layers size={11} /> SUB-BOARDS ({childBoards.length})
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {childBoards.map((subTitle, idx) => (
+              <div
+                key={subTitle}
+                className="glass-card p-4 flex flex-col justify-between group hover:border-[#c8a2ff]/40 transition-all cursor-pointer min-h-[110px]"
               >
-                {childName} <ChevronRight size={12} className="text-[#c8a2ff]" />
-              </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-[#c8a2ff] uppercase tracking-wider font-semibold">Sub-Board #{idx + 1}</span>
+                  <ChevronRight size={14} className="text-white/40 group-hover:text-[#c8a2ff] transition-colors" />
+                </div>
+                <div>
+                  <strong className="text-sm text-white font-semibold block group-hover:text-[#c8a2ff] transition-colors">
+                    {subTitle}
+                  </strong>
+                  <small className="text-[11px] text-white/40 block mt-0.5">Explore sub-collection →</small>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Memories inside Board */}
+      {/* Controlled Asymmetric Visual Layout (Scrapbook / Moodboard) */}
       <div className="section-header">
-        <h2>MEMORIES ({memories.length})</h2>
+        <h2>CURATED MOODBOARD ({memories.length} BLOCKS)</h2>
       </div>
+
       {memories.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {memories.map(m => (
-            <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
-          ))}
+        <div className="space-y-4 mb-8">
+          {/* HERO OPENER BLOCK (First Memory) */}
+          {heroMemory && (
+            <div
+              onClick={() => onMemory(heroMemory)}
+              className="glass-card relative h-80 rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl"
+            >
+              {heroMemory.image ? (
+                <GlassImage src={heroMemory.image} alt={heroMemory.title} />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                <span className="text-[10px] bg-[#c8a2ff]/20 text-[#c8a2ff] border border-[#c8a2ff]/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wider backdrop-blur-md">
+                  ✦ FEATURED OPENER
+                </span>
+                <span className={`badge-privacy ${heroMemory.privacy === 'public' ? 'is-public' : ''}`}>
+                  {heroMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+                  {heroMemory.privacy}
+                </span>
+              </div>
+              <div className="absolute bottom-5 left-5 right-5">
+                {heroMemory.mood && (
+                  <span className="text-xs text-[#c8a2ff] font-medium block mb-1">
+                    {heroMemory.mood}
+                  </span>
+                )}
+                <h3 className="text-xl font-bold text-white group-hover:text-[#c8a2ff] transition-colors">
+                  {heroMemory.title}
+                </h3>
+                <p className="text-xs text-white/70 mt-1 line-clamp-2">{heroMemory.description}</p>
+                <div className="flex items-center gap-3 text-[11px] text-white/50 mt-2">
+                  {heroMemory.location && <span className="flex items-center gap-1"><MapPin size={10} className="text-[#c8a2ff]" /> {heroMemory.location}</span>}
+                  <span>{heroMemory.date}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EDITORIAL QUOTE NOTE BLOCK */}
+          <div className="glass-card p-6 border-l-4 border-l-[#c8a2ff] relative">
+            <span className="eyebrow block mb-2">EDITORIAL NOTE</span>
+            <p className="text-base text-white/90 italic font-serif leading-relaxed">
+              "Some places are worth remembering for reasons you can't explain. We collect pieces of moments to hold onto what time moves past."
+            </p>
+            <span className="text-[11px] text-white/40 block mt-3">— Archive Thought · {board.name}</span>
+          </div>
+
+          {/* REMAINING MEMORIES MASONRY GRID */}
+          {remainingMemories.length > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              {remainingMemories.map(m => (
+                <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
-        <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
-          <Archive size={28} className="mx-auto mb-2 text-white/30" />
-          <p className="text-xs text-white/50 mb-3">No memories in this collection yet.</p>
+        <div className="py-14 text-center border border-dashed border-white/12 rounded-3xl glass-card">
+          <Archive size={32} className="mx-auto mb-3 text-[#c8a2ff]/40" />
+          <p className="text-sm font-semibold text-white mb-1">No blocks in this board yet</p>
+          <p className="text-xs text-white/50 mb-4 max-w-xs mx-auto">Start assembling your moodboard with pins, photos, notes, and places.</p>
           <button
             onClick={onCreate}
-            className="px-4 py-2 rounded-xl bg-[#c8a2ff] text-black text-xs font-semibold"
+            className="px-5 py-2.5 rounded-full bg-[#c8a2ff] text-black text-xs font-semibold shadow-lg shadow-[#c8a2ff]/20 hover:bg-[#d8c2ff] transition-all"
           >
-            + Add Memory
+            + Add First Block
           </button>
+        </div>
+      )}
+
+      {/* In-Board Glass Creation Sheet */}
+      {boardSheet && (
+        <div className="sheet-backdrop" onClick={() => setBoardSheet(null)}>
+          <div className="creation-sheet glass-card" onClick={e => e.stopPropagation()}>
+            <div className="sheet-handle" />
+            <div className="flex justify-between items-center mb-4">
+              <span className="eyebrow">ADD BLOCK TO {board.name.toUpperCase()}</span>
+              <button onClick={() => setBoardSheet(null)} className="text-white/60 hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => { setBoardSheet(null); onCreate() }}
+                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+              >
+                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                  <ImagePlus size={18} />
+                </div>
+                <strong className="text-xs text-white block">Pin / Photo</strong>
+                <small className="text-[10px] text-white/50">Visual photo moment</small>
+              </button>
+
+              <button
+                onClick={() => { setBoardSheet(null); onCreate() }}
+                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+              >
+                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                  <Layers size={18} />
+                </div>
+                <strong className="text-xs text-white block">Sub-Board</strong>
+                <small className="text-[10px] text-white/50">Nested sub-collection</small>
+              </button>
+
+              <button
+                onClick={() => { setBoardSheet(null); onCreate() }}
+                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+              >
+                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                  <FileText size={18} />
+                </div>
+                <strong className="text-xs text-white block">Note</strong>
+                <small className="text-[10px] text-white/50">Editorial text fragment</small>
+              </button>
+
+              <button
+                onClick={() => { setBoardSheet(null); onCreate() }}
+                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+              >
+                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                  <MapPin size={18} />
+                </div>
+                <strong className="text-xs text-white block">Place</strong>
+                <small className="text-[10px] text-white/50">Location landmark</small>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>
