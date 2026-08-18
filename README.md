@@ -59,9 +59,11 @@ Create image-first collections with:
 
 Example:
 
-```text
-CAFÉS IN JAMSHEDPUR
+JAPAN ✦
 
-├── Study Cafés
+├── Tokyo Nights
+├── Kyoto Dreams
+├── Osaka Eats
+└── Places on My List
 ├── Coffee Shops
 └── Places To Visit
