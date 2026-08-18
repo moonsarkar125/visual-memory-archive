@@ -727,37 +727,52 @@ function HomePage({
   )
 }
 
-/* MEMORY CARD COMPONENT */
+/* REUSABLE VERTICAL MEMORY / PIN CARD TEMPLATE (3:4 Portrait) */
 function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) {
   return (
-    <button className="memory-card group relative" onClick={onClick}>
+    <button className="memory-card group relative rounded-2xl overflow-hidden text-left cursor-pointer transition-all duration-300 border border-white/10 hover:border-[#c8a2ff]/40 shadow-xl" onClick={onClick}>
+      {/* Full-Bleed 80-90% Photograph */}
       {memory.image ? (
         <GlassImage src={memory.image} alt={memory.title} />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/80 flex items-center justify-center text-white/30">
+        <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30">
           <ImagePlus size={24} />
         </div>
       )}
-      <div className="memory-overlay">
+
+      {/* Floating Dark Glass Overlay */}
+      <div className="memory-overlay flex flex-col justify-between p-3.5 absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10">
+        {/* Top Minimal Floating Badges */}
         <div className="flex items-center justify-between gap-1">
           {memory.mood ? (
-            <span className="text-[10px] bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/15 text-white/90 font-medium">
+            <span className="text-[10px] bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-white/90 font-medium tracking-tight">
               {memory.mood}
             </span>
           ) : <span />}
-          <span className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
-            {memory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
-            {memory.privacy}
+          <span className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/12 text-white/70">
+            {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} className="text-[#c8a2ff]" />}
           </span>
         </div>
-        <div className="space-y-0.5">
-          <strong className="block text-sm text-white font-semibold group-hover:text-[#c8a2ff] transition-colors">{memory.title}</strong>
-          <small className="text-white/60 text-[11px] flex items-center gap-1">
-            {memory.location && <><MapPin size={10} className="text-[#c8a2ff]" /> {memory.location} · </>}
-            {memory.date}
+
+        {/* Bottom Floating Editorial Typography */}
+        <div className="space-y-0.5 pt-4">
+          <strong className="block text-sm text-white font-medium group-hover:text-[#c8a2ff] transition-colors leading-tight line-clamp-1">
+            {memory.title}
+          </strong>
+          <small className="text-white/60 text-[11px] flex items-center gap-1.5 font-normal">
+            {memory.location && (
+              <span className="flex items-center gap-1">
+                <MapPin size={10} className="text-[#c8a2ff]" /> {memory.location}
+              </span>
+            )}
+            {memory.location && memory.date && <span>·</span>}
+            <span>{memory.date}</span>
           </small>
         </div>
       </div>
+
+      {/* Signature VMA Abstract Corner Line Highlight (On Hover) */}
+      <span className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/0 group-hover:border-white/40 transition-colors pointer-events-none z-20" />
     </button>
   )
 }
