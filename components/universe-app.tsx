@@ -535,7 +535,7 @@ function HomePage({
             Good evening,<br />
             <span className="text-[#c8a2ff]">@{profile.username}</span>
           </h1>
-          <p className="lede">Collecting little moments.</p>
+          <p className="lede">Your little universe, in pieces ✦</p>
         </div>
         <div className="flex items-center gap-2">
           <button className="p-2.5 rounded-full border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#c8a2ff]/40 transition-all">
