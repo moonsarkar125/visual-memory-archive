@@ -3887,6 +3887,16 @@ function CreationSheet({
                 onMemory(m)
               }
             }}
+            onQuickBoard={name => {
+              const newBoardData = {
+                name,
+                description: 'Personal collection',
+                image: images.cafe,
+                privacy: 'private' as PrivacyStatus,
+              }
+              onBoard(newBoardData)
+              return name
+            }}
           />
         ) : mode === 'board' || mode === 'edit-board' || mode === 'create-child-board' ? (
           <BoardForm
@@ -4023,7 +4033,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
   )
 }
 
-/* Memory Creation / Edit Form */
+/* Memory Creation / Edit Form (Phase 5 Quick Save & Post-Save Enrichment) */
 function MemoryForm({
   boards,
   places,
@@ -4031,6 +4041,7 @@ function MemoryForm({
   initial,
   isStory,
   onSave,
+  onQuickBoard,
 }: {
   boards: Board[]
   places: Place[]
@@ -4038,41 +4049,166 @@ function MemoryForm({
   initial?: Memory | null
   isStory?: boolean
   onSave: (m: any) => void
+  onQuickBoard?: (name: string) => string
 }) {
   const [title, setTitle] = useState(initial?.title || '')
   const [description, setDescription] = useState(initial?.description || '')
   const [image, setImage] = useState(initial?.image || '')
-  const [boardId, setBoardId] = useState(initial?.boardId || boards[0]?.id || '')
+  const [boardId, setBoardId] = useState(initial?.boardId || '')
   const [placeId, setPlaceId] = useState(initial?.placeId || '')
   const [date, setDate] = useState(initial?.date || 'August 2026')
   const [location, setLocation] = useState(initial?.location || '')
-  const [mood, setMood] = useState(initial?.mood || '☁ Nostalgic')
-  const [moodId, setMoodId] = useState(initial?.moodId || 'nostalgic')
-  const [tags, setTags] = useState(initial?.tags ? initial.tags.join(', ') : 'memory, quiet')
+  const [mood, setMood] = useState(initial?.mood || '')
+  const [moodId, setMoodId] = useState(initial?.moodId || '')
+  const [tags, setTags] = useState(initial?.tags ? initial.tags.join(', ') : '')
   const [privacy, setPrivacy] = useState<PrivacyStatus>(initial?.privacy || 'private')
 
+  const [isQuickCreatingBoard, setIsQuickCreatingBoard] = useState(false)
+  const [newBoardName, setNewBoardName] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const isQuickSaveMode = !initial && !isStory
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!image && isQuickSaveMode) {
+      setErrorMsg('Please select a photo first')
+      return
+    }
+    setErrorMsg('')
+    setIsSaving(true)
+
+    const finalTitle = title.trim() || (description.trim() ? description.trim().slice(0, 30) : 'Untitled Moment')
+
+    onSave({
+      title: finalTitle,
+      description: description.trim(),
+      image: image || (isStory ? images.library : images.rain),
+      boardId,
+      placeId,
+      date: date || 'August 2026',
+      location,
+      mood,
+      moodId,
+      privacy,
+      tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+    })
+  }
+
+  // Quick Save Mode (Step 1: Photo -> Step 2: Note -> Step 3: Board -> Save)
+  if (isQuickSaveMode) {
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <h3 className="text-base font-normal text-white">QUICK SAVE MOMENT</h3>
+          <p className="text-xs text-[#b1afb8]">Capture now, organize later.</p>
+        </div>
+
+        {/* Step 1: Image Selection (Required) */}
+        <div className="form-group">
+          <label className="flex items-center justify-between text-xs text-white">
+            <span>Photo <span className="text-[#c7a6ff]">*</span></span>
+            <span className="text-[10px] text-[#8b8991]">Required</span>
+          </label>
+          <ImageUpload
+            value={image}
+            onChange={v => {
+              setImage(v)
+              if (v) setErrorMsg('')
+            }}
+          />
+        </div>
+
+        {/* Step 2: Optional Short Note */}
+        <div className="form-group">
+          <label className="text-xs text-[#b1afb8]">Add a little note... (Optional)</label>
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Say something about this moment..."
+            className="form-textarea min-h-[80px]"
+          />
+        </div>
+
+        {/* Step 3: Optional Board Selection / Quick Board Create */}
+        <div className="form-group">
+          <label className="text-xs text-[#b1afb8]">Collection (Optional)</label>
+          {isQuickCreatingBoard ? (
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={newBoardName}
+                onChange={e => setNewBoardName(e.target.value)}
+                placeholder="New collection name..."
+                className="form-input flex-1 text-xs"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newBoardName.trim() && onQuickBoard) {
+                    const createdId = onQuickBoard(newBoardName.trim())
+                    setBoardId(createdId)
+                    setIsQuickCreatingBoard(false)
+                  }
+                }}
+                className="btn-secondary text-xs px-3 py-2 flex-shrink-0"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsQuickCreatingBoard(false)}
+                className="text-xs text-[#8b8991] px-2 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <select
+              value={boardId}
+              onChange={e => {
+                if (e.target.value === '__new__') {
+                  setIsQuickCreatingBoard(true)
+                } else {
+                  setBoardId(e.target.value)
+                }
+              }}
+              className="form-select text-xs"
+            >
+              <option value="" className="bg-black text-white">No collection (Unassigned Archive)</option>
+              {boards.map(b => (
+                <option key={b.id} value={b.id} className="bg-black text-white">
+                  {b.name}
+                </option>
+              ))}
+              <option value="__new__" className="bg-black text-[#c7a6ff]">
+                + Create new board...
+              </option>
+            </select>
+          )}
+        </div>
+
+        {errorMsg && (
+          <p className="text-xs text-rose-400 bg-rose-950/40 border border-rose-500/30 p-2.5 rounded-xl">{errorMsg}</p>
+        )}
+
+        {/* Save Action */}
+        <button
+          type="submit"
+          disabled={!image || isSaving}
+          className="btn-primary w-full py-3 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isSaving ? 'Saving...' : 'Quick Save'}
+        </button>
+      </form>
+    )
+  }
+
+  // Full Edit Form (Post-Save Enrichment / Editing existing memory or story)
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault()
-        if (title.trim()) {
-          onSave({
-            title,
-            description,
-            image: image || (isStory ? images.library : images.rain),
-            boardId,
-            placeId,
-            date,
-            location,
-            mood,
-            moodId,
-            privacy,
-            tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-          })
-        }
-      }}
-      className="space-y-4"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="form-group">
         <label>{isStory ? 'Cover Photo (Optional)' : 'Photo'}</label>
         <ImageUpload value={image} onChange={setImage} />
@@ -4081,7 +4217,6 @@ function MemoryForm({
       <div className="form-group">
         <label>Title</label>
         <input
-          required
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
@@ -4208,8 +4343,8 @@ function MemoryForm({
         </div>
       </div>
 
-      <button type="submit" className="btn-primary mt-2">
-        {initial ? 'Update Moment' : 'Save Moment'}
+      <button type="submit" disabled={isSaving} className="btn-primary mt-2">
+        {isSaving ? 'Saving...' : initial ? 'Update Moment' : 'Save Moment'}
       </button>
     </form>
   )
