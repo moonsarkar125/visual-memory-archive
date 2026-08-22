@@ -1769,7 +1769,7 @@ function ArchivePage({
 
     if (filter === 'ALL' || filter === 'NOTES' || filter === 'PRIVATE') {
       notes.forEach(n => {
-        if (filter === 'PUBLIC' && n.privacy !== 'public') return
+        if (filter === 'PRIVATE' && n.privacy !== 'private') return
         list.push({ type: 'note', date: n.createdAt || n.date, data: n })
       })
     }
@@ -2675,6 +2675,7 @@ function MemoryForm({
   const [description, setDescription] = useState(initial?.description || '')
   const [image, setImage] = useState(initial?.image || '')
   const [boardId, setBoardId] = useState(initial?.boardId || boards[0]?.id || '')
+  const [date, setDate] = useState(initial?.date || 'August 2026')
   const [location, setLocation] = useState(initial?.location || '')
   const [mood, setMood] = useState(initial?.mood || '☁ nostalgic')
   const [tags, setTags] = useState(initial?.tags ? initial.tags.join(', ') : 'memory, quiet')
@@ -2692,7 +2693,7 @@ function MemoryForm({
             description,
             image: image || (isStory ? images.library : images.rain),
             boardId,
-            date: initial?.date || 'August 2026',
+            date,
             location,
             mood,
             privacy,
@@ -2749,6 +2750,30 @@ function MemoryForm({
             value={location}
             onChange={e => setLocation(e.target.value)}
             placeholder="e.g. Jamshedpur"
+            className="form-input"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="form-group">
+          <label>Date</label>
+          <input
+            type="text"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            placeholder="e.g. August 2026"
+            className="form-input"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Tags (comma separated)</label>
+          <input
+            type="text"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+            placeholder="e.g. rain, quiet"
             className="form-input"
           />
         </div>
