@@ -7,7 +7,7 @@ import {
   Pencil, Plus, Search, Send, Settings, Sparkles, Trash2, X, Heart, LayoutGrid,
   Shuffle, ArrowRight, Compass, Eye, Shield, Tag, Calendar, Layers,
   Pin, Share2, Quote, ExternalLink, SlidersHorizontal, ArrowUp, ArrowDown,
-  Bookmark, FolderPlus
+  Bookmark, FolderPlus, UserPlus, UserCheck, Users, User
 } from 'lucide-react'
 
 // Standard visual assets
@@ -20,6 +20,8 @@ const images = {
   hills: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=85',
   tokyo: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=85',
   library: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&q=85',
+  kyotoTemple: 'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=800&q=85',
+  streetArt: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=85',
 }
 
 export type PrivacyStatus = 'private' | 'public'
@@ -38,6 +40,7 @@ export type Place = {
   coordinates?: string
   image?: string
   description?: string
+  ownerId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -60,6 +63,7 @@ export type Board = {
   privacy: PrivacyStatus
   parentBoardId?: string
   children?: string[]
+  ownerId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -102,6 +106,7 @@ export type Memory = {
   tags: string[]
   mood?: string
   moodId?: string
+  ownerId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -114,6 +119,7 @@ export type Note = {
   boardId?: string
   placeId?: string
   moodId?: string
+  ownerId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -127,6 +133,7 @@ export type Profile = {
   location: string
   currentEra: string[]
   currentEraItems?: EraItem[]
+  isPublic?: boolean
 }
 
 export type SavedItem = {
@@ -135,6 +142,13 @@ export type SavedItem = {
   itemType: 'board' | 'moment'
   itemId: string
   savedAt: string
+}
+
+export type Follow = {
+  id: string
+  followerId: string
+  followingId: string
+  createdAt: string
 }
 
 const starterMoods: Mood[] = [
@@ -154,6 +168,7 @@ const starterPlaces: Place[] = [
     location: 'Jamshedpur',
     image: images.cafe,
     description: 'Little tables, warm espresso, and long afternoon conversations.',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-01T10:00:00.000Z',
     updatedAt: '2026-08-01T10:00:00.000Z',
   },
@@ -163,6 +178,7 @@ const starterPlaces: Place[] = [
     location: 'Tokyo, Japan',
     image: images.tokyo,
     description: 'Narrow neon-lit alleys and late night ramen counters.',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-03T10:00:00.000Z',
     updatedAt: '2026-08-03T10:00:00.000Z',
   },
@@ -172,8 +188,19 @@ const starterPlaces: Place[] = [
     location: 'Kyoto, Japan',
     image: images.rain,
     description: 'Quiet wooden eaves and rainy evenings.',
+    ownerId: 'voyager_kyoto',
     createdAt: '2026-08-04T10:00:00.000Z',
     updatedAt: '2026-08-04T10:00:00.000Z',
+  },
+  {
+    id: 'arashiyama-bamboo',
+    name: 'Arashiyama Bamboo Grove',
+    location: 'Kyoto, Japan',
+    image: images.kyotoTemple,
+    description: 'Towering green bamboo stalks whispering in the wind.',
+    ownerId: 'voyager_kyoto',
+    createdAt: '2026-08-05T10:00:00.000Z',
+    updatedAt: '2026-08-05T10:00:00.000Z',
   },
 ]
 
@@ -185,6 +212,56 @@ const starterEraItems: EraItem[] = [
   { id: 'era-5', label: '2am thoughts', icon: '🌙', order: 5 },
 ]
 
+const starterProfiles: Profile[] = [
+  {
+    username: 'terribleracoon556',
+    displayName: 'Shreya',
+    bio: 'collecting little moments ✦',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    cover: images.japan,
+    location: 'Jamshedpur',
+    currentEra: ['late night coding', '☕ coffee', '💻 cybersecurity', '📚 books', '🌙 2am thoughts'],
+    currentEraItems: starterEraItems,
+    isPublic: true,
+  },
+  {
+    username: 'voyager_kyoto',
+    displayName: 'Ren',
+    bio: 'wandering through quiet tea houses & temple gardens 🌿',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    cover: images.kyotoTemple,
+    location: 'Kyoto, Japan',
+    currentEra: ['🍵 matcha tasting', '📸 film photography', '🌿 zen gardens'],
+    currentEraItems: [
+      { id: 'v-1', label: 'matcha tasting', icon: '🍵', order: 1 },
+      { id: 'v-2', label: 'film photography', icon: '📸', order: 2 },
+      { id: 'v-3', label: 'zen gardens', icon: '🌿', order: 3 },
+    ],
+    isPublic: true,
+  },
+  {
+    username: 'tokyo_wanderer',
+    displayName: 'Kenji',
+    bio: 'capturing neon lights and 2am ramen counters 🌙',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    cover: images.tokyo,
+    location: 'Tokyo, Japan',
+    currentEra: ['🌙 late night walks', '🍜 ramen hunting', '🌆 urban exploring'],
+    currentEraItems: [
+      { id: 'k-1', label: 'late night walks', icon: '🌙', order: 1 },
+      { id: 'k-2', label: 'ramen hunting', icon: '🍜', order: 2 },
+      { id: 'k-3', label: 'urban exploring', icon: '🌆', order: 3 },
+    ],
+    isPublic: true,
+  },
+]
+
+const starterFollows: Follow[] = [
+  { id: 'f-1', followerId: 'terribleracoon556', followingId: 'voyager_kyoto', createdAt: '2026-08-10T10:00:00.000Z' },
+  { id: 'f-2', followerId: 'tokyo_wanderer', followingId: 'terribleracoon556', createdAt: '2026-08-12T10:00:00.000Z' },
+  { id: 'f-3', followerId: 'voyager_kyoto', followingId: 'tokyo_wanderer', createdAt: '2026-08-14T10:00:00.000Z' },
+]
+
 const starterBoards: Board[] = [
   {
     id: 'cafes',
@@ -194,6 +271,7 @@ const starterBoards: Board[] = [
     location: 'Jamshedpur',
     placeId: 'blue-door-cafe',
     privacy: 'private',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-01T10:00:00.000Z',
     updatedAt: '2026-08-01T10:00:00.000Z',
   },
@@ -204,6 +282,7 @@ const starterBoards: Board[] = [
     image: images.japan,
     location: 'Japan',
     privacy: 'public',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-02T10:00:00.000Z',
     updatedAt: '2026-08-02T10:00:00.000Z',
   },
@@ -216,6 +295,7 @@ const starterBoards: Board[] = [
     location: 'Tokyo, Japan',
     placeId: 'shinjuku-alley',
     privacy: 'public',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-03T10:00:00.000Z',
     updatedAt: '2026-08-03T10:00:00.000Z',
   },
@@ -228,6 +308,7 @@ const starterBoards: Board[] = [
     location: 'Kyoto, Japan',
     placeId: 'gion-kyoto',
     privacy: 'public',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-04T10:00:00.000Z',
     updatedAt: '2026-08-04T10:00:00.000Z',
   },
@@ -237,6 +318,7 @@ const starterBoards: Board[] = [
     description: 'pages that stayed long after finishing',
     image: images.books,
     privacy: 'private',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-05T10:00:00.000Z',
     updatedAt: '2026-08-05T10:00:00.000Z',
   },
@@ -246,8 +328,31 @@ const starterBoards: Board[] = [
     description: 'favorites and recommendations',
     image: images.hills,
     privacy: 'private',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-06T10:00:00.000Z',
     updatedAt: '2026-08-06T10:00:00.000Z',
+  },
+  {
+    id: 'kyoto-zen',
+    name: 'Kyoto Architecture & Zen',
+    description: 'Moments of peace in ancient temples and moss gardens.',
+    image: images.kyotoTemple,
+    location: 'Kyoto, Japan',
+    privacy: 'public',
+    ownerId: 'voyager_kyoto',
+    createdAt: '2026-08-08T10:00:00.000Z',
+    updatedAt: '2026-08-08T10:00:00.000Z',
+  },
+  {
+    id: 'tokyo-streets',
+    name: 'Tokyo Street Photography',
+    description: 'Reflections, crosswalks, and midnight shadows.',
+    image: images.streetArt,
+    location: 'Tokyo, Japan',
+    privacy: 'public',
+    ownerId: 'tokyo_wanderer',
+    createdAt: '2026-08-09T10:00:00.000Z',
+    updatedAt: '2026-08-09T10:00:00.000Z',
   },
 ]
 
@@ -263,25 +368,6 @@ const starterBoardBlocks: BoardBlock[] = [
     image: images.tokyo,
     location: 'Shinjuku, Tokyo',
     date: 'July 2026',
-  },
-  {
-    id: 'jp-b2',
-    boardId: 'japan',
-    type: 'note',
-    size: 'medium',
-    order: 2,
-    content: "I think I'm collecting future memories.",
-    date: 'Aug 2026',
-  },
-  {
-    id: 'jp-b3',
-    boardId: 'japan',
-    type: 'subboard',
-    size: 'medium',
-    order: 3,
-    subBoardName: 'Tokyo Nights',
-    subBoardCount: 4,
-    subBoardImage: images.tokyo,
   },
 ]
 
@@ -299,6 +385,7 @@ const starterMemories: Memory[] = [
     mood: '🌧 Rainy',
     moodId: 'rainy',
     tags: ['japan', 'rain', 'quiet'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-14T18:30:00.000Z',
     updatedAt: '2026-08-14T18:30:00.000Z',
   },
@@ -315,6 +402,7 @@ const starterMemories: Memory[] = [
     mood: '🌙 Late Night',
     moodId: 'late-night',
     tags: ['tokyo', 'night', 'neon'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-07-28T22:15:00.000Z',
     updatedAt: '2026-07-28T22:15:00.000Z',
   },
@@ -330,6 +418,7 @@ const starterMemories: Memory[] = [
     mood: '☕ Cozy',
     moodId: 'cozy',
     tags: ['matcha', 'peaceful'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-06-10T11:00:00.000Z',
     updatedAt: '2026-06-10T11:00:00.000Z',
   },
@@ -345,6 +434,7 @@ const starterMemories: Memory[] = [
     mood: '☁ Nostalgic',
     moodId: 'nostalgic',
     tags: ['books', 'quiet'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-07-15T14:00:00.000Z',
     updatedAt: '2026-07-15T14:00:00.000Z',
   },
@@ -361,6 +451,7 @@ const starterMemories: Memory[] = [
     mood: '☕ Cozy',
     moodId: 'cozy',
     tags: ['coffee', 'night'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-10T21:00:00.000Z',
     updatedAt: '2026-08-10T21:00:00.000Z',
   },
@@ -376,8 +467,42 @@ const starterMemories: Memory[] = [
     mood: '✨ Dreamy',
     moodId: 'dreamy',
     tags: ['night', 'stars'],
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-12T23:00:00.000Z',
     updatedAt: '2026-08-12T23:00:00.000Z',
+  },
+  {
+    id: 'kyoto-bamboo-walk',
+    title: 'Morning in Arashiyama',
+    description: 'Sunbeams breaking through the bamboo forest path.',
+    image: images.kyotoTemple,
+    boardId: 'kyoto-zen',
+    placeId: 'arashiyama-bamboo',
+    date: 'August 2026',
+    location: 'Kyoto, Japan',
+    privacy: 'public',
+    mood: '🌿 Peaceful',
+    moodId: 'peaceful',
+    tags: ['kyoto', 'bamboo', 'morning'],
+    ownerId: 'voyager_kyoto',
+    createdAt: '2026-08-15T08:00:00.000Z',
+    updatedAt: '2026-08-15T08:00:00.000Z',
+  },
+  {
+    id: 'tokyo-neon-rain',
+    title: 'Midnight Crossing',
+    description: 'Shibuya scramble crossing after a sudden summer shower.',
+    image: images.streetArt,
+    boardId: 'tokyo-streets',
+    date: 'August 2026',
+    location: 'Shibuya, Tokyo',
+    privacy: 'public',
+    mood: '🖤 Dark',
+    moodId: 'dark',
+    tags: ['tokyo', 'rain', 'night'],
+    ownerId: 'tokyo_wanderer',
+    createdAt: '2026-08-16T23:30:00.000Z',
+    updatedAt: '2026-08-16T23:30:00.000Z',
   },
 ]
 
@@ -389,6 +514,7 @@ const starterNotes: Note[] = [
     privacy: 'private',
     placeId: 'blue-door-cafe',
     moodId: 'nostalgic',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-06T10:00:00.000Z',
     updatedAt: '2026-08-06T10:00:00.000Z',
   },
@@ -398,35 +524,25 @@ const starterNotes: Note[] = [
     date: 'August 12, 2026',
     privacy: 'private',
     moodId: 'peaceful',
+    ownerId: 'terribleracoon556',
     createdAt: '2026-08-12T10:00:00.000Z',
     updatedAt: '2026-08-12T10:00:00.000Z',
   },
 ]
-
-const starterProfile: Profile = {
-  username: 'terribleracoon556',
-  displayName: 'Shreya',
-  bio: 'collecting little moments ✦',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  cover: images.japan,
-  location: 'Jamshedpur',
-  currentEra: ['late night coding', '☕ coffee', '💻 cybersecurity', '📚 books', '🌙 2am thoughts'],
-  currentEraItems: starterEraItems,
-}
 
 const starterSavedItems: SavedItem[] = [
   {
     id: 'saved-1',
     userId: 'terribleracoon556',
     itemType: 'board',
-    itemId: 'japan',
+    itemId: 'kyoto-zen',
     savedAt: '2026-08-15T10:00:00.000Z',
   },
   {
     id: 'saved-2',
     userId: 'terribleracoon556',
     itemType: 'moment',
-    itemId: 'tokyo',
+    itemId: 'tokyo-neon-rain',
     savedAt: '2026-08-16T14:00:00.000Z',
   },
 ]
@@ -434,25 +550,31 @@ const starterSavedItems: SavedItem[] = [
 const uid = () => Math.random().toString(36).slice(2, 9)
 
 export default function UniverseApp() {
-  const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'board' | 'memory' | 'archive' | 'saved' | 'timeline' | 'place'>('home')
+  const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'public-profile' | 'board' | 'memory' | 'archive' | 'saved' | 'timeline' | 'place'>('home')
   const [boards, setBoards] = useState<Board[]>(starterBoards)
   const [boardBlocks, setBoardBlocks] = useState<BoardBlock[]>(starterBoardBlocks)
   const [memories, setMemories] = useState<Memory[]>(starterMemories)
   const [notes, setNotes] = useState<Note[]>(starterNotes)
-  const [profile, setProfile] = useState<Profile>(starterProfile)
+  const [profiles, setProfiles] = useState<Profile[]>(starterProfiles)
+  const [profile, setProfile] = useState<Profile>(starterProfiles[0])
   const [savedItems, setSavedItems] = useState<SavedItem[]>(starterSavedItems)
   const [places, setPlaces] = useState<Place[]>(starterPlaces)
   const [moods, setMoods] = useState<Mood[]>(starterMoods)
   const [eraItems, setEraItems] = useState<EraItem[]>(starterEraItems)
+  const [follows, setFollows] = useState<Follow[]>(starterFollows)
 
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
+  const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
+
   const [sheet, setSheet] = useState<string | null>(null)
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null)
   const [editingBoard, setEditingBoard] = useState<Board | null>(null)
   const [editingPlace, setEditingPlace] = useState<Place | null>(null)
   const [parentForNewChild, setParentForNewChild] = useState<Board | null>(null)
+
+  const [userListModal, setUserListModal] = useState<{ title: string; users: Profile[] } | null>(null)
   const [confirmDialog, setConfirmDialog] = useState<{
     type: 'memory' | 'board' | 'note' | 'place'
     id: string
@@ -465,18 +587,20 @@ export default function UniverseApp() {
   // Initialize from LocalStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('little-universe-v2') || localStorage.getItem('little-universe-v1')
+      const saved = localStorage.getItem('little-universe-v3') || localStorage.getItem('little-universe-v2')
       if (saved) {
         const data = JSON.parse(saved)
         if (data.boards) setBoards(data.boards)
         if (data.boardBlocks) setBoardBlocks(data.boardBlocks)
         if (data.memories) setMemories(data.memories)
         if (data.notes) setNotes(data.notes)
-        if (data.profile) setProfile({ ...starterProfile, ...data.profile })
+        if (data.profiles) setProfiles(data.profiles)
+        if (data.profile) setProfile(data.profile)
         if (data.savedItems) setSavedItems(data.savedItems)
         if (data.places) setPlaces(data.places)
         if (data.moods) setMoods(data.moods)
         if (data.eraItems) setEraItems(data.eraItems)
+        if (data.follows) setFollows(data.follows)
       }
     } catch {}
   }, [])
@@ -484,10 +608,10 @@ export default function UniverseApp() {
   // Sync to LocalStorage
   useEffect(() => {
     localStorage.setItem(
-      'little-universe-v2',
-      JSON.stringify({ boards, boardBlocks, memories, notes, profile, savedItems, places, moods, eraItems })
+      'little-universe-v3',
+      JSON.stringify({ boards, boardBlocks, memories, notes, profiles, profile, savedItems, places, moods, eraItems, follows })
     )
-  }, [boards, boardBlocks, memories, notes, profile, savedItems, places, moods, eraItems])
+  }, [boards, boardBlocks, memories, notes, profiles, profile, savedItems, places, moods, eraItems, follows])
 
   // Clear toast automatically
   useEffect(() => {
@@ -497,23 +621,25 @@ export default function UniverseApp() {
     }
   }, [toast])
 
-  // Pick initial shuffle memory
+  // Pick initial shuffle memory (only user's memories or public memories)
   useEffect(() => {
-    if (memories.length > 0 && !shuffledMemory) {
-      const randomIdx = Math.floor(Math.random() * memories.length)
-      setShuffledMemory(memories[randomIdx])
+    const pool = memories.filter(m => m.ownerId === profile.username || m.privacy === 'public')
+    if (pool.length > 0 && !shuffledMemory) {
+      const randomIdx = Math.floor(Math.random() * pool.length)
+      setShuffledMemory(pool[randomIdx])
     }
-  }, [memories, shuffledMemory])
+  }, [memories, profile.username, shuffledMemory])
 
   const handleShuffle = useCallback(() => {
-    if (memories.length === 0) return
+    const pool = memories.filter(m => m.ownerId === profile.username || m.privacy === 'public')
+    if (pool.length === 0) return
     const currentId = shuffledMemory?.id
-    const candidates = memories.filter(m => m.id !== currentId)
-    const pool = candidates.length > 0 ? candidates : memories
-    const randomIdx = Math.floor(Math.random() * pool.length)
-    setShuffledMemory(pool[randomIdx])
+    const candidates = pool.filter(m => m.id !== currentId)
+    const selectionPool = candidates.length > 0 ? candidates : pool
+    const randomIdx = Math.floor(Math.random() * selectionPool.length)
+    setShuffledMemory(selectionPool[randomIdx])
     setToast('Surfaced a random memory ✦')
-  }, [memories, shuffledMemory])
+  }, [memories, profile.username, shuffledMemory])
 
   const openBoard = (board: Board) => {
     setSelectedBoard(board)
@@ -530,15 +656,24 @@ export default function UniverseApp() {
     setPage('place')
   }
 
+  const openPublicProfile = (username: string) => {
+    if (username === profile.username) {
+      setPage('profile')
+    } else {
+      setSelectedUsername(username)
+      setPage('public-profile')
+    }
+  }
+
   // Saved / Favorites toggle
   const isSaved = (type: 'board' | 'moment', id: string) => {
-    return savedItems.some(s => s.itemType === type && s.itemId === id)
+    return savedItems.some(s => s.userId === profile.username && s.itemType === type && s.itemId === id)
   }
 
   const toggleSave = (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     if (isSaved(type, id)) {
-      setSavedItems(prev => prev.filter(s => !(s.itemType === type && s.itemId === id)))
+      setSavedItems(prev => prev.filter(s => !(s.userId === profile.username && s.itemType === type && s.itemId === id)))
       setToast('Removed from saved')
     } else {
       const newItem: SavedItem = {
@@ -553,6 +688,42 @@ export default function UniverseApp() {
     }
   }
 
+  // Follow system logic
+  const isFollowing = (targetUsername: string) => {
+    return follows.some(f => f.followerId === profile.username && f.followingId === targetUsername)
+  }
+
+  const toggleFollow = (targetUsername: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    if (targetUsername === profile.username) return
+    if (isFollowing(targetUsername)) {
+      setFollows(prev => prev.filter(f => !(f.followerId === profile.username && f.followingId === targetUsername)))
+      setToast(`Unfollowed @${targetUsername}`)
+    } else {
+      const newFollow: Follow = {
+        id: uid(),
+        followerId: profile.username,
+        followingId: targetUsername,
+        createdAt: new Date().toISOString(),
+      }
+      setFollows(prev => [...prev, newFollow])
+      setToast(`Now following @${targetUsername} ✦`)
+    }
+  }
+
+  const getFollowersCount = (username: string) => follows.filter(f => f.followingId === username).length
+  const getFollowingCount = (username: string) => follows.filter(f => f.followerId === username).length
+
+  const getFollowersList = (username: string): Profile[] => {
+    const followerUsernames = follows.filter(f => f.followingId === username).map(f => f.followerId)
+    return profiles.filter(p => followerUsernames.includes(p.username))
+  }
+
+  const getFollowingList = (username: string): Profile[] => {
+    const followingUsernames = follows.filter(f => f.followerId === username).map(f => f.followingId)
+    return profiles.filter(p => followingUsernames.includes(p.username))
+  }
+
   // Board CRUD operations
   const addBoard = (boardData: Omit<Board, 'id'>) => {
     const now = new Date().toISOString()
@@ -560,6 +731,7 @@ export default function UniverseApp() {
       ...boardData,
       id: uid(),
       privacy: boardData.privacy || 'private',
+      ownerId: profile.username,
       createdAt: now,
       updatedAt: now,
     }
@@ -616,6 +788,7 @@ export default function UniverseApp() {
       ...memoryData,
       id: uid(),
       privacy: memoryData.privacy || 'private',
+      ownerId: profile.username,
       createdAt: now,
       updatedAt: now,
     }
@@ -683,6 +856,7 @@ export default function UniverseApp() {
     const newPlace: Place = {
       ...placeData,
       id: uid(),
+      ownerId: profile.username,
       createdAt: now,
       updatedAt: now,
     }
@@ -732,11 +906,13 @@ export default function UniverseApp() {
   const updateEraItems = (items: EraItem[]) => {
     setEraItems(items)
     const currentEraLabels = items.map(item => (item.icon ? `${item.icon} ${item.label}` : item.label))
-    setProfile(prev => ({
-      ...prev,
+    const updatedProfile = {
+      ...profile,
       currentEra: currentEraLabels,
       currentEraItems: items,
-    }))
+    }
+    setProfile(updatedProfile)
+    setProfiles(prev => prev.map(p => (p.username === profile.username ? updatedProfile : p)))
     setSheet(null)
     setToast('Current Era updated ✦')
   }
@@ -749,6 +925,7 @@ export default function UniverseApp() {
       date: 'August 2026',
       privacy: 'private',
       boardId,
+      ownerId: profile.username,
       createdAt: now,
       updatedAt: now,
     }
@@ -823,6 +1000,14 @@ export default function UniverseApp() {
     setSelectedMemory(memories[nextIndex])
   }
 
+  const switchUserContext = (targetUsername: string) => {
+    const targetProf = profiles.find(p => p.username === targetUsername)
+    if (targetProf) {
+      setProfile(targetProf)
+      setToast(`Switched user context to @${targetProf.username}`)
+    }
+  }
+
   return (
     <div className="universe-shell">
       <div className="ambient ambient-one" />
@@ -832,9 +1017,9 @@ export default function UniverseApp() {
         {page === 'home' && (
           <HomePage
             profile={profile}
-            boards={boards}
-            memories={memories}
-            notes={notes}
+            boards={boards.filter(b => (b.ownerId || profile.username) === profile.username)}
+            memories={memories.filter(m => (m.ownerId || profile.username) === profile.username)}
+            notes={notes.filter(n => (n.ownerId || profile.username) === profile.username)}
             shuffledMemory={shuffledMemory}
             onShuffle={handleShuffle}
             onBoard={openBoard}
@@ -850,16 +1035,22 @@ export default function UniverseApp() {
 
         {page === 'search' && (
           <SearchPage
+            currentUsername={profile.username}
+            profiles={profiles}
             boards={boards}
             memories={memories}
             notes={notes}
             places={places}
             moods={moods}
+            follows={follows}
             onBoard={openBoard}
             onMemory={openMemory}
             onPlace={openPlace}
+            onUser={openPublicProfile}
             isSaved={isSaved}
             onToggleSave={toggleSave}
+            isFollowing={isFollowing}
+            onToggleFollow={toggleFollow}
           />
         )}
 
@@ -868,11 +1059,16 @@ export default function UniverseApp() {
         {page === 'profile' && (
           <ProfilePage
             profile={profile}
-            boards={boards}
-            memories={memories}
-            notes={notes}
-            places={places}
+            allProfiles={profiles}
+            boards={boards.filter(b => (b.ownerId || profile.username) === profile.username)}
+            memories={memories.filter(m => (m.ownerId || profile.username) === profile.username)}
+            notes={notes.filter(n => (n.ownerId || profile.username) === profile.username)}
+            places={places.filter(p => (p.ownerId || profile.username) === profile.username)}
             eraItems={eraItems}
+            followersCount={getFollowersCount(profile.username)}
+            followingCount={getFollowingCount(profile.username)}
+            onShowFollowers={() => setUserListModal({ title: 'Followers', users: getFollowersList(profile.username) })}
+            onShowFollowing={() => setUserListModal({ title: 'Following', users: getFollowingList(profile.username) })}
             onBoard={openBoard}
             onMemory={openMemory}
             onEditProfile={() => setSheet('profile')}
@@ -880,6 +1076,36 @@ export default function UniverseApp() {
             onOpenArchive={() => setPage('archive')}
             onOpenSaved={() => setPage('saved')}
             onOpenTimeline={() => setPage('timeline')}
+            onSwitchUser={switchUserContext}
+            isSaved={isSaved}
+            onToggleSave={toggleSave}
+          />
+        )}
+
+        {page === 'public-profile' && selectedUsername && (
+          <PublicProfilePage
+            username={selectedUsername}
+            profile={profiles.find(p => p.username === selectedUsername) || {
+              username: selectedUsername,
+              displayName: selectedUsername,
+              bio: 'Visual Memory Creator ✦',
+              avatar: images.japan,
+              cover: images.tokyo,
+              location: 'Worldwide',
+              currentEra: [],
+            }}
+            currentUsername={profile.username}
+            boards={boards.filter(b => b.ownerId === selectedUsername && b.privacy === 'public')}
+            memories={memories.filter(m => m.ownerId === selectedUsername && m.privacy === 'public')}
+            followersCount={getFollowersCount(selectedUsername)}
+            followingCount={getFollowingCount(selectedUsername)}
+            isFollowing={isFollowing(selectedUsername)}
+            onToggleFollow={e => toggleFollow(selectedUsername, e)}
+            onShowFollowers={() => setUserListModal({ title: 'Followers', users: getFollowersList(selectedUsername) })}
+            onShowFollowing={() => setUserListModal({ title: 'Following', users: getFollowingList(selectedUsername) })}
+            onBoard={openBoard}
+            onMemory={openMemory}
+            onBack={() => setPage('search')}
             isSaved={isSaved}
             onToggleSave={toggleSave}
           />
@@ -887,10 +1113,11 @@ export default function UniverseApp() {
 
         {page === 'archive' && (
           <ArchivePage
-            boards={boards}
-            memories={memories}
-            notes={notes}
-            places={places}
+            currentUsername={profile.username}
+            boards={boards.filter(b => (b.ownerId || profile.username) === profile.username)}
+            memories={memories.filter(m => (m.ownerId || profile.username) === profile.username)}
+            notes={notes.filter(n => (n.ownerId || profile.username) === profile.username)}
+            places={places.filter(p => (p.ownerId || profile.username) === profile.username)}
             onBoard={openBoard}
             onMemory={openMemory}
             onPlace={openPlace}
@@ -908,11 +1135,14 @@ export default function UniverseApp() {
 
         {page === 'saved' && (
           <SavedPage
-            savedItems={savedItems}
+            currentUsername={profile.username}
+            savedItems={savedItems.filter(s => s.userId === profile.username)}
             boards={boards}
             memories={memories}
+            profiles={profiles}
             onBoard={openBoard}
             onMemory={openMemory}
+            onUser={openPublicProfile}
             onBack={() => setPage('home')}
             isSaved={isSaved}
             onToggleSave={toggleSave}
@@ -921,10 +1151,10 @@ export default function UniverseApp() {
 
         {page === 'timeline' && (
           <TimelinePage
-            memories={memories}
-            notes={notes}
-            boards={boards}
-            places={places}
+            memories={memories.filter(m => (m.ownerId || profile.username) === profile.username)}
+            notes={notes.filter(n => (n.ownerId || profile.username) === profile.username)}
+            boards={boards.filter(b => (b.ownerId || profile.username) === profile.username)}
+            places={places.filter(p => (p.ownerId || profile.username) === profile.username)}
             onMemory={openMemory}
             onBoard={openBoard}
             onPlace={openPlace}
@@ -938,6 +1168,7 @@ export default function UniverseApp() {
         {page === 'place' && selectedPlace && (
           <PlacePage
             place={selectedPlace}
+            currentUsername={profile.username}
             memories={memories}
             notes={notes}
             boards={boards}
@@ -957,6 +1188,7 @@ export default function UniverseApp() {
         {page === 'board' && selectedBoard && (
           <BoardPage
             board={selectedBoard}
+            currentUsername={profile.username}
             allBoards={boards}
             blocks={boardBlocks.filter(b => b.boardId === selectedBoard.id).sort((a, b) => a.order - b.order)}
             allMemories={memories.filter(m => m.boardId === selectedBoard.id)}
@@ -973,6 +1205,7 @@ export default function UniverseApp() {
             }}
             onMemory={openMemory}
             onBoard={openBoard}
+            onUser={openPublicProfile}
             onAddBlock={addBlockToBoard}
             onEditBoard={() => {
               setEditingBoard(selectedBoard)
@@ -994,8 +1227,10 @@ export default function UniverseApp() {
         {page === 'memory' && selectedMemory && (
           <MemoryPage
             memory={selectedMemory}
+            currentUsername={profile.username}
             board={boards.find(b => b.id === selectedMemory.boardId)}
             place={places.find(p => p.id === selectedMemory.placeId)}
+            owner={profiles.find(p => p.username === (selectedMemory.ownerId || profile.username))}
             onBack={() => setPage('home')}
             onEdit={() => {
               setEditingMemory(selectedMemory)
@@ -1003,6 +1238,7 @@ export default function UniverseApp() {
             }}
             onDelete={() => requestDeleteMemory(selectedMemory)}
             onTogglePrivacy={() => toggleMemoryPrivacy(selectedMemory.id)}
+            onUser={openPublicProfile}
             onNext={() => navigateMemory('next')}
             onPrev={() => navigateMemory('prev')}
             isSaved={isSaved}
@@ -1011,7 +1247,7 @@ export default function UniverseApp() {
         )}
 
         {/* Floating 5-Item Bottom Navigation */}
-        {page !== 'board' && page !== 'memory' && page !== 'place' && (
+        {page !== 'board' && page !== 'memory' && page !== 'place' && page !== 'public-profile' && (
           <BottomNav
             activeTab={page === 'archive' || page === 'saved' || page === 'timeline' ? 'home' : page}
             onTabSelect={setPage}
@@ -1024,8 +1260,8 @@ export default function UniverseApp() {
       {sheet && (
         <CreationSheet
           type={sheet}
-          boards={boards}
-          places={places}
+          boards={boards.filter(b => (b.ownerId || profile.username) === profile.username)}
+          places={places.filter(p => (p.ownerId || profile.username) === profile.username)}
           moods={moods}
           profile={profile}
           eraItems={eraItems}
@@ -1050,9 +1286,26 @@ export default function UniverseApp() {
           onEraSave={updateEraItems}
           onProfile={p => {
             setProfile(p)
+            setProfiles(prev => prev.map(prof => (prof.username === p.username ? p : prof)))
             setSheet(null)
             setToast('Profile updated')
           }}
+        />
+      )}
+
+      {/* User List Modal (Followers / Following) */}
+      {userListModal && (
+        <UserListModal
+          title={userListModal.title}
+          users={userListModal.users}
+          currentUsername={profile.username}
+          isFollowing={isFollowing}
+          onToggleFollow={toggleFollow}
+          onSelectUser={u => {
+            setUserListModal(null)
+            openPublicProfile(u.username)
+          }}
+          onClose={() => setUserListModal(null)}
         />
       )}
 
@@ -1569,41 +1822,115 @@ function PlaceCard({
   )
 }
 
-/* SEARCH & DISCOVERY PAGE — PREMIUM EDITORIAL SEARCH */
+/* USER / CREATOR PROFILE CARD COMPONENT */
+function UserCard({
+  profile,
+  publicBoardCount,
+  followersCount,
+  isFollowing,
+  onSelect,
+  onToggleFollow,
+}: {
+  profile: Profile
+  publicBoardCount: number
+  followersCount: number
+  isFollowing?: boolean
+  onSelect: () => void
+  onToggleFollow?: (e: React.MouseEvent) => void
+}) {
+  return (
+    <div
+      onClick={onSelect}
+      className="glass-card p-4 rounded-2xl cursor-pointer hover:border-white/25 transition-all group flex items-center justify-between gap-4"
+    >
+      <div className="flex items-center gap-3.5 min-w-0">
+        <img src={profile.avatar} alt={profile.username} className="w-12 h-12 rounded-xl object-cover border border-white/10 flex-shrink-0" />
+        <div className="min-w-0">
+          <h4 className="text-sm font-medium text-white group-hover:text-[#c7a6ff] transition-colors truncate flex items-center gap-1.5">
+            @{profile.username}
+            <span className="text-[10px] text-[#8b8991] font-normal">({profile.displayName})</span>
+          </h4>
+          <p className="text-xs text-[#b1afb8] truncate">{profile.bio}</p>
+          <div className="flex items-center gap-3 text-[10px] text-[#8b8991] mt-1">
+            <span>{publicBoardCount} collections</span>
+            <span>·</span>
+            <span>{followersCount} followers</span>
+          </div>
+        </div>
+      </div>
+
+      {onToggleFollow && (
+        <button
+          onClick={onToggleFollow}
+          className={`btn-secondary text-xs px-3 py-1.5 flex-shrink-0 flex items-center gap-1 ${
+            isFollowing ? 'bg-white/15 text-white border-white/30' : ''
+          }`}
+        >
+          {isFollowing ? (
+            <>
+              <UserCheck size={12} className="text-[#c7a6ff]" /> Following
+            </>
+          ) : (
+            <>
+              <UserPlus size={12} /> Follow
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  )
+}
+
+/* SEARCH & PUBLIC DISCOVERY PAGE */
 function SearchPage({
+  currentUsername,
+  profiles,
   boards,
   memories,
   notes,
   places,
   moods,
+  follows,
   onBoard,
   onMemory,
   onPlace,
+  onUser,
   isSaved,
   onToggleSave,
+  isFollowing,
+  onToggleFollow,
 }: {
+  currentUsername: string
+  profiles: Profile[]
   boards: Board[]
   memories: Memory[]
   notes: Note[]
   places: Place[]
   moods: Mood[]
+  follows: Follow[]
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
   onPlace: (p: Place) => void
+  onUser: (username: string) => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
+  isFollowing: (username: string) => boolean
+  onToggleFollow: (username: string, e?: React.MouseEvent) => void
 }) {
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('ALL')
   const [isFocused, setIsFocused] = useState(false)
 
-  const filterOptions = ['ALL', 'BOARDS', 'MEMORIES', 'PLACES', 'NOTES', 'TAGS']
+  const filterOptions = ['ALL', 'BOARDS', 'MEMORIES', 'USERS', 'PLACES', 'TAGS']
 
+  // Public discovery query filter (Excludes private content!)
   const filteredResults = useMemo(() => {
     const q = query.toLowerCase().trim()
 
+    // Boards must be public
     const matchingBoards = boards.filter(
       b =>
+        b.privacy === 'public' &&
         (activeFilter === 'ALL' || activeFilter === 'BOARDS') &&
         (!q ||
           b.name.toLowerCase().includes(q) ||
@@ -1611,8 +1938,10 @@ function SearchPage({
           b.location?.toLowerCase().includes(q))
     )
 
+    // Memories must be public
     const matchingMemories = memories.filter(
       m =>
+        m.privacy === 'public' &&
         (activeFilter === 'ALL' || activeFilter === 'MEMORIES' || activeFilter === 'PLACES' || activeFilter === 'TAGS') &&
         (!q ||
           m.title.toLowerCase().includes(q) ||
@@ -1622,31 +1951,43 @@ function SearchPage({
           m.tags.some(t => t.toLowerCase().includes(q)))
     )
 
-    const matchingPlaces = places.filter(
-      p =>
+    // Places must have public memories or boards
+    const matchingPlaces = places.filter(p => {
+      const hasPublicContent = memories.some(m => m.placeId === p.id && m.privacy === 'public') || boards.some(b => b.placeId === p.id && b.privacy === 'public')
+      return (
+        hasPublicContent &&
         (activeFilter === 'ALL' || activeFilter === 'PLACES') &&
         (!q ||
           p.name.toLowerCase().includes(q) ||
           p.location.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q))
+      )
+    })
+
+    // Users / Creators
+    const matchingUsers = profiles.filter(
+      p =>
+        (activeFilter === 'ALL' || activeFilter === 'USERS') &&
+        (!q || p.username.toLowerCase().includes(q) || p.displayName.toLowerCase().includes(q) || p.bio.toLowerCase().includes(q))
     )
 
-    return { boards: matchingBoards, memories: matchingMemories, places: matchingPlaces }
-  }, [query, activeFilter, boards, memories, places])
+    return { boards: matchingBoards, memories: matchingMemories, places: matchingPlaces, users: matchingUsers }
+  }, [query, activeFilter, boards, memories, places, profiles])
 
-  const totalResultsCount = filteredResults.boards.length + filteredResults.memories.length + filteredResults.places.length
+  const totalResultsCount =
+    filteredResults.boards.length + filteredResults.memories.length + filteredResults.places.length + filteredResults.users.length
 
   return (
     <section className="screen space-y-6">
       {/* Editorial Search Hero Header */}
       <div className="pt-2">
         <span className="eyebrow flex items-center gap-2 mb-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> YOUR UNIVERSE
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> PUBLIC DISCOVERY
         </span>
         <h1 className="title-large">
-          Search your <span className="font-normal text-[#c7a6ff]">universe.</span>
+          Discover other <span className="font-normal text-[#c7a6ff]">worlds.</span>
         </h1>
-        <p className="lede mt-2 mb-0">Look for places, feelings, memories and little things.</p>
+        <p className="lede mt-2 mb-0">Explore public collections, creators, places, and shared memories.</p>
       </div>
 
       {/* Floating Smoked Glass Search Bar */}
@@ -1663,7 +2004,7 @@ function SearchPage({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search memories, places, feelings..."
+            placeholder="Search public collections, creators, feelings..."
             className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-[#66636c]"
           />
           {query ? (
@@ -1676,26 +2017,6 @@ function SearchPage({
             </span>
           )}
         </div>
-
-        {/* Dropdown Suggestions */}
-        {isFocused && !query && (
-          <div className="absolute top-full left-0 right-0 mt-2 glass-card p-5 rounded-2xl border border-white/15 backdrop-blur-2xl shadow-2xl z-30 animate-fadeIn space-y-4">
-            <div>
-              <span className="text-[10px] text-[#66636c] font-semibold uppercase tracking-wider block mb-2">RECENT SEARCHES</span>
-              <div className="flex flex-wrap gap-2">
-                {['Tokyo', 'Cafés', 'Japan', 'Books', 'Nostalgic'].map(item => (
-                  <button
-                    key={item}
-                    onClick={() => setQuery(item)}
-                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-[#b1afb8] hover:border-white/30 hover:text-white transition-all"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Minimal Editorial Filters */}
@@ -1717,7 +2038,7 @@ function SearchPage({
       {/* "Search By Feeling / Mood" */}
       {!query && (
         <div>
-          <span className="eyebrow block mb-3 text-[10px]">SEARCH BY FEELING & MOOD</span>
+          <span className="eyebrow block mb-3 text-[10px]">DISCOVER BY FEELING & MOOD</span>
           <div className="flex flex-wrap gap-2">
             {moods.map(m => (
               <button
@@ -1733,11 +2054,56 @@ function SearchPage({
         </div>
       )}
 
+      {/* Featured Creators Section when not querying */}
+      {!query && activeFilter === 'ALL' && (
+        <div>
+          <div className="section-header">
+            <h2>DISCOVER CREATORS</h2>
+          </div>
+          <div className="space-y-3">
+            {profiles.map(p => (
+              <UserCard
+                key={p.username}
+                profile={p}
+                publicBoardCount={boards.filter(b => b.ownerId === p.username && b.privacy === 'public').length}
+                followersCount={follows.filter(f => f.followingId === p.username).length}
+                isFollowing={isFollowing(p.username)}
+                onSelect={() => onUser(p.username)}
+                onToggleFollow={p.username !== currentUsername ? e => onToggleFollow(p.username, e) : undefined}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Results Header */}
       {query && (
         <div className="flex items-center justify-between text-xs text-[#8b8991]">
-          <span>RESULTS FOR "{query}"</span>
+          <span>PUBLIC RESULTS FOR "{query}"</span>
           <span>{totalResultsCount} items found</span>
+        </div>
+      )}
+
+      {/* Creator / User Results */}
+      {filteredResults.users.length > 0 && (query || activeFilter === 'USERS') && (
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Creators</h3>
+            <span className="text-[10px] text-[#66636c]">{filteredResults.users.length} results</span>
+          </div>
+          <div className="space-y-3">
+            {filteredResults.users.map(u => (
+              <UserCard
+                key={u.username}
+                profile={u}
+                publicBoardCount={boards.filter(b => b.ownerId === u.username && b.privacy === 'public').length}
+                followersCount={follows.filter(f => f.followingId === u.username).length}
+                isFollowing={isFollowing(u.username)}
+                onSelect={() => onUser(u.username)}
+                onToggleFollow={u.username !== currentUsername ? e => onToggleFollow(u.username, e) : undefined}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -1745,7 +2111,7 @@ function SearchPage({
       {filteredResults.places.length > 0 && (
         <div>
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
-            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Places</h3>
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Public Places</h3>
             <span className="text-[10px] text-[#66636c]">{filteredResults.places.length} results</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1753,9 +2119,9 @@ function SearchPage({
               <PlaceCard
                 key={p.id}
                 place={p}
-                allMemories={memories}
-                allNotes={notes}
-                allBoards={boards}
+                allMemories={memories.filter(m => m.privacy === 'public')}
+                allNotes={notes.filter(n => n.privacy === 'public')}
+                allBoards={boards.filter(b => b.privacy === 'public')}
                 onClick={() => onPlace(p)}
               />
             ))}
@@ -1767,7 +2133,7 @@ function SearchPage({
       {filteredResults.boards.length > 0 && (
         <div>
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
-            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Collections</h3>
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Public Collections</h3>
             <span className="text-[10px] text-[#66636c]">{filteredResults.boards.length} results</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1790,7 +2156,7 @@ function SearchPage({
       {filteredResults.memories.length > 0 && (
         <div>
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
-            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Memories</h3>
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Public Memories</h3>
             <span className="text-[10px] text-[#66636c]">{filteredResults.memories.length} results</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -1808,11 +2174,11 @@ function SearchPage({
       )}
 
       {/* Empty State */}
-      {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && filteredResults.places.length === 0 && (
+      {totalResultsCount === 0 && (
         <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8">
           <Compass size={32} className="mx-auto mb-3 text-[#8b8991]" />
-          <h3 className="text-sm font-medium text-white mb-1">NOTHING HERE YET</h3>
-          <p className="text-xs text-[#b1afb8] mb-6">Try another memory, place or feeling.</p>
+          <h3 className="text-sm font-medium text-white mb-1">NO PUBLIC CONTENT FOUND</h3>
+          <p className="text-xs text-[#b1afb8] mb-6">Try searching for another memory, creator, or place.</p>
         </div>
       )}
     </section>
@@ -1823,8 +2189,8 @@ function SearchPage({
 function InboxPage() {
   const notifications = [
     { id: 1, text: 'Someone saved your public collection "Japan — someday"', time: '2h ago', icon: <Heart size={16} /> },
-    { id: 2, text: 'A new voyager found your visual memory archive', time: 'Yesterday', icon: <CircleUserRound size={16} /> },
-    { id: 3, text: 'Your story "Rainy Evening" is ready to be revisited', time: '3d ago', icon: <BookOpen size={16} /> },
+    { id: 2, text: 'A new voyager started following your visual universe', time: 'Yesterday', icon: <CircleUserRound size={16} /> },
+    { id: 3, text: 'Your story "Rainy Evening" was featured in Kyoto discovery', time: '3d ago', icon: <BookOpen size={16} /> },
   ]
 
   return (
@@ -1856,14 +2222,19 @@ function InboxPage() {
   )
 }
 
-/* PROFILE PAGE */
+/* OWNER PROFILE PAGE */
 function ProfilePage({
   profile,
+  allProfiles,
   boards,
   memories,
   notes,
   places,
   eraItems,
+  followersCount,
+  followingCount,
+  onShowFollowers,
+  onShowFollowing,
   onBoard,
   onMemory,
   onEditProfile,
@@ -1871,15 +2242,21 @@ function ProfilePage({
   onOpenArchive,
   onOpenSaved,
   onOpenTimeline,
+  onSwitchUser,
   isSaved,
   onToggleSave,
 }: {
   profile: Profile
+  allProfiles: Profile[]
   boards: Board[]
   memories: Memory[]
   notes: Note[]
   places: Place[]
   eraItems?: EraItem[]
+  followersCount: number
+  followingCount: number
+  onShowFollowers: () => void
+  onShowFollowing: () => void
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
   onEditProfile: () => void
@@ -1887,6 +2264,7 @@ function ProfilePage({
   onOpenArchive: () => void
   onOpenSaved: () => void
   onOpenTimeline: () => void
+  onSwitchUser: (username: string) => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
@@ -1910,16 +2288,49 @@ function ProfilePage({
         </div>
       </div>
 
-      {/* User Info */}
+      {/* User Info & Prototype User Context Switcher */}
       <div className="pt-4 space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-normal text-white flex items-center gap-3">
-          @{profile.username}
-          <span className="text-xs font-normal text-white border border-white/20 px-2.5 py-0.5 rounded-full bg-white/5">
-            {profile.displayName || 'Creator'}
-          </span>
-        </h1>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h1 className="text-2xl sm:text-3xl font-normal text-white flex items-center gap-3">
+            @{profile.username}
+            <span className="text-xs font-normal text-white border border-white/20 px-2.5 py-0.5 rounded-full bg-white/5">
+              {profile.displayName || 'Creator'}
+            </span>
+          </h1>
+
+          {/* Prototype Context Switcher */}
+          <div className="flex items-center gap-2 text-xs text-[#8b8991] bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span>Active User:</span>
+            <select
+              value={profile.username}
+              onChange={e => onSwitchUser(e.target.value)}
+              className="bg-transparent text-white border-none outline-none text-xs font-medium cursor-pointer"
+            >
+              {allProfiles.map(p => (
+                <option key={p.username} value={p.username} className="bg-black text-white">
+                  @{p.username} ({p.displayName})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <p className="text-xs sm:text-sm text-[#b1afb8]">{profile.bio}</p>
-        <div className="flex items-center gap-4 text-xs text-[#b1afb8] pt-1 flex-wrap">
+
+        {/* Dynamic Followers / Following Counts */}
+        <div className="flex items-center gap-5 text-xs text-white pt-1">
+          <button onClick={onShowFollowers} className="hover:text-[#c7a6ff] transition-colors flex items-center gap-1.5">
+            <strong className="font-medium text-white">{followersCount}</strong>
+            <span className="text-[#8b8991]">followers</span>
+          </button>
+          <span className="text-[#66636c]">·</span>
+          <button onClick={onShowFollowing} className="hover:text-[#c7a6ff] transition-colors flex items-center gap-1.5">
+            <strong className="font-medium text-white">{followingCount}</strong>
+            <span className="text-[#8b8991]">following</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 text-xs text-[#b1afb8] pt-2 flex-wrap">
           <span className="flex items-center gap-1">
             <MapPin size={12} className="text-[#c7a6ff]" /> {profile.location}
           </span>
@@ -2036,8 +2447,264 @@ function ProfilePage({
   )
 }
 
+/* PUBLIC VISITOR PROFILE PAGE */
+function PublicProfilePage({
+  username,
+  profile,
+  currentUsername,
+  boards,
+  memories,
+  followersCount,
+  followingCount,
+  isFollowing,
+  onToggleFollow,
+  onShowFollowers,
+  onShowFollowing,
+  onBoard,
+  onMemory,
+  onBack,
+  isSaved,
+  onToggleSave,
+}: {
+  username: string
+  profile: Profile
+  currentUsername: string
+  boards: Board[]
+  memories: Memory[]
+  followersCount: number
+  followingCount: number
+  isFollowing: boolean
+  onToggleFollow: (e: React.MouseEvent) => void
+  onShowFollowers: () => void
+  onShowFollowing: () => void
+  onBoard: (b: Board) => void
+  onMemory: (m: Memory) => void
+  onBack: () => void
+  isSaved: (type: 'board' | 'moment', id: string) => boolean
+  onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
+}) {
+  return (
+    <section className="screen space-y-8">
+      {/* Back button */}
+      <div className="pt-2">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to Discovery
+        </button>
+      </div>
+
+      {/* Cover & Avatar Header */}
+      <div className="relative h-48 sm:h-56 rounded-3xl overflow-hidden border border-white/10 glass-card">
+        <img src={profile.cover} alt="Profile Cover" className="w-full h-full object-cover opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <button
+            onClick={onToggleFollow}
+            className={`btn-secondary text-xs px-4 py-1.5 backdrop-blur-md flex items-center gap-1.5 ${
+              isFollowing ? 'bg-white/20 text-white border-white/40' : 'btn-primary'
+            }`}
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck size={14} className="text-[#c7a6ff]" /> Following
+              </>
+            ) : (
+              <>
+                <UserPlus size={14} /> Follow Creator
+              </>
+            )}
+          </button>
+        </div>
+        <div className="absolute -bottom-6 left-6 flex items-end gap-4">
+          <img
+            src={profile.avatar}
+            alt="Avatar"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-black shadow-2xl"
+          />
+        </div>
+      </div>
+
+      {/* User Info */}
+      <div className="pt-4 space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-normal text-white flex items-center gap-3">
+          @{profile.username}
+          <span className="text-xs font-normal text-[#c7a6ff] border border-[#c7a6ff]/30 px-2.5 py-0.5 rounded-full bg-[#c7a6ff]/10">
+            {profile.displayName}
+          </span>
+        </h1>
+        <p className="text-xs sm:text-sm text-[#b1afb8]">{profile.bio}</p>
+
+        {/* Followers / Following Counts */}
+        <div className="flex items-center gap-5 text-xs text-white pt-1">
+          <button onClick={onShowFollowers} className="hover:text-[#c7a6ff] transition-colors flex items-center gap-1.5">
+            <strong className="font-medium text-white">{followersCount}</strong>
+            <span className="text-[#8b8991]">followers</span>
+          </button>
+          <span className="text-[#66636c]">·</span>
+          <button onClick={onShowFollowing} className="hover:text-[#c7a6ff] transition-colors flex items-center gap-1.5">
+            <strong className="font-medium text-white">{followingCount}</strong>
+            <span className="text-[#8b8991]">following</span>
+          </button>
+        </div>
+
+        {profile.location && (
+          <div className="text-xs text-[#b1afb8] pt-1">
+            <span className="flex items-center gap-1">
+              <MapPin size={12} className="text-[#c7a6ff]" /> {profile.location}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Dynamic Public Stats Counter */}
+      <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl glass-card text-center">
+        <div>
+          <strong className="text-lg text-white block font-normal">{memories.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Public Memories</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block font-normal">{boards.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Public Collections</span>
+        </div>
+      </div>
+
+      {/* CURRENT ERA Section */}
+      {profile.currentEra && profile.currentEra.length > 0 && (
+        <div className="era-card glass-card">
+          <span className="eyebrow flex items-center gap-2 text-[10px] mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURRENT ERA
+          </span>
+          <div className="era-tags">
+            {profile.currentEra.map((item, idx) => (
+              <span key={idx} className="era-tag">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Public Collections */}
+      <div>
+        <div className="section-header">
+          <h2>PUBLIC COLLECTIONS ({boards.length})</h2>
+        </div>
+        {boards.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {boards.map(board => (
+              <BoardCard
+                key={board.id}
+                board={board}
+                allBoards={boards}
+                allMemories={memories}
+                onClick={() => onBoard(board)}
+                isSaved={isSaved('board', board.id)}
+                onToggleSave={e => onToggleSave('board', board.id, e)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-[#8b8991]">No public collections shared yet.</p>
+        )}
+      </div>
+
+      {/* Public Memories */}
+      <div>
+        <div className="section-header">
+          <h2>PUBLIC MEMORIES ({memories.length})</h2>
+        </div>
+        {memories.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {memories.map(m => (
+              <MemoryCard
+                key={m.id}
+                memory={m}
+                onClick={() => onMemory(m)}
+                isSaved={isSaved('moment', m.id)}
+                onToggleSave={e => onToggleSave('moment', m.id, e)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-[#8b8991]">No public memories shared yet.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+/* USER LIST MODAL (FOLLOWERS / FOLLOWING) */
+function UserListModal({
+  title,
+  users,
+  currentUsername,
+  isFollowing,
+  onToggleFollow,
+  onSelectUser,
+  onClose,
+}: {
+  title: string
+  users: Profile[]
+  currentUsername: string
+  isFollowing: (u: string) => boolean
+  onToggleFollow: (u: string, e?: React.MouseEvent) => void
+  onSelectUser: (u: Profile) => void
+  onClose: () => void
+}) {
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div
+        className="glass-card p-6 max-w-md w-full mx-4 rounded-3xl space-y-4 animate-fadeIn border border-white/15 shadow-2xl max-h-[80vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+            <Users size={16} className="text-[#c7a6ff]" /> {title} ({users.length})
+          </h3>
+          <button onClick={onClose} className="text-[#8b8991] hover:text-white">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto space-y-3 pr-1 flex-1">
+          {users.length > 0 ? (
+            users.map(u => (
+              <div
+                key={u.username}
+                onClick={() => onSelectUser(u)}
+                className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between cursor-pointer hover:border-white/25 transition-all"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <img src={u.avatar} alt={u.username} className="w-10 h-10 rounded-xl object-cover border border-white/10 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <strong className="text-xs font-medium text-white block truncate">@{u.username}</strong>
+                    <span className="text-[11px] text-[#b1afb8] block truncate">{u.bio}</span>
+                  </div>
+                </div>
+
+                {u.username !== currentUsername && (
+                  <button
+                    onClick={e => onToggleFollow(u.username, e)}
+                    className={`btn-secondary text-[11px] px-2.5 py-1 flex-shrink-0 flex items-center gap-1 ${
+                      isFollowing(u.username) ? 'bg-white/15 text-white' : ''
+                    }`}
+                  >
+                    {isFollowing(u.username) ? 'Following' : 'Follow'}
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-xs text-[#8b8991]">No creators in this list.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ARCHIVE PAGE — COMPLETE CONTENT HISTORY */
 function ArchivePage({
+  currentUsername,
   boards,
   memories,
   notes,
@@ -2052,6 +2719,7 @@ function ArchivePage({
   onDeleteMemory,
   onToggleMemoryPrivacy,
 }: {
+  currentUsername: string
   boards: Board[]
   memories: Memory[]
   notes: Note[]
@@ -2443,6 +3111,7 @@ function TimelinePage({
 /* PLACE PAGE — PLACE DETAIL VIEW */
 function PlacePage({
   place,
+  currentUsername,
   memories,
   notes,
   boards,
@@ -2455,6 +3124,7 @@ function PlacePage({
   onToggleSave,
 }: {
   place: Place
+  currentUsername: string
   memories: Memory[]
   notes: Note[]
   boards: Board[]
@@ -2466,9 +3136,12 @@ function PlacePage({
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
-  const linkedMemories = memories.filter(m => m.placeId === place.id)
-  const linkedNotes = notes.filter(n => n.placeId === place.id)
-  const linkedBoards = boards.filter(b => b.placeId === place.id)
+  const isOwner = (place.ownerId || currentUsername) === currentUsername
+
+  // Public/Owner visibility rule for memories & boards at this place
+  const linkedMemories = memories.filter(m => m.placeId === place.id && (isOwner || m.privacy === 'public'))
+  const linkedNotes = notes.filter(n => n.placeId === place.id && (isOwner || n.privacy === 'public'))
+  const linkedBoards = boards.filter(b => b.placeId === place.id && (isOwner || b.privacy === 'public'))
 
   return (
     <section className="screen space-y-6">
@@ -2477,18 +3150,20 @@ function PlacePage({
         <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
           <ArrowLeft size={16} /> Back to My Universe
         </button>
-        <div className="flex items-center gap-2">
-          <button onClick={() => onEditPlace(place)} className="btn-secondary text-xs px-3 py-1.5">
-            <Pencil size={12} /> Edit Place
-          </button>
-          <button
-            onClick={() => onDeletePlace(place)}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all"
-            title="Delete Place"
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
+        {isOwner && (
+          <div className="flex items-center gap-2">
+            <button onClick={() => onEditPlace(place)} className="btn-secondary text-xs px-3 py-1.5">
+              <Pencil size={12} /> Edit Place
+            </button>
+            <button
+              onClick={() => onDeletePlace(place)}
+              className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all"
+              title="Delete Place"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Hero Banner */}
@@ -2601,37 +3276,44 @@ function PlacePage({
   )
 }
 
-/* SAVED / FAVORITES PAGE */
+/* SAVED / FAVORITES PAGE WITH PUBLIC SAVES SUPPORT */
 function SavedPage({
+  currentUsername,
   savedItems,
   boards,
   memories,
+  profiles,
   onBoard,
   onMemory,
+  onUser,
   onBack,
   isSaved,
   onToggleSave,
 }: {
+  currentUsername: string
   savedItems: SavedItem[]
   boards: Board[]
   memories: Memory[]
+  profiles: Profile[]
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
+  onUser: (u: string) => void
   onBack: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
   const [filter, setFilter] = useState<'ALL' | 'BOARDS' | 'MOMENTS'>('ALL')
 
+  // Exclude private/deleted saved items from other users!
   const savedBoards = useMemo(() => {
     const ids = savedItems.filter(s => s.itemType === 'board').map(s => s.itemId)
-    return boards.filter(b => ids.includes(b.id))
-  }, [savedItems, boards])
+    return boards.filter(b => ids.includes(b.id) && ((b.ownerId || currentUsername) === currentUsername || b.privacy === 'public'))
+  }, [savedItems, boards, currentUsername])
 
   const savedMemories = useMemo(() => {
     const ids = savedItems.filter(s => s.itemType === 'moment').map(s => s.itemId)
-    return memories.filter(m => ids.includes(m.id))
-  }, [savedItems, memories])
+    return memories.filter(m => ids.includes(m.id) && ((m.ownerId || currentUsername) === currentUsername || m.privacy === 'public'))
+  }, [savedItems, memories, currentUsername])
 
   return (
     <section className="screen space-y-6">
@@ -2645,7 +3327,7 @@ function SavedPage({
       <div>
         <span className="eyebrow block mb-2 text-[10px]">CURATED SELECTIONS</span>
         <h1 className="title-large">Saved Favorites</h1>
-        <p className="lede mt-1 mb-0">Public and private moments you have bookmarked.</p>
+        <p className="lede mt-1 mb-0">Public and private moments you have bookmarked across your universe.</p>
       </div>
 
       {/* Filter Tabs */}
@@ -2720,6 +3402,7 @@ function SavedPage({
 /* EDITORIAL BOARD PAGE WITH CHILD BOARDS */
 function BoardPage({
   board,
+  currentUsername,
   allBoards,
   blocks,
   allMemories,
@@ -2727,6 +3410,7 @@ function BoardPage({
   onBack,
   onMemory,
   onBoard,
+  onUser,
   onAddBlock,
   onEditBoard,
   onDeleteBoard,
@@ -2738,6 +3422,7 @@ function BoardPage({
   onToggleSave,
 }: {
   board: Board
+  currentUsername: string
   allBoards: Board[]
   blocks: BoardBlock[]
   allMemories: Memory[]
@@ -2745,6 +3430,7 @@ function BoardPage({
   onBack: () => void
   onMemory: (m: Memory) => void
   onBoard: (b: Board) => void
+  onUser: (username: string) => void
   onAddBlock: (b: any) => void
   onEditBoard: () => void
   onDeleteBoard: () => void
@@ -2755,7 +3441,8 @@ function BoardPage({
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
-  const childBoards = allBoards.filter(b => b.parentBoardId === board.id)
+  const isOwner = (board.ownerId || currentUsername) === currentUsername
+  const childBoards = allBoards.filter(b => b.parentBoardId === board.id && (isOwner || b.privacy === 'public'))
   const parentBoard = board.parentBoardId ? allBoards.find(b => b.id === board.parentBoardId) : null
 
   return (
@@ -2785,12 +3472,16 @@ function BoardPage({
           <button onClick={e => onToggleSave('board', board.id, e)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white transition-all">
             <Bookmark size={14} className={isSaved('board', board.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
           </button>
-          <button onClick={onEditBoard} className="btn-secondary text-xs px-3 py-1.5">
-            <Pencil size={12} /> Edit
-          </button>
-          <button onClick={onDeleteBoard} className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all">
-            <Trash2 size={14} />
-          </button>
+          {isOwner && (
+            <>
+              <button onClick={onEditBoard} className="btn-secondary text-xs px-3 py-1.5">
+                <Pencil size={12} /> Edit
+              </button>
+              <button onClick={onDeleteBoard} className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all">
+                <Trash2 size={14} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -2807,6 +3498,14 @@ function BoardPage({
             <span className="text-[10px] bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-[#c7a6ff]">
               Child Board
             </span>
+          )}
+          {board.ownerId && board.ownerId !== currentUsername && (
+            <button
+              onClick={() => onUser(board.ownerId!)}
+              className="text-[10px] bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/15 text-white hover:text-[#c7a6ff] transition-colors"
+            >
+              by @{board.ownerId}
+            </button>
           )}
         </div>
         <div className="absolute bottom-6 left-6 right-6 space-y-2 z-10">
@@ -2833,9 +3532,11 @@ function BoardPage({
       <div>
         <div className="section-header">
           <h2>CHILD BOARDS ({childBoards.length})</h2>
-          <button onClick={onAddChildBoard} className="text-xs text-[#c7a6ff] hover:underline flex items-center gap-1">
-            <FolderPlus size={14} /> + Add Child Board
-          </button>
+          {isOwner && (
+            <button onClick={onAddChildBoard} className="text-xs text-[#c7a6ff] hover:underline flex items-center gap-1">
+              <FolderPlus size={14} /> + Add Child Board
+            </button>
+          )}
         </div>
         {childBoards.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -2851,14 +3552,14 @@ function BoardPage({
               />
             ))}
           </div>
-        ) : (
+        ) : isOwner ? (
           <button
             onClick={onAddChildBoard}
             className="w-full py-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#b1afb8] text-xs font-medium flex items-center justify-center gap-2 hover:border-white/30 hover:text-white transition-all"
           >
             <FolderPlus size={14} /> Create nested child board inside {board.name}
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* Asymmetric / Scrapbook Board Blocks Layout */}
@@ -2893,29 +3594,37 @@ function BoardPage({
 /* MEMORY PAGE — DETAILED MOMENT VIEW */
 function MemoryPage({
   memory,
+  currentUsername,
   board,
   place,
+  owner,
   onBack,
   onEdit,
   onDelete,
   onTogglePrivacy,
+  onUser,
   onNext,
   onPrev,
   isSaved,
   onToggleSave,
 }: {
   memory: Memory
+  currentUsername: string
   board?: Board | null
   place?: Place | null
+  owner?: Profile | null
   onBack: () => void
   onEdit: () => void
   onDelete: () => void
   onTogglePrivacy: () => void
+  onUser: (username: string) => void
   onNext: () => void
   onPrev: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
+  const isOwner = (memory.ownerId || currentUsername) === currentUsername
+
   return (
     <section className="screen space-y-6">
       {/* Top Header */}
@@ -2927,9 +3636,11 @@ function MemoryPage({
           <button onClick={onNext} className="btn-secondary text-xs px-3 py-1.5" title="Next Memory">
             Next <ChevronRight size={14} />
           </button>
-          <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1.5">
-            <Pencil size={12} /> Edit
-          </button>
+          {isOwner && (
+            <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1.5">
+              <Pencil size={12} /> Edit
+            </button>
+          )}
           <button onClick={e => onToggleSave('moment', memory.id, e)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white transition-all">
             <Bookmark size={14} className={isSaved('moment', memory.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
           </button>
@@ -2948,7 +3659,7 @@ function MemoryPage({
       {/* Memory Content Details */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {memory.mood && (
               <span className="text-xs bg-white/10 border border-white/15 px-3 py-1 rounded-full text-white font-medium">
                 {memory.mood}
@@ -2964,12 +3675,26 @@ function MemoryPage({
                 <MapPin size={10} /> {place.name}
               </span>
             )}
+            {owner && (
+              <button
+                onClick={() => onUser(owner.username)}
+                className="text-xs bg-white/5 border border-white/10 px-3 py-1 rounded-full text-white/80 hover:text-[#c7a6ff] transition-colors flex items-center gap-1.5"
+              >
+                <User size={10} /> @{owner.username}
+              </button>
+            )}
           </div>
 
-          <button onClick={onTogglePrivacy} className={`badge-privacy cursor-pointer ${memory.privacy === 'public' ? 'is-public' : ''}`}>
-            {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
-            {memory.privacy.toUpperCase()}
-          </button>
+          {isOwner ? (
+            <button onClick={onTogglePrivacy} className={`badge-privacy cursor-pointer ${memory.privacy === 'public' ? 'is-public' : ''}`}>
+              {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
+              {memory.privacy.toUpperCase()}
+            </button>
+          ) : (
+            <span className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
+              <Globe2 size={10} /> PUBLIC
+            </span>
+          )}
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-normal text-white">{memory.title}</h1>
@@ -2985,9 +3710,11 @@ function MemoryPage({
           <span>{memory.date}</span>
         </div>
 
-        <button onClick={onDelete} className="flex items-center gap-2 text-xs text-rose-400/80 hover:text-rose-400 pt-4">
-          <Trash2 size={14} /> Delete memory from archive
-        </button>
+        {isOwner && (
+          <button onClick={onDelete} className="flex items-center gap-2 text-xs text-rose-400/80 hover:text-rose-400 pt-4">
+            <Trash2 size={14} /> Delete memory from archive
+          </button>
+        )}
       </div>
     </section>
   )
