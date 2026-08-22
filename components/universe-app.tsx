@@ -5,7 +5,8 @@ import {
   Archive, ArrowLeft, Bell, BookOpen, Camera, ChevronRight, CircleUserRound,
   FileText, Globe2, ImagePlus, LockKeyhole, MapPin, MoreHorizontal,
   Pencil, Plus, Search, Send, Settings, Sparkles, Trash2, X, Heart, LayoutGrid,
-  Shuffle, ArrowRight, Compass, Eye, Shield, Tag, Calendar, Layers
+  Shuffle, ArrowRight, Compass, Eye, Shield, Tag, Calendar, Layers,
+  Pin, Share2, Quote, ExternalLink, SlidersHorizontal, ArrowUp, ArrowDown
 } from 'lucide-react'
 
 // Standard visual assets
@@ -31,6 +32,31 @@ export type Board = {
   location?: string
   privacy: PrivacyStatus
   children?: string[]
+}
+
+export type BoardBlockType = 'pin' | 'memory' | 'subboard' | 'note' | 'photo' | 'place' | 'story'
+export type BoardBlockSize = 'small' | 'medium' | 'large' | 'full' | 'wide' | 'tall'
+
+export type BoardBlock = {
+  id: string
+  boardId: string
+  type: BoardBlockType
+  order: number
+  size?: BoardBlockSize
+  title?: string
+  description?: string
+  content?: string
+  image?: string
+  location?: string
+  date?: string
+  mood?: string
+  tags?: string[]
+  subBoardId?: string
+  subBoardName?: string
+  subBoardCount?: number
+  subBoardImage?: string
+  privacy?: PrivacyStatus
+  sourceUrl?: string
 }
 
 export type Memory = {
@@ -77,12 +103,12 @@ const starterBoards: Board[] = [
   {
     id: 'japan',
     name: 'Japan — someday',
-    description: 'a soft itinerary for later',
+    description: 'Tokyo, Kyoto, quiet streets, train rides, food, little shops and everywhere I want to wander.',
     image: images.japan,
     count: 12,
     location: 'Japan',
     privacy: 'public',
-    children: ['Tokyo', 'Kyoto', 'Osaka', 'Shrines'],
+    children: ['Tokyo Nights', 'Kyoto Dreams', 'Osaka Eats', 'Shrines & Temples'],
   },
   {
     id: 'books',
@@ -100,6 +126,192 @@ const starterBoards: Board[] = [
     image: images.hills,
     count: 43,
     privacy: 'private',
+  },
+]
+
+const starterBoardBlocks: BoardBlock[] = [
+  {
+    id: 'jp-b1',
+    boardId: 'japan',
+    type: 'photo',
+    size: 'full',
+    order: 1,
+    title: 'Tokyo Alley Lights',
+    description: 'Neon signs reflecting on wet pavement late at night in Shinjuku.',
+    image: images.tokyo,
+    location: 'Shinjuku, Tokyo',
+    date: 'July 2026',
+  },
+  {
+    id: 'jp-b2',
+    boardId: 'japan',
+    type: 'note',
+    size: 'medium',
+    order: 2,
+    content: 'I think I\'m collecting future memories.',
+    date: 'Aug 2026',
+  },
+  {
+    id: 'jp-b3',
+    boardId: 'japan',
+    type: 'subboard',
+    size: 'medium',
+    order: 3,
+    subBoardName: 'Tokyo Nights',
+    description: 'Neon, narrow alleys & 2am ramen counters',
+    subBoardCount: 12,
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=85',
+  },
+  {
+    id: 'jp-b4',
+    boardId: 'japan',
+    type: 'pin',
+    size: 'tall',
+    order: 4,
+    title: 'Shibuya Crossing at Midnight',
+    description: 'The pulse of Tokyo under soft rain and neon reflections.',
+    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=85',
+    location: 'Shibuya, Tokyo',
+    date: 'July 2026',
+    tags: ['tokyo', 'night'],
+  },
+  {
+    id: 'jp-b5',
+    boardId: 'japan',
+    type: 'memory',
+    size: 'medium',
+    order: 5,
+    title: 'Kyoto Evening',
+    description: 'One of those evenings worth keeping. Rain tapping softly on dark wooden eaves.',
+    image: images.rain,
+    location: 'Gion, Kyoto',
+    date: 'August 2026',
+    mood: '☁ nostalgic',
+    tags: ['kyoto', 'rain'],
+  },
+  {
+    id: 'jp-b6',
+    boardId: 'japan',
+    type: 'photo',
+    size: 'tall',
+    order: 6,
+    title: 'Kyoto Street',
+    image: images.japan,
+    location: 'Kyoto Street',
+    date: 'July 2026',
+  },
+  {
+    id: 'jp-b7',
+    boardId: 'japan',
+    type: 'subboard',
+    size: 'medium',
+    order: 7,
+    subBoardName: 'Japan Food',
+    description: 'Ramen shops, tea houses & matcha stalls',
+    subBoardCount: 8,
+    image: images.tea,
+  },
+  {
+    id: 'jp-b8',
+    boardId: 'japan',
+    type: 'place',
+    size: 'small',
+    order: 8,
+    title: 'SHIBUYA CROSSING',
+    description: 'Want to walk here at night when the rain stops.',
+    location: 'Shibuya, Tokyo, Japan',
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=85',
+  },
+  {
+    id: 'jp-b9',
+    boardId: 'japan',
+    type: 'story',
+    size: 'wide',
+    order: 9,
+    title: 'Places Living in My Head',
+    content: 'A few places exist in my head long before I\'ve ever visited them. Kyoto in autumn, rain falling on wooden roofs, and tiny coffee bars where no one hurries.',
+    date: 'August 2026',
+  },
+  {
+    id: 'jp-b10',
+    boardId: 'japan',
+    type: 'note',
+    size: 'small',
+    order: 10,
+    content: 'Someday.',
+    date: 'Aug 2026',
+  },
+  {
+    id: 'cf-b1',
+    boardId: 'cafes',
+    type: 'memory',
+    size: 'large',
+    order: 1,
+    title: 'Rainy evening',
+    description: 'One of those evenings that felt quietly perfect. Rain tapping softly against the window.',
+    image: images.rain,
+    location: 'Jamshedpur',
+    date: 'August 2026',
+    mood: '☁ nostalgic',
+  },
+  {
+    id: 'cf-b2',
+    boardId: 'cafes',
+    type: 'note',
+    size: 'medium',
+    order: 2,
+    content: 'The aroma of freshly roasted beans in a dim corner café makes any rainy day slow down.',
+    date: 'August 2026',
+  },
+  {
+    id: 'cf-b3',
+    boardId: 'cafes',
+    type: 'subboard',
+    size: 'medium',
+    order: 3,
+    subBoardName: 'Study Cafés',
+    description: 'Quiet tables with outlets and warm tea',
+    subBoardCount: 5,
+    image: images.tea,
+  },
+  {
+    id: 'cf-b4',
+    boardId: 'cafes',
+    type: 'place',
+    size: 'small',
+    order: 4,
+    title: 'CORNER CAFÉ',
+    description: 'Best window table for watching monsoon rain.',
+    location: 'Bistupur, Jamshedpur',
+  },
+  {
+    id: 'bk-b1',
+    boardId: 'books',
+    type: 'photo',
+    size: 'large',
+    order: 1,
+    title: 'Sanctuary of Pages',
+    image: images.books,
+    location: 'Personal Nook',
+  },
+  {
+    id: 'bk-b2',
+    boardId: 'books',
+    type: 'note',
+    size: 'medium',
+    order: 2,
+    content: 'We read to discover we are not alone in the quiet hours.',
+    date: 'July 2026',
+  },
+  {
+    id: 'bk-b3',
+    boardId: 'books',
+    type: 'story',
+    size: 'wide',
+    order: 3,
+    title: 'On Stories That Stay',
+    content: 'Some stories leave a faint echo in the mind that never fully fades out. You close the cover and the room feels subtly altered.',
+    date: 'July 2026',
   },
 ]
 
@@ -208,6 +420,7 @@ const uid = () => Math.random().toString(36).slice(2, 9)
 export default function UniverseApp() {
   const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'board' | 'memory'>('home')
   const [boards, setBoards] = useState<Board[]>(starterBoards)
+  const [boardBlocks, setBoardBlocks] = useState<BoardBlock[]>(starterBoardBlocks)
   const [memories, setMemories] = useState<Memory[]>(starterMemories)
   const [notes, setNotes] = useState<Note[]>(starterNotes)
   const [profile, setProfile] = useState<Profile>(starterProfile)
@@ -225,6 +438,7 @@ export default function UniverseApp() {
       if (saved) {
         const data = JSON.parse(saved)
         if (data.boards) setBoards(data.boards)
+        if (data.boardBlocks) setBoardBlocks(data.boardBlocks)
         if (data.memories) setMemories(data.memories)
         if (data.notes) setNotes(data.notes)
         if (data.profile) setProfile({ ...starterProfile, ...data.profile })
@@ -234,8 +448,8 @@ export default function UniverseApp() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('little-universe-v2', JSON.stringify({ boards, memories, notes, profile }))
-  }, [boards, memories, notes, profile])
+    localStorage.setItem('little-universe-v2', JSON.stringify({ boards, boardBlocks, memories, notes, profile }))
+  }, [boards, boardBlocks, memories, notes, profile])
 
   // Clear toast automatically
   useEffect(() => {
@@ -284,6 +498,22 @@ export default function UniverseApp() {
     const nextMemory: Memory = { ...memoryData, id: uid() }
     setMemories(v => [nextMemory, ...v])
     setBoards(v => v.map(b => b.id === memoryData.boardId ? { ...b, count: b.count + 1 } : b))
+    
+    const newBlock: BoardBlock = {
+      id: uid(),
+      boardId: memoryData.boardId,
+      type: 'memory',
+      order: 99,
+      title: memoryData.title,
+      description: memoryData.description,
+      image: memoryData.image,
+      location: memoryData.location,
+      date: memoryData.date,
+      mood: memoryData.mood,
+      tags: memoryData.tags,
+      privacy: memoryData.privacy,
+    }
+    setBoardBlocks(prev => [...prev, newBlock])
     setSheet(null)
     setToast('Moment saved safely 🔒')
   }
@@ -318,7 +548,54 @@ export default function UniverseApp() {
     }
   }
 
-  // Previous & Next memory navigation
+  const addBlockToBoard = (blockData: Omit<BoardBlock, 'id' | 'order'>) => {
+    const currentBoardBlocks = boardBlocks.filter(b => b.boardId === blockData.boardId)
+    const newBlock: BoardBlock = {
+      ...blockData,
+      id: uid(),
+      order: currentBoardBlocks.length + 1,
+    }
+    setBoardBlocks(prev => [...prev, newBlock])
+    setBoards(prev => prev.map(b => b.id === blockData.boardId ? { ...b, count: b.count + 1 } : b))
+    setToast('Block added to personal page ✦')
+  }
+
+  const updateBoardDetails = (boardId: string, updates: Partial<Board>) => {
+    setBoards(prev => prev.map(b => b.id === boardId ? { ...b, ...updates } : b))
+    if (selectedBoard && selectedBoard.id === boardId) {
+      setSelectedBoard(prev => prev ? { ...prev, ...updates } : null)
+    }
+    setToast('Board details updated ✦')
+  }
+
+  const deleteBlockFromBoard = (blockId: string) => {
+    setBoardBlocks(prev => prev.filter(b => b.id !== blockId))
+    setToast('Block removed from board')
+  }
+
+  const reorderBlockInBoard = (blockId: string, direction: 'up' | 'down') => {
+    if (!selectedBoard) return
+    const boardBlocksForCurrent = boardBlocks
+      .filter(b => b.boardId === selectedBoard.id)
+      .sort((a, b) => a.order - b.order)
+    
+    const idx = boardBlocksForCurrent.findIndex(b => b.id === blockId)
+    if (idx === -1) return
+    
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= boardBlocksForCurrent.length) return
+
+    const updated = [...boardBlocksForCurrent]
+    const temp = updated[idx].order
+    updated[idx].order = updated[targetIdx].order
+    updated[targetIdx].order = temp
+
+    setBoardBlocks(prev => {
+      const otherBlocks = prev.filter(b => b.boardId !== selectedBoard.id)
+      return [...otherBlocks, ...updated]
+    })
+  }
+
   const navigateMemory = (direction: 'prev' | 'next') => {
     if (!selectedMemory || memories.length === 0) return
     const currentIndex = memories.findIndex(m => m.id === selectedMemory.id)
@@ -376,10 +653,16 @@ export default function UniverseApp() {
         {page === 'board' && selectedBoard && (
           <BoardPage
             board={selectedBoard}
-            memories={memories.filter(m => m.boardId === selectedBoard.id)}
+            blocks={boardBlocks.filter(b => b.boardId === selectedBoard.id).sort((a, b) => a.order - b.order)}
+            allMemories={memories.filter(m => m.boardId === selectedBoard.id)}
             onBack={() => setPage('home')}
             onMemory={openMemory}
-            onCreate={() => setSheet('memory')}
+            onAddBlock={addBlockToBoard}
+            onUpdateBoard={updateBoardDetails}
+            onDeleteBlock={deleteBlockFromBoard}
+            onReorderBlock={reorderBlockInBoard}
+            onShareBoard={() => setToast('Board link copied to clipboard ✦')}
+            onOpenSubBoard={subName => setToast(`Exploring sub-collection: ${subName}`)}
           />
         )}
 
@@ -395,7 +678,7 @@ export default function UniverseApp() {
           />
         )}
 
-        {/* Fixed 5-Item Bottom Navigation */}
+        {/* Floating 5-Item Bottom Navigation */}
         {page !== 'board' && page !== 'memory' && (
           <BottomNav
             activeTab={page}
@@ -426,7 +709,7 @@ export default function UniverseApp() {
       {/* Toast Notification */}
       {toast && (
         <div className="toast">
-          <Sparkles size={16} /> {toast}
+          <Sparkles size={14} className="text-[#c7a6ff]" /> {toast}
         </div>
       )}
     </div>
@@ -444,7 +727,7 @@ function GlassImage({ src, alt, className = '' }: { src: string; alt: string; cl
   )
 }
 
-/* 5-Item Mobile-First Bottom Navigation */
+/* 5-Item Bottom Navigation System */
 function BottomNav({
   activeTab,
   onTabSelect,
@@ -479,7 +762,7 @@ function BottomNav({
         aria-label="Create something new"
         onClick={onCreateSelect}
       >
-        <Plus />
+        <Plus size={20} />
       </button>
 
       <button
@@ -503,7 +786,7 @@ function BottomNav({
   )
 }
 
-/* HOME PAGE — EDITORIAL RECOMPOSITION */
+/* HOME PAGE — PREMIUM EDITORIAL COMPOSITION */
 function HomePage({
   profile,
   boards,
@@ -531,238 +814,210 @@ function HomePage({
   const otherBoards = boards.slice(1)
 
   return (
-    <section className="screen">
-      {/* Header — Spacious Editorial Greeting */}
-      <div className="flex justify-between items-start mb-6">
+    <section className="screen space-y-8">
+      {/* Editorial Header */}
+      <div className="flex justify-between items-start pt-2">
         <div>
-          <span className="eyebrow flex items-center gap-1.5 mb-1">
-            <Sparkles size={11} className="text-[#c8a2ff]" /> MY UNIVERSE
+          <span className="eyebrow flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> MY UNIVERSE
           </span>
           <h1 className="title-large">
             Good evening,<br />
-            <span className="text-[#c8a2ff] font-semibold">@{profile.username}</span>
+            <span className="font-normal text-white">@{profile.username}</span>
           </h1>
-          <p className="lede mt-1">Your little universe, in pieces ✦</p>
+          <p className="lede mt-2 mb-0">collecting little moments ✦</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onCreate}
-            className="p-2.5 rounded-full border border-white/12 bg-white/5 text-white/70 hover:text-white hover:border-[#c8a2ff]/40 transition-all"
-            title="Create new memory"
-          >
-            <Plus size={18} />
-          </button>
-        </div>
+        <button
+          onClick={onCreate}
+          className="btn-secondary"
+          title="Create new memory"
+        >
+          <Plus size={16} /> <span className="hidden sm:inline">New Memory</span>
+        </button>
       </div>
 
-      {/* FEATURED HERO MEMORY (The Hero of the Viewport) */}
-      {featuredMemory && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="eyebrow flex items-center gap-1">
-              <Sparkles size={11} className="text-[#c8a2ff]" /> FEATURED MEMORY
-            </span>
-            <span className="text-[11px] text-white/40">Opening Scene</span>
-          </div>
-          <div
-            onClick={() => onMemory(featuredMemory)}
-            className="glass-card relative h-[340px] rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl transition-all hover:border-[#c8a2ff]/40"
-          >
-            {featuredMemory.image ? (
-              <GlassImage src={featuredMemory.image} alt={featuredMemory.title} />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-              <span className="text-[10px] bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 text-white/90 font-medium">
-                {featuredMemory.mood || '✨ featured'}
-              </span>
-              <span className={`badge-privacy ${featuredMemory.privacy === 'public' ? 'is-public' : ''}`}>
-                {featuredMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
-                {featuredMemory.privacy}
-              </span>
-            </div>
-            <div className="absolute bottom-5 left-5 right-5 space-y-1">
-              <h2 className="text-2xl font-bold text-white group-hover:text-[#c8a2ff] transition-colors leading-tight">
-                {featuredMemory.title}
-              </h2>
-              <p className="text-xs text-white/70 line-clamp-1">{featuredMemory.description}</p>
-              <div className="flex items-center gap-3 text-[11px] text-white/50 pt-1">
-                {featuredMemory.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin size={10} className="text-[#c8a2ff]" /> {featuredMemory.location}
-                  </span>
+      {/* Main Responsive Grid Layout for Desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Main Column (8 cols on desktop) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* FEATURED HERO MEMORY */}
+          {featuredMemory && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="eyebrow flex items-center gap-1.5">
+                  <Sparkles size={11} className="text-[#c7a6ff]" /> FEATURED MEMORY
+                </span>
+                <span className="text-[11px] text-[#8b8991]">Opening Scene</span>
+              </div>
+              <div
+                onClick={() => onMemory(featuredMemory)}
+                className="glass-card relative h-[380px] sm:h-[440px] rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl transition-all"
+              >
+                {featuredMemory.image ? (
+                  <GlassImage src={featuredMemory.image} alt={featuredMemory.title} />
+                ) : (
+                  <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-white/30" />
                 )}
-                <span>· {featuredMemory.date}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* FLOATING EDITORIAL QUOTE NOTE (Floating directly on page background) */}
-      <div className="my-7 pl-4 border-l-2 border-l-[#c8a2ff] py-1">
-        <p className="text-sm italic font-serif text-white/85 leading-relaxed">
-          "Maybe memories are just places we decided not to forget."
-        </p>
-        <span className="text-[10px] text-white/40 block mt-1 uppercase tracking-wider">— Archive Reflection</span>
-      </div>
-
-      {/* TONIGHT'S LITTLE DISCOVERY (Secondary Feature Reveal) */}
-      {shuffledMemory && (
-        <div className="shuffle-card mb-8">
-          {shuffledMemory.image && (
-            <div className="w-14 h-14 rounded-xl overflow-hidden mr-3.5 flex-shrink-0 border border-white/15">
-              <GlassImage src={shuffledMemory.image} alt={shuffledMemory.title} />
-            </div>
-          )}
-          <div className="shuffle-card-content">
-            <span className="eyebrow flex items-center gap-1.5 text-[10px]">
-              <Shuffle size={10} /> TONIGHT'S DISCOVERY
-            </span>
-            <p className="text-xs font-medium text-white">{shuffledMemory.title}</p>
-            <small className="text-[10px] text-white/50">
-              {shuffledMemory.location && `${shuffledMemory.location} · `}
-              {shuffledMemory.date}
-            </small>
-          </div>
-          <div className="flex items-center gap-2 ml-2">
-            <button
-              onClick={() => onMemory(shuffledMemory)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-md shadow-[#c8a2ff]/15"
-            >
-              View <ArrowRight size={11} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ASYMMETRIC CURATED COLLECTIONS (YOUR COLLECTIONS) */}
-      <div className="mb-8">
-        <div className="section-header">
-          <h2>YOUR COLLECTIONS</h2>
-          <button onClick={() => {}}>
-            See all <ChevronRight size={14} />
-          </button>
-        </div>
-
-        {/* Asymmetric Editorial Grid: 1 Large Hero Collection + Staggered Cards */}
-        <div className="space-y-3">
-          {mainBoard && (
-            <div
-              onClick={() => onBoard(mainBoard)}
-              className="glass-card relative h-48 rounded-3xl overflow-hidden group cursor-pointer border border-white/12 p-5 flex flex-col justify-between"
-            >
-              <GlassImage src={mainBoard.image} alt={mainBoard.name} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-              <div className="relative z-10 flex justify-between items-start">
-                <span className="text-[10px] bg-black/60 px-2.5 py-1 rounded-full border border-white/15 text-[#c8a2ff] uppercase tracking-wider font-semibold">
-                  FEATURED COLLECTION
-                </span>
-                <span className={`badge-privacy ${mainBoard.privacy === 'public' ? 'is-public' : ''}`}>
-                  {mainBoard.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
-                  {mainBoard.privacy}
-                </span>
-              </div>
-              <div className="relative z-10 space-y-1">
-                <strong className="text-xl text-white font-semibold block group-hover:text-[#c8a2ff] transition-colors">
-                  {mainBoard.name}
-                </strong>
-                <p className="text-xs text-white/70 line-clamp-1">{mainBoard.description}</p>
-                <small className="text-[11px] text-white/50 flex items-center gap-2">
-                  {mainBoard.count} memories · {mainBoard.location}
-                </small>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <div className="absolute top-5 left-5 right-5 flex items-center justify-between z-10">
+                  <span className="text-[10px] bg-black/70 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 text-white/90 font-medium">
+                    {featuredMemory.mood || '✨ featured'}
+                  </span>
+                  <span className={`badge-privacy ${featuredMemory.privacy === 'public' ? 'is-public' : ''}`}>
+                    {featuredMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+                    {featuredMemory.privacy}
+                  </span>
+                </div>
+                <div className="absolute bottom-6 left-6 right-6 space-y-1.5 z-10">
+                  <h2 className="text-2xl sm:text-3xl font-normal text-white group-hover:text-[#c7a6ff] transition-colors leading-tight">
+                    {featuredMemory.title}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#b1afb8] line-clamp-2 max-w-xl">{featuredMemory.description}</p>
+                  <div className="flex items-center gap-3 text-[11px] text-[#8b8991] pt-2">
+                    {featuredMemory.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={10} className="text-[#c7a6ff]" /> {featuredMemory.location}
+                      </span>
+                    )}
+                    <span>· {featuredMemory.date}</span>
+                  </div>
+                </div>
+                <span className="corner-line-tl" />
               </div>
             </div>
           )}
 
-          {otherBoards.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
-              {otherBoards.map(board => (
-                <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+          {/* RECENT MOMENTS RAIL / GRID */}
+          <div>
+            <div className="section-header">
+              <h2>RECENT MOMENTS</h2>
+              <button onClick={() => {}}>
+                View all <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {recentMoments.slice(0, 6).map(memory => (
+                <MemoryCard key={memory.id} memory={memory} onClick={() => onMemory(memory)} />
               ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* DYNAMIC RECENT MOMENTS COLLAGE RAIL */}
-      <div className="mb-8">
-        <div className="section-header">
-          <h2>RECENT MOMENTS</h2>
-          <button onClick={() => {}}>
-            View all <ChevronRight size={14} />
-          </button>
-        </div>
-        <div className="memory-row pb-2">
-          {recentMoments.map(memory => (
-            <MemoryCard key={memory.id} memory={memory} onClick={() => onMemory(memory)} />
-          ))}
-        </div>
-      </div>
+        {/* Side Column (4 cols on desktop) */}
+        <div className="lg:col-span-4 space-y-8">
+          {/* EDITORIAL QUOTE NOTE */}
+          <div className="glass-card p-6 border-l-2 border-l-[#c7a6ff] relative">
+            <span className="eyebrow block mb-2 text-[10px]">ARCHIVE REFLECTION</span>
+            <p className="editorial-note-text text-sm sm:text-base">
+              "Some places are worth remembering for reasons you can't explain."
+            </p>
+            <span className="text-[11px] text-[#66636c] block mt-3">— Personal Note ✦</span>
+            <span className="corner-line-tl" />
+          </div>
 
-      {/* ARCHIVE NOTES */}
-      <div>
-        <div className="section-header">
-          <h2>NOTES FROM MY UNIVERSE</h2>
-        </div>
-        <div className="notes-grid mb-6">
-          {notes.map(note => (
-            <div key={note.id} className="note-card">
-              <FileText size={16} className="text-[#c8a2ff] mb-2" />
-              <p>"{note.text}"</p>
-              <span>{note.date}</span>
+          {/* TONIGHT'S DISCOVERY */}
+          {shuffledMemory && (
+            <div className="shuffle-card">
+              <div className="shuffle-card-content">
+                <span className="eyebrow flex items-center gap-1.5 text-[10px] mb-1">
+                  <Shuffle size={10} /> TONIGHT'S DISCOVERY
+                </span>
+                <p className="text-sm font-medium text-white">{shuffledMemory.title}</p>
+                <small className="text-[11px] text-[#b1afb8] block mt-0.5">
+                  {shuffledMemory.location && `${shuffledMemory.location} · `}
+                  {shuffledMemory.date}
+                </small>
+              </div>
+              <button
+                onClick={() => onMemory(shuffledMemory)}
+                className="btn-secondary px-3 py-1.5 text-xs ml-3"
+              >
+                View <ArrowRight size={12} />
+              </button>
             </div>
-          ))}
-          <button
-            onClick={onCreate}
-            className="p-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#c8a2ff] text-xs font-semibold flex items-center justify-center gap-2 hover:border-[#c8a2ff]/40 transition-all"
-          >
-            <Plus size={16} /> Write a note
-          </button>
+          )}
+
+          {/* YOUR COLLECTIONS */}
+          <div>
+            <div className="section-header">
+              <h2>YOUR COLLECTIONS</h2>
+              <button onClick={() => {}}>
+                See all <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              {mainBoard && (
+                <BoardCard board={mainBoard} onClick={() => onBoard(mainBoard)} />
+              )}
+              {otherBoards.length > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {otherBoards.map(board => (
+                    <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ARCHIVE NOTES */}
+          <div>
+            <div className="section-header">
+              <h2>NOTES FROM MY UNIVERSE</h2>
+            </div>
+            <div className="space-y-3">
+              {notes.map(note => (
+                <div key={note.id} className="note-card glass-card">
+                  <span className="text-[#c7a6ff] text-xs font-semibold block mb-1">✦</span>
+                  <p>"{note.text}"</p>
+                  <span>{note.date}</span>
+                </div>
+              ))}
+              <button
+                onClick={onCreate}
+                className="w-full py-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#b1afb8] text-xs font-medium flex items-center justify-center gap-2 hover:border-white/30 hover:text-white transition-all"
+              >
+                <Plus size={14} /> Write a note
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-/* REUSABLE VERTICAL MEMORY / PIN CARD TEMPLATE (3:4 Portrait) */
+/* REUSABLE VERTICAL MEMORY CARD (3:4 Ratio Photo-Dominant) */
 function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) {
   return (
-    <button className="memory-card group relative rounded-2xl overflow-hidden text-left cursor-pointer transition-all duration-300 border border-white/10 hover:border-[#c8a2ff]/40 shadow-xl" onClick={onClick}>
-      {/* Full-Bleed 80-90% Photograph */}
+    <button className="memory-card group" onClick={onClick}>
       {memory.image ? (
         <GlassImage src={memory.image} alt={memory.title} />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30">
-          <ImagePlus size={24} />
+        <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-white/30">
+          <ImagePlus size={22} />
         </div>
       )}
 
-      {/* Floating Dark Glass Overlay */}
-      <div className="memory-overlay flex flex-col justify-between p-3.5 absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10">
-        {/* Top Minimal Floating Badges */}
+      <div className="memory-overlay">
         <div className="flex items-center justify-between gap-1">
           {memory.mood ? (
-            <span className="text-[10px] bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-white/90 font-medium tracking-tight">
+            <span className="text-[10px] bg-black/65 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-white/90 font-medium">
               {memory.mood}
             </span>
           ) : <span />}
           <span className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/12 text-white/70">
-            {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} className="text-[#c8a2ff]" />}
+            {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} className="text-[#c7a6ff]" />}
           </span>
         </div>
 
-        {/* Bottom Floating Editorial Typography */}
-        <div className="space-y-0.5 pt-4">
-          <strong className="block text-sm text-white font-medium group-hover:text-[#c8a2ff] transition-colors leading-tight line-clamp-1">
+        <div className="space-y-1 pt-4">
+          <strong className="block text-sm text-white font-normal group-hover:text-[#c7a6ff] transition-colors leading-tight line-clamp-1">
             {memory.title}
           </strong>
-          <small className="text-white/60 text-[11px] flex items-center gap-1.5 font-normal">
+          <small className="text-[#b1afb8] text-[11px] flex items-center gap-1.5">
             {memory.location && (
               <span className="flex items-center gap-1">
-                <MapPin size={10} className="text-[#c8a2ff]" /> {memory.location}
+                <MapPin size={10} className="text-[#c7a6ff]" /> {memory.location}
               </span>
             )}
             {memory.location && memory.date && <span>·</span>}
@@ -771,8 +1026,7 @@ function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }
         </div>
       </div>
 
-      {/* Signature VMA Abstract Corner Line Highlight (On Hover) */}
-      <span className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/0 group-hover:border-white/40 transition-colors pointer-events-none z-20" />
+      <span className="corner-line-tl" />
     </button>
   )
 }
@@ -780,11 +1034,11 @@ function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }
 /* BOARD / COLLECTION CARD COMPONENT */
 function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) {
   return (
-    <button className="board-card glass-card group text-left" onClick={onClick}>
+    <button className="board-card glass-card group" onClick={onClick}>
       <div className="board-cover relative overflow-hidden">
         <GlassImage src={board.image} alt={board.name} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-        <div className="absolute top-2.5 right-2.5">
+        <div className="absolute top-3 right-3">
           <span className={`badge-privacy ${board.privacy === 'public' ? 'is-public' : ''}`}>
             {board.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
             {board.privacy}
@@ -792,22 +1046,23 @@ function BoardCard({ board, onClick }: { board: Board; onClick: () => void }) {
         </div>
       </div>
       <div className="board-card-body">
-        <div className="flex items-center justify-between text-[10px] text-white/50 uppercase tracking-wider">
+        <div className="flex items-center justify-between text-[10px] text-[#8b8991] uppercase tracking-wider">
           <span>{board.count} memories</span>
           {board.children && <span>{board.children.length} sub</span>}
         </div>
-        <strong className="group-hover:text-[#c8a2ff] transition-colors">{board.name}</strong>
+        <strong className="group-hover:text-[#c7a6ff] transition-colors">{board.name}</strong>
         {board.location && (
-          <small className="text-white/40 text-xs flex items-center gap-1 mt-0.5">
-            <MapPin size={10} className="text-[#c8a2ff]" /> {board.location}
+          <small className="text-[#66636c] text-xs flex items-center gap-1 mt-0.5">
+            <MapPin size={10} className="text-[#c7a6ff]" /> {board.location}
           </small>
         )}
       </div>
+      <span className="corner-line-tl" />
     </button>
   )
 }
 
-/* SEARCH & DISCOVERY PAGE — PREMIUM COMMERCIAL REDESIGN */
+/* SEARCH & DISCOVERY PAGE — PREMIUM EDITORIAL SEARCH */
 function SearchPage({
   boards,
   memories,
@@ -847,24 +1102,24 @@ function SearchPage({
   const totalResultsCount = filteredResults.boards.length + filteredResults.memories.length
 
   return (
-    <section className="screen">
-      {/* Editorial Search Hero */}
-      <div className="mb-6">
-        <span className="eyebrow flex items-center gap-1.5 mb-1">
-          <Sparkles size={11} className="text-[#c8a2ff]" /> YOUR UNIVERSE
+    <section className="screen space-y-6">
+      {/* Editorial Search Hero Header */}
+      <div className="pt-2">
+        <span className="eyebrow flex items-center gap-2 mb-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> YOUR UNIVERSE
         </span>
-        <h1 className="text-3xl font-light text-white tracking-tight">
-          Search your <span className="text-[#c8a2ff] font-medium">universe.</span>
+        <h1 className="title-large">
+          Search your <span className="font-normal text-[#c7a6ff]">universe.</span>
         </h1>
-        <p className="text-xs text-white/60 mt-1">Look for places, feelings, memories and little things.</p>
+        <p className="lede mt-2 mb-0">Look for places, feelings, memories and little things.</p>
       </div>
 
-      {/* Floating Smoked Glass Search Surface */}
-      <div className="relative mb-5 z-20">
-        <div className={`flex items-center gap-3.5 bg-white/[0.035] border rounded-2xl px-4 py-3.5 transition-all backdrop-blur-xl shadow-2xl ${
-          isFocused ? 'border-[#c8a2ff]/60 shadow-[#c8a2ff]/10 ring-1 ring-[#c8a2ff]/20' : 'border-white/12'
+      {/* Floating Smoked Glass Search Bar */}
+      <div className="relative z-20">
+        <div className={`flex items-center gap-3.5 bg-black/70 border rounded-2xl px-5 py-4 transition-all backdrop-blur-2xl shadow-2xl ${
+          isFocused ? 'border-white/30 ring-1 ring-white/20' : 'border-white/12'
         }`}>
-          <Search size={18} className={`transition-colors ${isFocused ? 'text-[#c8a2ff]' : 'text-white/40'}`} />
+          <Search size={18} className={`transition-colors ${isFocused ? 'text-[#c7a6ff]' : 'text-[#8b8991]'}`} />
           <input
             type="text"
             value={query}
@@ -872,30 +1127,30 @@ function SearchPage({
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search memories, places, feelings..."
-            className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-white/40"
+            className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-[#66636c]"
           />
           {query ? (
-            <button onClick={() => setQuery('')} className="text-white/40 hover:text-white transition-colors">
+            <button onClick={() => setQuery('')} className="text-[#8b8991] hover:text-white transition-colors">
               <X size={16} />
             </button>
           ) : (
-            <span className="text-[10px] text-white/40 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md font-mono flex-shrink-0">
+            <span className="text-[10px] text-[#8b8991] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md font-mono flex-shrink-0">
               ⌘ K
             </span>
           )}
         </div>
 
-        {/* Visual Search Suggestions Dropdown (On Focus) */}
+        {/* Dropdown Suggestions */}
         {isFocused && !query && (
-          <div className="absolute top-full left-0 right-0 mt-2 glass-card p-4 rounded-2xl border border-white/15 backdrop-blur-2xl shadow-2xl z-30 animate-fadeIn space-y-4">
+          <div className="absolute top-full left-0 right-0 mt-2 glass-card p-5 rounded-2xl border border-white/15 backdrop-blur-2xl shadow-2xl z-30 animate-fadeIn space-y-4">
             <div>
-              <span className="text-[10px] text-white/40 font-semibold uppercase tracking-wider block mb-2">RECENT SEARCHES</span>
+              <span className="text-[10px] text-[#66636c] font-semibold uppercase tracking-wider block mb-2">RECENT SEARCHES</span>
               <div className="flex flex-wrap gap-2">
                 {['Tokyo', 'Cafés', 'Japan', 'Books'].map(item => (
                   <button
                     key={item}
                     onClick={() => setQuery(item)}
-                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 hover:text-white transition-all"
+                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-[#b1afb8] hover:border-white/30 hover:text-white transition-all"
                   >
                     {item}
                   </button>
@@ -903,15 +1158,15 @@ function SearchPage({
               </div>
             </div>
             <div>
-              <span className="text-[10px] text-[#c8a2ff] font-semibold uppercase tracking-wider block mb-2">TRY SEARCHING</span>
-              <div className="space-y-1.5 text-xs text-white/70">
-                <p onClick={() => setQuery('places I want to visit')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+              <span className="text-[10px] text-[#c7a6ff] font-semibold uppercase tracking-wider block mb-2">TRY SEARCHING</span>
+              <div className="space-y-1.5 text-xs text-[#b1afb8]">
+                <p onClick={() => setQuery('places I want to visit')} className="hover:text-white cursor-pointer transition-colors">
                   "places I want to visit"
                 </p>
-                <p onClick={() => setQuery('rainy memories')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+                <p onClick={() => setQuery('rainy memories')} className="hover:text-white cursor-pointer transition-colors">
                   "rainy memories"
                 </p>
-                <p onClick={() => setQuery('late night cafés')} className="hover:text-[#c8a2ff] cursor-pointer transition-colors">
+                <p onClick={() => setQuery('late night cafés')} className="hover:text-white cursor-pointer transition-colors">
                   "late night cafés"
                 </p>
               </div>
@@ -921,35 +1176,35 @@ function SearchPage({
       </div>
 
       {/* Minimal Editorial Filters */}
-      <div className="flex gap-4 overflow-x-auto pb-2 mb-6 scrollbar-none border-b border-white/10">
+      <div className="flex gap-6 overflow-x-auto pb-2 border-b border-white/10">
         {filterOptions.map(option => (
           <button
             key={option}
             onClick={() => setActiveFilter(option)}
-            className={`pb-2 text-xs font-semibold tracking-wider transition-all relative ${
-              activeFilter === option ? 'text-white' : 'text-white/40 hover:text-white/70'
+            className={`pb-2 text-xs font-medium tracking-wider transition-all relative ${
+              activeFilter === option ? 'text-white' : 'text-[#8b8991] hover:text-white'
             }`}
           >
             {option}
             {activeFilter === option && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#c8a2ff] rounded-full" />
+              <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#c7a6ff]" />
             )}
           </button>
         ))}
       </div>
 
-      {/* "Search By Feeling" Discovery Section */}
+      {/* "Search By Feeling" */}
       {!query && (
-        <div className="mb-8">
-          <span className="eyebrow block mb-2.5">SEARCH BY FEELING</span>
+        <div>
+          <span className="eyebrow block mb-3 text-[10px]">SEARCH BY FEELING</span>
           <div className="flex flex-wrap gap-2">
             {feelingTags.map(tag => (
               <button
                 key={tag}
                 onClick={() => setQuery(tag)}
-                className="px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 hover:text-white transition-all flex items-center gap-1.5"
+                className="px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-[#b1afb8] hover:border-white/25 hover:text-white transition-all flex items-center gap-2"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#c8a2ff]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" />
                 {tag}
               </button>
             ))}
@@ -957,9 +1212,9 @@ function SearchPage({
         </div>
       )}
 
-      {/* Search Results Header */}
+      {/* Results Header */}
       {query && (
-        <div className="flex items-center justify-between text-xs text-white/50 mb-4">
+        <div className="flex items-center justify-between text-xs text-[#8b8991]">
           <span>RESULTS FOR "{query}"</span>
           <span>{totalResultsCount} items found</span>
         </div>
@@ -967,12 +1222,12 @@ function SearchPage({
 
       {/* Board Results */}
       {filteredResults.boards.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-            <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider">Collections</h3>
-            <span className="text-[10px] text-white/40">{filteredResults.boards.length} results</span>
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Collections</h3>
+            <span className="text-[10px] text-[#66636c]">{filteredResults.boards.length} results</span>
           </div>
-          <div className="board-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredResults.boards.map(b => (
               <BoardCard key={b.id} board={b} onClick={() => onBoard(b)} />
             ))}
@@ -982,12 +1237,12 @@ function SearchPage({
 
       {/* Memory Results */}
       {filteredResults.memories.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-            <h3 className="text-xs font-semibold text-[#c8a2ff] uppercase tracking-wider">Memories</h3>
-            <span className="text-[10px] text-white/40">{filteredResults.memories.length} results</span>
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Memories</h3>
+            <span className="text-[10px] text-[#66636c]">{filteredResults.memories.length} results</span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredResults.memories.map(m => (
               <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
             ))}
@@ -995,18 +1250,18 @@ function SearchPage({
         </div>
       )}
 
-      {/* Clean Empty State */}
+      {/* Empty State */}
       {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && (
-        <div className="py-16 text-center glass-card border border-white/10 rounded-3xl p-6">
-          <Compass size={32} className="mx-auto mb-3 text-[#c8a2ff]/50" />
-          <h3 className="text-sm font-semibold text-white mb-1">NOTHING HERE YET</h3>
-          <p className="text-xs text-white/50 mb-4">Try another memory, place or feeling.</p>
+        <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8">
+          <Compass size={32} className="mx-auto mb-3 text-[#8b8991]" />
+          <h3 className="text-sm font-medium text-white mb-1">NOTHING HERE YET</h3>
+          <p className="text-xs text-[#b1afb8] mb-6">Try another memory, place or feeling.</p>
           <div className="flex flex-wrap justify-center gap-2">
             {['☕ cafés', '🌙 late nights', '📚 books', '✈️ Japan'].map(item => (
               <button
                 key={item}
                 onClick={() => setQuery(item.replace(/[^a-zA-Z]/g, '').toLowerCase())}
-                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:border-[#c8a2ff]/40 transition-all"
+                className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-[#b1afb8] hover:border-white/30 hover:text-white transition-all"
               >
                 {item}
               </button>
@@ -1018,7 +1273,7 @@ function SearchPage({
   )
 }
 
-/* INBOX / NOTIFICATIONS PAGE */
+/* INBOX PAGE */
 function InboxPage() {
   const notifications = [
     { id: 1, text: 'Someone saved your public collection "Japan — someday"', time: '2h ago', icon: <Heart size={16} /> },
@@ -1027,35 +1282,37 @@ function InboxPage() {
   ]
 
   return (
-    <section className="screen">
-      <span className="eyebrow">NOTIFICATIONS</span>
-      <h1 className="title-large">Inbox</h1>
-      <p className="lede">Quiet updates from your visual archive.</p>
+    <section className="screen space-y-6">
+      <div className="pt-2">
+        <span className="eyebrow block mb-2 text-[10px]">NOTIFICATIONS</span>
+        <h1 className="title-large">Inbox</h1>
+        <p className="lede mt-2 mb-0">Quiet updates from your visual archive.</p>
+      </div>
 
-      <div className="space-y-3 mb-8">
+      <div className="space-y-3">
         {notifications.map(n => (
-          <div key={n.id} className="glass-card p-4 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+          <div key={n.id} className="glass-card p-4 flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white">
               {n.icon}
             </div>
             <div className="flex-1">
-              <p className="text-xs text-white/90 font-medium">{n.text}</p>
-              <span className="text-[10px] text-white/40">{n.time}</span>
+              <p className="text-xs text-white font-normal">{n.text}</p>
+              <span className="text-[10px] text-[#66636c]">{n.time}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="py-12 text-center text-white/30 border border-dashed border-white/10 rounded-2xl">
-        <Send size={24} className="mx-auto mb-2 text-[#c8a2ff]/40" />
-        <p className="text-xs text-white/60">Messages will live here.</p>
+      <div className="py-16 text-center text-[#66636c] border border-dashed border-white/10 rounded-3xl">
+        <Send size={24} className="mx-auto mb-2 text-[#8b8991]" />
+        <p className="text-xs text-[#b1afb8]">Messages will live here.</p>
         <small className="text-[10px]">Keep your little universe quiet for now.</small>
       </div>
     </section>
   )
 }
 
-/* PROFILE & CURRENT ERA PAGE */
+/* PROFILE PAGE */
 function ProfilePage({
   profile,
   boards,
@@ -1074,60 +1331,60 @@ function ProfilePage({
   onEditProfile: () => void
 }) {
   return (
-    <section className="screen">
+    <section className="screen space-y-8">
       {/* Cover & Avatar Header */}
-      <div className="relative h-44 rounded-2xl overflow-hidden mb-12 border border-white/10">
-        <img src={profile.cover} alt="Profile Cover" className="w-full h-full object-cover opacity-70" />
+      <div className="relative h-48 sm:h-56 rounded-3xl overflow-hidden border border-white/10 glass-card">
+        <img src={profile.cover} alt="Profile Cover" className="w-full h-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         <button
           onClick={onEditProfile}
-          className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-white/80 hover:text-white text-xs font-semibold flex items-center gap-1.5 backdrop-blur-md"
+          className="absolute top-4 right-4 btn-secondary text-xs px-3.5 py-1.5 backdrop-blur-md"
         >
           <Pencil size={12} /> Edit Profile
         </button>
-        <div className="absolute -bottom-8 left-6 flex items-end gap-4">
+        <div className="absolute -bottom-6 left-6 flex items-end gap-4">
           <img
             src={profile.avatar}
             alt="Avatar"
-            className="w-20 h-20 rounded-2xl object-cover border-4 border-black shadow-2xl"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-black shadow-2xl"
           />
         </div>
       </div>
 
       {/* User Info */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+      <div className="pt-4 space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-normal text-white flex items-center gap-3">
           @{profile.username}
-          <span className="text-xs font-normal text-[#c8a2ff] border border-[#c8a2ff]/30 px-2 py-0.5 rounded-full bg-[#c8a2ff]/10">
+          <span className="text-xs font-normal text-white border border-white/20 px-2.5 py-0.5 rounded-full bg-white/5">
             {profile.displayName || 'Creator'}
           </span>
         </h1>
-        <p className="text-xs text-white/70 mt-1">{profile.bio}</p>
-        <small className="text-[11px] text-white/40 flex items-center gap-1 mt-2">
-          <MapPin size={12} /> {profile.location}
+        <p className="text-xs sm:text-sm text-[#b1afb8]">{profile.bio}</p>
+        <small className="text-[11px] text-[#66636c] flex items-center gap-1.5 pt-1">
+          <MapPin size={12} className="text-[#c7a6ff]" /> {profile.location}
         </small>
       </div>
 
       {/* Stats Counter */}
-      <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 text-center mb-6">
+      <div className="grid grid-cols-3 gap-4 p-5 rounded-2xl glass-card text-center">
         <div>
-          <strong className="text-lg text-white block">{memories.length}</strong>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">Memories</span>
+          <strong className="text-xl text-white block font-normal">{memories.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Memories</span>
         </div>
         <div>
-          <strong className="text-lg text-white block">{boards.length}</strong>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">Collections</span>
+          <strong className="text-xl text-white block font-normal">{boards.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Collections</span>
         </div>
         <div>
-          <strong className="text-lg text-white block">{notes.length}</strong>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">Notes</span>
+          <strong className="text-xl text-white block font-normal">{notes.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Notes</span>
         </div>
       </div>
 
       {/* CURRENT ERA Section */}
       <div className="era-card glass-card">
-        <span className="eyebrow flex items-center gap-1.5">
-          <Sparkles size={11} /> CURRENT ERA
+        <span className="eyebrow flex items-center gap-2 text-[10px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURRENT ERA
         </span>
         <div className="era-tags">
           {profile.currentEra.map((item, idx) => (
@@ -1139,124 +1396,134 @@ function ProfilePage({
       </div>
 
       {/* Pinned Collections */}
-      <div className="section-header">
-        <h2>PINNED COLLECTIONS</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        {boards.slice(0, 2).map(board => (
-          <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
-        ))}
+      <div>
+        <div className="section-header">
+          <h2>PINNED COLLECTIONS</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {boards.slice(0, 2).map(board => (
+            <BoardCard key={board.id} board={board} onClick={() => onBoard(board)} />
+          ))}
+        </div>
       </div>
 
       {/* My Universe Archive Grid */}
-      <div className="section-header">
-        <h2>MY UNIVERSE</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        {memories.map(m => (
-          <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
-        ))}
+      <div>
+        <div className="section-header">
+          <h2>MY UNIVERSE</h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {memories.map(m => (
+            <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+          ))}
+        </div>
       </div>
     </section>
   )
 }
 
-/* BOARD / CURATED EDITORIAL COLLECTION PAGE */
+/* BOARD / COLLECTION PAGE */
 function BoardPage({
   board,
-  memories,
+  blocks,
+  allMemories,
   onBack,
   onMemory,
-  onCreate,
+  onAddBlock,
+  onUpdateBoard,
+  onDeleteBlock,
+  onReorderBlock,
+  onShareBoard,
+  onOpenSubBoard,
 }: {
   board: Board
-  memories: Memory[]
+  blocks: BoardBlock[]
+  allMemories: Memory[]
   onBack: () => void
   onMemory: (m: Memory) => void
-  onCreate: () => void
+  onAddBlock: (blockData: Omit<BoardBlock, 'id' | 'order'>) => void
+  onUpdateBoard: (boardId: string, updates: Partial<Board>) => void
+  onDeleteBlock: (blockId: string) => void
+  onReorderBlock: (blockId: string, direction: 'up' | 'down') => void
+  onShareBoard: () => void
+  onOpenSubBoard: (name: string) => void
 }) {
   const [boardSheet, setBoardSheet] = useState<string | null>(null)
-
   const childBoards = board.children || []
-  const heroMemory = memories[0]
-  const remainingMemories = memories.slice(1)
+  const heroMemory = allMemories[0]
+  const remainingMemories = allMemories.slice(1)
 
   return (
-    <section className="screen">
-      {/* Header Back Bar */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors">
+    <section className="screen space-y-6">
+      {/* Header Controls */}
+      <div className="flex items-center justify-between pt-2">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#b1afb8] hover:text-white transition-colors">
           <ArrowLeft size={16} /> Back to universe
         </button>
-        <button
-          onClick={() => setBoardSheet('add')}
-          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#c8a2ff] text-black hover:bg-[#d8c2ff] transition-all flex items-center gap-1 shadow-lg shadow-[#c8a2ff]/15"
-        >
-          <Plus size={13} /> Add Block
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={onShareBoard} className="btn-secondary text-xs px-3.5 py-1.5">
+            <Share2 size={13} /> Share
+          </button>
+          <button onClick={() => setBoardSheet('add')} className="btn-secondary text-xs px-3.5 py-1.5">
+            <Plus size={14} /> Add Block
+          </button>
+        </div>
       </div>
 
-      {/* Cinematic Post-Style Board Header */}
-      <div className="relative h-72 rounded-3xl overflow-hidden mb-6 border border-white/10 glass-card">
-        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-75" />
+      {/* Cinematic Board Header */}
+      <div className="relative h-72 sm:h-80 rounded-3xl overflow-hidden border border-white/10 glass-card">
+        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-65" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-5 right-5 z-10">
           <span className={`badge-privacy ${board.privacy === 'public' ? 'is-public' : ''}`}>
             {board.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
             {board.privacy.toUpperCase()}
           </span>
         </div>
-        <div className="absolute bottom-5 left-5 right-5">
-          <span className="eyebrow flex items-center gap-1.5 mb-1">
-            <Sparkles size={11} /> CURATED COLLECTION
+        <div className="absolute bottom-6 left-6 right-6 space-y-2 z-10">
+          <span className="eyebrow flex items-center gap-2 text-[10px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURATED COLLECTION
           </span>
-          <h1 className="text-3xl font-semibold text-white tracking-tight">{board.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-normal text-white">{board.name}</h1>
           {board.description && (
-            <p className="text-sm text-white/80 mt-1.5 max-w-xl font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#b1afb8] max-w-2xl font-serif italic leading-relaxed">
               "{board.description}"
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-white/50">
-            <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md">
-              {memories.length} pins
-            </span>
-            {childBoards.length > 0 && (
-              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md">
-                {childBoards.length} sub-boards
-              </span>
-            )}
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#8b8991] pt-1">
+            <span>{allMemories.length} pins</span>
+            {childBoards.length > 0 && <span>· {childBoards.length} sub-boards</span>}
             {board.location && (
-              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-white/80 backdrop-blur-md flex items-center gap-1">
-                <MapPin size={10} className="text-[#c8a2ff]" /> {board.location}
+              <span className="flex items-center gap-1">
+                · <MapPin size={10} className="text-[#c7a6ff]" /> {board.location}
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Sub-Boards Visual Section */}
+      {/* Sub-Boards Section */}
       {childBoards.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="eyebrow flex items-center gap-1">
-              <Layers size={11} /> SUB-BOARDS ({childBoards.length})
-            </span>
+        <div>
+          <div className="section-header">
+            <h2>SUB-BOARDS ({childBoards.length})</h2>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {childBoards.map((subTitle, idx) => (
               <div
                 key={subTitle}
-                className="glass-card p-4 flex flex-col justify-between group hover:border-[#c8a2ff]/40 transition-all cursor-pointer min-h-[110px]"
+                onClick={() => onOpenSubBoard(subTitle)}
+                className="glass-card p-4 flex flex-col justify-between group cursor-pointer hover:border-white/25 transition-all min-h-[110px]"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[#c8a2ff] uppercase tracking-wider font-semibold">Sub-Board #{idx + 1}</span>
-                  <ChevronRight size={14} className="text-white/40 group-hover:text-[#c8a2ff] transition-colors" />
+                <div className="flex items-center justify-between text-[10px] text-[#c7a6ff]">
+                  <span>Sub #{idx + 1}</span>
+                  <ChevronRight size={14} className="text-[#8b8991] group-hover:text-white" />
                 </div>
                 <div>
-                  <strong className="text-sm text-white font-semibold block group-hover:text-[#c8a2ff] transition-colors">
+                  <strong className="text-xs sm:text-sm text-white font-medium block group-hover:text-[#c7a6ff] transition-colors">
                     {subTitle}
                   </strong>
-                  <small className="text-[11px] text-white/40 block mt-0.5">Explore sub-collection →</small>
+                  <small className="text-[10px] text-[#66636c] block mt-0.5">Explore sub-collection →</small>
                 </div>
               </div>
             ))}
@@ -1264,166 +1531,125 @@ function BoardPage({
         </div>
       )}
 
-      {/* Controlled Asymmetric Visual Layout (Scrapbook / Moodboard) */}
-      <div className="section-header">
-        <h2>CURATED MOODBOARD ({memories.length} BLOCKS)</h2>
+      {/* Controlled Asymmetric Visual Layout */}
+      <div>
+        <div className="section-header">
+          <h2>CURATED MOODBOARD ({allMemories.length} BLOCKS)</h2>
+        </div>
+
+        {allMemories.length > 0 ? (
+          <div className="space-y-6">
+            {heroMemory && (
+              <div
+                onClick={() => onMemory(heroMemory)}
+                className="glass-card relative h-80 sm:h-[400px] rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl"
+              >
+                {heroMemory.image ? (
+                  <GlassImage src={heroMemory.image} alt={heroMemory.title} />
+                ) : (
+                  <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-white/30" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <div className="absolute top-5 left-5 right-5 flex items-center justify-between z-10">
+                  <span className="text-[10px] bg-black/70 px-3 py-1 rounded-full border border-white/15 text-white/90 font-medium">
+                    ✦ FEATURED OPENER
+                  </span>
+                  <span className={`badge-privacy ${heroMemory.privacy === 'public' ? 'is-public' : ''}`}>
+                    {heroMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+                    {heroMemory.privacy}
+                  </span>
+                </div>
+                <div className="absolute bottom-6 left-6 right-6 space-y-1 z-10">
+                  <h3 className="text-xl sm:text-2xl font-normal text-white group-hover:text-[#c7a6ff] transition-colors">
+                    {heroMemory.title}
+                  </h3>
+                  <p className="text-xs text-[#b1afb8] line-clamp-2 max-w-xl">{heroMemory.description}</p>
+                </div>
+              </div>
+            )}
+
+            {/* EDITORIAL QUOTE NOTE BLOCK */}
+            <div className="glass-card p-6 border-l-2 border-l-[#c7a6ff]">
+              <span className="eyebrow block mb-2 text-[10px]">EDITORIAL NOTE</span>
+              <p className="editorial-note-text text-sm sm:text-base">
+                "Some places are worth remembering for reasons you can't explain. We collect pieces of moments to hold onto what time moves past."
+              </p>
+              <span className="text-[11px] text-[#66636c] block mt-3">— Archive Thought · {board.name}</span>
+            </div>
+
+            {/* REMAINING MEMORIES MASONRY GRID */}
+            {remainingMemories.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {remainingMemories.map(m => (
+                  <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="py-16 text-center border border-dashed border-white/12 rounded-3xl glass-card p-8">
+            <Archive size={32} className="mx-auto mb-3 text-[#8b8991]" />
+            <p className="text-sm font-medium text-white mb-1">No blocks in this board yet</p>
+            <p className="text-xs text-[#b1afb8] mb-6 max-w-xs mx-auto">Start assembling your moodboard with pins, photos, notes, and places.</p>
+            <button
+              onClick={() => setBoardSheet('add')}
+              className="btn-primary max-w-xs mx-auto"
+            >
+              + Add First Block
+            </button>
+          </div>
+        )}
       </div>
 
-      {memories.length > 0 ? (
-        <div className="space-y-4 mb-8">
-          {/* HERO OPENER BLOCK (First Memory) */}
-          {heroMemory && (
-            <div
-              onClick={() => onMemory(heroMemory)}
-              className="glass-card relative h-80 rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl"
-            >
-              {heroMemory.image ? (
-                <GlassImage src={heroMemory.image} alt={heroMemory.title} />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-white/10 to-black/90 flex items-center justify-center text-white/30" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                <span className="text-[10px] bg-[#c8a2ff]/20 text-[#c8a2ff] border border-[#c8a2ff]/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wider backdrop-blur-md">
-                  ✦ FEATURED OPENER
-                </span>
-                <span className={`badge-privacy ${heroMemory.privacy === 'public' ? 'is-public' : ''}`}>
-                  {heroMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
-                  {heroMemory.privacy}
-                </span>
-              </div>
-              <div className="absolute bottom-5 left-5 right-5">
-                {heroMemory.mood && (
-                  <span className="text-xs text-[#c8a2ff] font-medium block mb-1">
-                    {heroMemory.mood}
-                  </span>
-                )}
-                <h3 className="text-xl font-bold text-white group-hover:text-[#c8a2ff] transition-colors">
-                  {heroMemory.title}
-                </h3>
-                <p className="text-xs text-white/70 mt-1 line-clamp-2">{heroMemory.description}</p>
-                <div className="flex items-center gap-3 text-[11px] text-white/50 mt-2">
-                  {heroMemory.location && <span className="flex items-center gap-1"><MapPin size={10} className="text-[#c8a2ff]" /> {heroMemory.location}</span>}
-                  <span>{heroMemory.date}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* EDITORIAL QUOTE NOTE BLOCK */}
-          <div className="glass-card p-6 border-l-4 border-l-[#c8a2ff] relative">
-            <span className="eyebrow block mb-2">EDITORIAL NOTE</span>
-            <p className="text-base text-white/90 italic font-serif leading-relaxed">
-              "Some places are worth remembering for reasons you can't explain. We collect pieces of moments to hold onto what time moves past."
-            </p>
-            <span className="text-[11px] text-white/40 block mt-3">— Archive Thought · {board.name}</span>
-          </div>
-
-          {/* PLACE & LANDMARK BLOCK */}
-          {board.location && (
-            <div className="glass-card p-5 flex items-center justify-between group hover:border-[#c8a2ff]/40 transition-all">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-[#c8a2ff]/10 text-[#c8a2ff] border border-[#c8a2ff]/20">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#c8a2ff] uppercase tracking-wider font-semibold block">FEATURED PLACE</span>
-                  <h4 className="text-sm font-semibold text-white group-hover:text-[#c8a2ff] transition-colors">{board.location}</h4>
-                  <p className="text-xs text-white/60 mt-0.5">Primary landmark for this collection</p>
-                </div>
-              </div>
-              <span className="text-xs text-white/40 group-hover:text-white transition-colors">Explore →</span>
-            </div>
-          )}
-
-          {/* REMAINING MEMORIES MASONRY GRID */}
-          {remainingMemories.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
-              {remainingMemories.map(m => (
-                <MemoryCard key={m.id} memory={m} onClick={() => onMemory(m)} />
-              ))}
-            </div>
-          )}
-
-          {/* STORY / ESSAY SECTION BLOCK */}
-          <div className="glass-card p-6 border border-white/10 space-y-2">
-            <span className="eyebrow flex items-center gap-1">
-              <FileText size={11} /> ARCHIVE STORY
-            </span>
-            <h4 className="text-base font-semibold text-white">Quiet Moments in {board.name}</h4>
-            <p className="text-xs text-white/70 leading-relaxed">
-              Every detail stored here carries a quiet memory. From rainy evenings to dim café corners, this curated moodboard serves as a permanent digital capsule.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="py-14 text-center border border-dashed border-white/12 rounded-3xl glass-card">
-          <Archive size={32} className="mx-auto mb-3 text-[#c8a2ff]/40" />
-          <p className="text-sm font-semibold text-white mb-1">No blocks in this board yet</p>
-          <p className="text-xs text-white/50 mb-4 max-w-xs mx-auto">Start assembling your moodboard with pins, photos, notes, and places.</p>
-          <button
-            onClick={onCreate}
-            className="px-5 py-2.5 rounded-full bg-[#c8a2ff] text-black text-xs font-semibold shadow-lg shadow-[#c8a2ff]/20 hover:bg-[#d8c2ff] transition-all"
-          >
-            + Add First Block
-          </button>
-        </div>
-      )}
-
-      {/* In-Board Glass Creation Sheet */}
+      {/* Creation Bottom Sheet */}
       {boardSheet && (
         <div className="sheet-backdrop" onClick={() => setBoardSheet(null)}>
           <div className="creation-sheet glass-card" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-6">
               <span className="eyebrow">ADD BLOCK TO {board.name.toUpperCase()}</span>
-              <button onClick={() => setBoardSheet(null)} className="text-white/60 hover:text-white">
+              <button onClick={() => setBoardSheet(null)} className="text-[#8b8991] hover:text-white">
                 <X size={18} />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => { setBoardSheet(null); onCreate() }}
-                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+                onClick={() => {
+                  setBoardSheet(null)
+                  onAddBlock({
+                    boardId: board.id,
+                    type: 'photo',
+                    title: 'New Visual Moment',
+                    image: images.cafe,
+                    date: 'August 2026',
+                  })
+                }}
+                className="glass-card p-5 text-left hover:border-white/25 transition-all"
               >
-                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                <div className="p-2.5 rounded-xl bg-white/5 text-white w-fit mb-3">
                   <ImagePlus size={18} />
                 </div>
-                <strong className="text-xs text-white block">Pin / Photo</strong>
-                <small className="text-[10px] text-white/50">Visual photo moment</small>
+                <strong className="text-xs text-white block font-medium">Pin / Photo</strong>
+                <small className="text-[10px] text-[#66636c]">Visual photo moment</small>
               </button>
 
               <button
-                onClick={() => { setBoardSheet(null); onCreate() }}
-                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
+                onClick={() => {
+                  setBoardSheet(null)
+                  onAddBlock({
+                    boardId: board.id,
+                    type: 'note',
+                    content: 'A quiet thought for this collection.',
+                    date: 'August 2026',
+                  })
+                }}
+                className="glass-card p-5 text-left hover:border-white/25 transition-all"
               >
-                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
-                  <Layers size={18} />
-                </div>
-                <strong className="text-xs text-white block">Sub-Board</strong>
-                <small className="text-[10px] text-white/50">Nested sub-collection</small>
-              </button>
-
-              <button
-                onClick={() => { setBoardSheet(null); onCreate() }}
-                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
-              >
-                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
+                <div className="p-2.5 rounded-xl bg-white/5 text-white w-fit mb-3">
                   <FileText size={18} />
                 </div>
-                <strong className="text-xs text-white block">Note</strong>
-                <small className="text-[10px] text-white/50">Editorial text fragment</small>
-              </button>
-
-              <button
-                onClick={() => { setBoardSheet(null); onCreate() }}
-                className="glass-card p-4 text-left hover:border-[#c8a2ff]/40 transition-all"
-              >
-                <div className="p-2 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff] w-fit mb-2">
-                  <MapPin size={18} />
-                </div>
-                <strong className="text-xs text-white block">Place</strong>
-                <small className="text-[10px] text-white/50">Location landmark</small>
+                <strong className="text-xs text-white block font-medium">Note</strong>
+                <small className="text-[10px] text-[#66636c]">Editorial text fragment</small>
               </button>
             </div>
           </div>
@@ -1433,7 +1659,7 @@ function BoardPage({
   )
 }
 
-/* FULL-SCREEN MEMORY VIEWER PAGE / MODAL */
+/* MEMORY VIEWER PAGE */
 function MemoryPage({
   memory,
   board,
@@ -1451,7 +1677,6 @@ function MemoryPage({
   onNext: () => void
   onPrev: () => void
 }) {
-  // Arrow key navigation listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') onNext()
@@ -1463,89 +1688,73 @@ function MemoryPage({
   }, [onNext, onPrev, onBack])
 
   return (
-    <section className="screen min-h-svh flex flex-col">
-      {/* Top Controls */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-white/60 hover:text-white">
+    <section className="screen min-h-svh flex flex-col space-y-6">
+      <div className="flex items-center justify-between pt-2">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#b1afb8] hover:text-white transition-colors">
           <ArrowLeft size={16} /> Back
         </button>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={onPrev}
-            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:text-white"
-          >
+          <button onClick={onPrev} className="btn-secondary text-xs px-3 py-1">
             ← Prev
           </button>
-          <button
-            onClick={onNext}
-            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/80 hover:text-white"
-          >
+          <button onClick={onNext} className="btn-secondary text-xs px-3 py-1">
             Next →
           </button>
         </div>
       </div>
 
-      {/* Hero Image */}
       {memory.image && (
-        <div className="relative w-full h-[400px] rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black">
+        <div className="relative w-full h-[380px] sm:h-[500px] rounded-3xl overflow-hidden border border-white/10 bg-black">
           <img src={memory.image} alt={memory.title} className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* Memory Content */}
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 space-y-6 max-w-3xl">
         <div className="flex items-center justify-between">
-          <button
-            onClick={onTogglePrivacy}
-            className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}
-          >
+          <button onClick={onTogglePrivacy} className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
             {memory.privacy === 'private' ? <LockKeyhole size={11} /> : <Globe2 size={11} />}
             {memory.privacy.toUpperCase()}
           </button>
           {memory.mood && (
-            <span className="text-xs bg-[#c8a2ff]/10 text-[#c8a2ff] border border-[#c8a2ff]/30 px-3 py-1 rounded-full">
+            <span className="text-xs bg-white/5 text-[#b1afb8] border border-white/10 px-3 py-1 rounded-full">
               {memory.mood}
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl font-semibold text-white">{memory.title}</h1>
-        <p className="text-sm text-white/80 leading-relaxed">{memory.description}</p>
+        <h1 className="text-3xl sm:text-4xl font-normal text-white">{memory.title}</h1>
+        <p className="text-sm text-[#b1afb8] leading-relaxed">{memory.description}</p>
 
-        {/* Metadata */}
-        <div className="flex items-center gap-4 text-xs text-white/50 border-t border-b border-white/10 py-3">
+        <div className="flex items-center gap-4 text-xs text-[#8b8991] border-t border-b border-white/10 py-4">
           {memory.location && (
-            <span className="flex items-center gap-1">
-              <MapPin size={13} /> {memory.location}
+            <span className="flex items-center gap-1.5">
+              <MapPin size={13} className="text-[#c7a6ff]" /> {memory.location}
             </span>
           )}
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <Calendar size={13} /> {memory.date}
           </span>
         </div>
 
-        {/* Tags */}
         <div className="flex flex-wrap gap-2">
           {memory.tags.map(t => (
-            <span key={t} className="text-xs bg-white/5 border border-white/10 text-white/70 px-2.5 py-1 rounded-full">
+            <span key={t} className="text-xs bg-white/5 border border-white/10 text-[#b1afb8] px-3 py-1 rounded-full">
               #{t}
             </span>
           ))}
         </div>
 
-        {/* Associated Board */}
         {board && (
-          <div className="glass-card p-3 flex items-center justify-between">
-            <span className="text-xs text-white/50">COLLECTION</span>
-            <strong className="text-xs text-white">{board.name}</strong>
+          <div className="glass-card p-4 flex items-center justify-between">
+            <span className="text-xs text-[#8b8991]">COLLECTION</span>
+            <strong className="text-xs text-white font-medium">{board.name}</strong>
           </div>
         )}
 
-        {/* Delete Option */}
         <button
           onClick={onDelete}
-          className="flex items-center gap-2 text-xs text-rose-400/70 hover:text-rose-400 pt-4"
+          className="flex items-center gap-2 text-xs text-rose-400/80 hover:text-rose-400 pt-4"
         >
           <Trash2 size={14} /> Delete memory from archive
         </button>
@@ -1581,11 +1790,11 @@ function CreationSheet({
       <div className="creation-sheet glass-card" onClick={e => e.stopPropagation()}>
         <div className="sheet-handle" />
 
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-6">
           <span className="eyebrow">
             {mode ? (mode === 'profile' ? 'EDIT PROFILE' : mode === 'memory' ? 'ADD MOMENT' : mode === 'note' ? 'WRITE NOTE' : 'CREATE COLLECTION') : 'MAKE ROOM FOR IT'}
           </span>
-          <button onClick={onClose} className="text-white/60 hover:text-white">
+          <button onClick={onClose} className="text-[#8b8991] hover:text-white">
             <X size={18} />
           </button>
         </div>
@@ -1594,44 +1803,44 @@ function CreationSheet({
           <div className="space-y-3">
             <button
               onClick={() => setMode('memory')}
-              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+              className="w-full glass-card p-4 flex items-center gap-4 text-left hover:border-white/25 transition-all"
             >
-              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+              <div className="p-2.5 rounded-xl bg-white/5 text-white">
                 <ImagePlus size={20} />
               </div>
               <div className="flex-1">
-                <strong className="text-sm text-white block">Add Moment</strong>
-                <small className="text-xs text-white/50">Save a visual photo or memory</small>
+                <strong className="text-sm text-white block font-medium">Add Moment</strong>
+                <small className="text-xs text-[#b1afb8]">Save a visual photo or memory</small>
               </div>
-              <ChevronRight size={16} className="text-white/40" />
+              <ChevronRight size={16} className="text-[#8b8991]" />
             </button>
 
             <button
               onClick={() => setMode('board')}
-              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+              className="w-full glass-card p-4 flex items-center gap-4 text-left hover:border-white/25 transition-all"
             >
-              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+              <div className="p-2.5 rounded-xl bg-white/5 text-white">
                 <LayoutGrid size={20} />
               </div>
               <div className="flex-1">
-                <strong className="text-sm text-white block">Create Collection</strong>
-                <small className="text-xs text-white/50">Start a new visual board</small>
+                <strong className="text-sm text-white block font-medium">Create Collection</strong>
+                <small className="text-xs text-[#b1afb8]">Give this little world a place to live</small>
               </div>
-              <ChevronRight size={16} className="text-white/40" />
+              <ChevronRight size={16} className="text-[#8b8991]" />
             </button>
 
             <button
               onClick={() => setMode('note')}
-              className="w-full glass-card p-4 flex items-center gap-3 text-left hover:border-[#c8a2ff]/40 transition-all"
+              className="w-full glass-card p-4 flex items-center gap-4 text-left hover:border-white/25 transition-all"
             >
-              <div className="p-2.5 rounded-xl bg-[#c8a2ff]/10 text-[#c8a2ff]">
+              <div className="p-2.5 rounded-xl bg-white/5 text-white">
                 <FileText size={20} />
               </div>
               <div className="flex-1">
-                <strong className="text-sm text-white block">Write Note</strong>
-                <small className="text-xs text-white/50">Tuck away a personal thought</small>
+                <strong className="text-sm text-white block font-medium">Write Note</strong>
+                <small className="text-xs text-[#b1afb8]">Tuck away a personal thought</small>
               </div>
-              <ChevronRight size={16} className="text-white/40" />
+              <ChevronRight size={16} className="text-[#8b8991]" />
             </button>
           </div>
         ) : mode === 'memory' ? (
@@ -1648,7 +1857,7 @@ function CreationSheet({
   )
 }
 
-/* Image Upload Input helper */
+/* Image Upload Component */
 function ImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null)
   return (
@@ -1669,13 +1878,13 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="w-full h-32 rounded-2xl border border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center gap-2 text-white/60 hover:border-[#c8a2ff]/40 transition-all overflow-hidden"
+        className="w-full h-36 rounded-2xl border border-dashed border-white/20 bg-white/[0.02] flex flex-col items-center justify-center gap-2 text-[#b1afb8] hover:border-white/40 transition-all overflow-hidden"
       >
         {value ? (
           <img src={value} alt="Preview" className="w-full h-full object-cover" />
         ) : (
           <>
-            <Camera size={22} className="text-[#c8a2ff]" />
+            <Camera size={22} className="text-white" />
             <span className="text-xs">Choose photo from camera roll</span>
           </>
         )}
@@ -1744,7 +1953,7 @@ function MemoryForm({ boards, onSave }: { boards: Board[]; onSave: (m: any) => v
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <div className="form-group">
           <label>Collection</label>
           <select value={boardId} onChange={e => setBoardId(e.target.value)} className="form-select">
@@ -1778,8 +1987,8 @@ function MemoryForm({ boards, onSave }: { boards: Board[]; onSave: (m: any) => v
               onClick={() => setMood(m)}
               className={`px-3 py-1 rounded-full text-xs transition-all border ${
                 mood === m
-                  ? 'bg-[#c8a2ff]/15 border-[#c8a2ff] text-[#c8a2ff]'
-                  : 'bg-white/5 border-white/10 text-white/60'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'bg-white/5 border-white/10 text-[#8b8991]'
               }`}
             >
               {m}
@@ -1788,9 +1997,8 @@ function MemoryForm({ boards, onSave }: { boards: Board[]; onSave: (m: any) => v
         </div>
       </div>
 
-      {/* Privacy Selector */}
-      <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-        <span className="text-xs text-white/70">Visibility</span>
+      <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+        <span className="text-xs text-[#b1afb8]">Visibility</span>
         <div className="flex gap-2">
           {(['private', 'public'] as const).map(p => (
             <button
@@ -1799,8 +2007,8 @@ function MemoryForm({ boards, onSave }: { boards: Board[]; onSave: (m: any) => v
               onClick={() => setPrivacy(p)}
               className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 border transition-all ${
                 privacy === p
-                  ? 'bg-[#c8a2ff]/20 border-[#c8a2ff] text-[#c8a2ff]'
-                  : 'bg-transparent border-white/10 text-white/50'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'bg-transparent border-white/10 text-[#66636c]'
               }`}
             >
               {p === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
@@ -1841,14 +2049,19 @@ function BoardForm({ onSave }: { onSave: (b: any) => void }) {
       }}
       className="space-y-4"
     >
+      <div className="mb-2">
+        <h3 className="text-lg font-normal text-white">CREATE A COLLECTION</h3>
+        <p className="text-xs text-[#b1afb8]">Give this little world a place to live.</p>
+      </div>
+
       <div className="form-group">
-        <label>Collection Name</label>
+        <label>Board name</label>
         <input
           required
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
-          placeholder="e.g. Places worth returning to"
+          placeholder="e.g. Japan — Someday"
           className="form-input"
         />
       </div>
@@ -1858,18 +2071,39 @@ function BoardForm({ onSave }: { onSave: (b: any) => void }) {
         <textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
-          placeholder="What belongs here?"
+          placeholder="e.g. Tokyo, Kyoto, quiet streets..."
           className="form-textarea"
         />
       </div>
 
       <div className="form-group">
-        <label>Cover Photo</label>
+        <label>Cover image</label>
         <ImageUpload value={image} onChange={setImage} />
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div className="form-group">
+          <label>Location</label>
+          <input
+            type="text"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            placeholder="e.g. Japan"
+            className="form-input"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Visibility</label>
+          <select value={privacy} onChange={e => setPrivacy(e.target.value as PrivacyStatus)} className="form-select">
+            <option value="private" className="bg-black text-white">Private</option>
+            <option value="public" className="bg-black text-white">Public</option>
+          </select>
+        </div>
+      </div>
+
       <button type="submit" className="btn-primary mt-2">
-        Create Collection
+        Create collection
       </button>
     </form>
   )
