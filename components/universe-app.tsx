@@ -24,6 +24,31 @@ const images = {
 
 export type PrivacyStatus = 'private' | 'public'
 
+export type Mood = {
+  id: string
+  name: string
+  icon: string
+  description?: string
+}
+
+export type Place = {
+  id: string
+  name: string
+  location: string
+  coordinates?: string
+  image?: string
+  description?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type EraItem = {
+  id: string
+  label: string
+  icon?: string
+  order: number
+}
+
 export type Board = {
   id: string
   name: string
@@ -31,6 +56,7 @@ export type Board = {
   image: string
   count?: number
   location?: string
+  placeId?: string
   privacy: PrivacyStatus
   parentBoardId?: string
   children?: string[]
@@ -69,11 +95,13 @@ export type Memory = {
   description: string
   image?: string
   boardId: string
+  placeId?: string
   date: string
   location?: string
   privacy: PrivacyStatus
   tags: string[]
   mood?: string
+  moodId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -84,6 +112,8 @@ export type Note = {
   date: string
   privacy: PrivacyStatus
   boardId?: string
+  placeId?: string
+  moodId?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -96,6 +126,7 @@ export type Profile = {
   cover: string
   location: string
   currentEra: string[]
+  currentEraItems?: EraItem[]
 }
 
 export type SavedItem = {
@@ -106,6 +137,54 @@ export type SavedItem = {
   savedAt: string
 }
 
+const starterMoods: Mood[] = [
+  { id: 'nostalgic', name: 'Nostalgic', icon: '☁', description: 'Memories that feel soft and distant' },
+  { id: 'cozy', name: 'Cozy', icon: '☕', description: 'Warm cups, quiet corners, and soft light' },
+  { id: 'rainy', name: 'Rainy', icon: '🌧', description: 'Tapping raindrops on window panes' },
+  { id: 'late-night', name: 'Late Night', icon: '🌙', description: '2am thoughts and dim neon' },
+  { id: 'dreamy', name: 'Dreamy', icon: '✨', description: 'Subtle wonder and starry skies' },
+  { id: 'peaceful', name: 'Peaceful', icon: '🌿', description: 'Calm mornings and green leaves' },
+  { id: 'dark', name: 'Dark', icon: '🖤', description: 'Deep shadows, ambient black, and mystery' },
+]
+
+const starterPlaces: Place[] = [
+  {
+    id: 'blue-door-cafe',
+    name: 'Blue Door Café',
+    location: 'Jamshedpur',
+    image: images.cafe,
+    description: 'Little tables, warm espresso, and long afternoon conversations.',
+    createdAt: '2026-08-01T10:00:00.000Z',
+    updatedAt: '2026-08-01T10:00:00.000Z',
+  },
+  {
+    id: 'shinjuku-alley',
+    name: 'Shinjuku Alley',
+    location: 'Tokyo, Japan',
+    image: images.tokyo,
+    description: 'Narrow neon-lit alleys and late night ramen counters.',
+    createdAt: '2026-08-03T10:00:00.000Z',
+    updatedAt: '2026-08-03T10:00:00.000Z',
+  },
+  {
+    id: 'gion-kyoto',
+    name: 'Gion Rain Street',
+    location: 'Kyoto, Japan',
+    image: images.rain,
+    description: 'Quiet wooden eaves and rainy evenings.',
+    createdAt: '2026-08-04T10:00:00.000Z',
+    updatedAt: '2026-08-04T10:00:00.000Z',
+  },
+]
+
+const starterEraItems: EraItem[] = [
+  { id: 'era-1', label: 'late night coding', icon: '💻', order: 1 },
+  { id: 'era-2', label: 'coffee', icon: '☕', order: 2 },
+  { id: 'era-3', label: 'cybersecurity', icon: '💻', order: 3 },
+  { id: 'era-4', label: 'books', icon: '📚', order: 4 },
+  { id: 'era-5', label: '2am thoughts', icon: '🌙', order: 5 },
+]
+
 const starterBoards: Board[] = [
   {
     id: 'cafes',
@@ -113,6 +192,7 @@ const starterBoards: Board[] = [
     description: 'little tables, long conversations, and warm cups',
     image: images.cafe,
     location: 'Jamshedpur',
+    placeId: 'blue-door-cafe',
     privacy: 'private',
     createdAt: '2026-08-01T10:00:00.000Z',
     updatedAt: '2026-08-01T10:00:00.000Z',
@@ -134,6 +214,7 @@ const starterBoards: Board[] = [
     description: 'Neon, narrow alleys & 2am ramen counters',
     image: images.tokyo,
     location: 'Tokyo, Japan',
+    placeId: 'shinjuku-alley',
     privacy: 'public',
     createdAt: '2026-08-03T10:00:00.000Z',
     updatedAt: '2026-08-03T10:00:00.000Z',
@@ -145,6 +226,7 @@ const starterBoards: Board[] = [
     description: 'Quiet temples, rain on eaves & green tea stalls',
     image: images.rain,
     location: 'Kyoto, Japan',
+    placeId: 'gion-kyoto',
     privacy: 'public',
     createdAt: '2026-08-04T10:00:00.000Z',
     updatedAt: '2026-08-04T10:00:00.000Z',
@@ -198,105 +280,70 @@ const starterBoardBlocks: BoardBlock[] = [
     size: 'medium',
     order: 3,
     subBoardName: 'Tokyo Nights',
-    description: 'Neon, narrow alleys & 2am ramen counters',
-    subBoardCount: 12,
-    image: images.tokyo,
-  },
-  {
-    id: 'jp-b4',
-    boardId: 'japan',
-    type: 'pin',
-    size: 'tall',
-    order: 4,
-    title: 'Shibuya Crossing at Midnight',
-    description: 'The pulse of Tokyo under soft rain and neon reflections.',
-    image: images.tokyo,
-    location: 'Shibuya, Tokyo',
-    date: 'July 2026',
-    tags: ['tokyo', 'night'],
-  },
-  {
-    id: 'jp-b5',
-    boardId: 'japan',
-    type: 'memory',
-    size: 'medium',
-    order: 5,
-    title: 'Kyoto Evening',
-    description: 'One of those evenings worth keeping. Rain tapping softly on dark wooden eaves.',
-    image: images.rain,
-    location: 'Gion, Kyoto',
-    date: 'August 2026',
-    mood: '☁ nostalgic',
-    tags: ['kyoto', 'rain'],
-  },
-  {
-    id: 'cf-b1',
-    boardId: 'cafes',
-    type: 'memory',
-    size: 'large',
-    order: 1,
-    title: 'Rainy evening',
-    description: 'One of those evenings that felt quietly perfect. Rain tapping softly against the window.',
-    image: images.rain,
-    location: 'Jamshedpur',
-    date: 'August 2026',
-    mood: '☁ nostalgic',
+    subBoardCount: 4,
+    subBoardImage: images.tokyo,
   },
 ]
 
 const starterMemories: Memory[] = [
   {
     id: 'rain',
-    title: 'Rainy evening',
-    description: 'One of those evenings that felt quietly perfect. Rain tapping softly against the window.',
+    title: 'Rainy evening in Kyoto',
+    description: 'Watching the rain fall softly over green tea roofs in Gion.',
     image: images.rain,
-    boardId: 'cafes',
+    boardId: 'japan',
+    placeId: 'gion-kyoto',
     date: 'August 2026',
-    location: 'Jamshedpur',
-    privacy: 'private',
-    mood: '☁ nostalgic',
-    tags: ['rain', 'quiet', 'café'],
-    createdAt: '2026-08-01T12:00:00.000Z',
-    updatedAt: '2026-08-01T12:00:00.000Z',
-  },
-  {
-    id: 'tea',
-    title: 'A cup of calm',
-    description: 'Some mornings are meant to be taken slowly with green tea.',
-    image: images.tea,
-    boardId: 'cafes',
-    date: 'August 2026',
-    location: 'Home',
-    privacy: 'private',
-    mood: '☕ cozy',
-    tags: ['morning', 'tea'],
-    createdAt: '2026-08-02T09:00:00.000Z',
-    updatedAt: '2026-08-02T09:00:00.000Z',
+    location: 'Kyoto, Japan',
+    privacy: 'public',
+    mood: '🌧 Rainy',
+    moodId: 'rainy',
+    tags: ['japan', 'rain', 'quiet'],
+    createdAt: '2026-08-14T18:30:00.000Z',
+    updatedAt: '2026-08-14T18:30:00.000Z',
   },
   {
     id: 'tokyo',
-    title: 'Tokyo alley lights',
-    description: 'Neon signs reflecting on wet pavement late at night in Shinjuku.',
+    title: 'Tokyo night lights',
+    description: 'Walking alone through Shinjuku past neon signs reflecting on wet asphalt.',
     image: images.tokyo,
     boardId: 'tokyo-nights',
+    placeId: 'shinjuku-alley',
     date: 'July 2026',
-    location: 'Tokyo',
+    location: 'Shinjuku, Tokyo',
     privacy: 'public',
-    mood: '✨ serene',
-    tags: ['japan', 'night', 'lights'],
-    createdAt: '2026-07-20T22:00:00.000Z',
-    updatedAt: '2026-07-20T22:00:00.000Z',
+    mood: '🌙 Late Night',
+    moodId: 'late-night',
+    tags: ['tokyo', 'night', 'neon'],
+    createdAt: '2026-07-28T22:15:00.000Z',
+    updatedAt: '2026-07-28T22:15:00.000Z',
   },
   {
-    id: 'library',
-    title: 'Quiet reading nook',
-    description: 'A hidden sanctuary where time slows down between wooden bookshelves.',
-    image: images.library,
+    id: 'tea',
+    title: 'Quiet tea house',
+    description: 'A steaming cup of matcha in a wooden room with tatami mats.',
+    image: images.tea,
+    boardId: 'japan',
+    date: 'June 2026',
+    location: 'Uji, Kyoto',
+    privacy: 'private',
+    mood: '☕ Cozy',
+    moodId: 'cozy',
+    tags: ['matcha', 'peaceful'],
+    createdAt: '2026-06-10T11:00:00.000Z',
+    updatedAt: '2026-06-10T11:00:00.000Z',
+  },
+  {
+    id: 'books-read',
+    title: 'Reading by candlelight',
+    description: 'Lost in Murakami chapters while rain taps against the window glass.',
+    image: images.books,
     boardId: 'books',
     date: 'July 2026',
-    location: 'Library',
+    location: 'Jamshedpur',
     privacy: 'private',
-    mood: '📚 peaceful',
+    mood: '☁ Nostalgic',
+    moodId: 'nostalgic',
     tags: ['books', 'quiet'],
     createdAt: '2026-07-15T14:00:00.000Z',
     updatedAt: '2026-07-15T14:00:00.000Z',
@@ -307,10 +354,12 @@ const starterMemories: Memory[] = [
     description: 'The aroma of freshly roasted beans in a dimly lit corner café.',
     image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85',
     boardId: 'cafes',
+    placeId: 'blue-door-cafe',
     date: 'August 2026',
     location: 'Jamshedpur',
     privacy: 'private',
-    mood: '☕ cozy',
+    mood: '☕ Cozy',
+    moodId: 'cozy',
     tags: ['coffee', 'night'],
     createdAt: '2026-08-10T21:00:00.000Z',
     updatedAt: '2026-08-10T21:00:00.000Z',
@@ -324,7 +373,8 @@ const starterMemories: Memory[] = [
     date: 'August 2026',
     location: 'Observatory',
     privacy: 'public',
-    mood: '✨ serene',
+    mood: '✨ Dreamy',
+    moodId: 'dreamy',
     tags: ['night', 'stars'],
     createdAt: '2026-08-12T23:00:00.000Z',
     updatedAt: '2026-08-12T23:00:00.000Z',
@@ -337,6 +387,8 @@ const starterNotes: Note[] = [
     text: "Some places are worth remembering for reasons you can't explain.",
     date: 'August 6, 2026',
     privacy: 'private',
+    placeId: 'blue-door-cafe',
+    moodId: 'nostalgic',
     createdAt: '2026-08-06T10:00:00.000Z',
     updatedAt: '2026-08-06T10:00:00.000Z',
   },
@@ -345,6 +397,7 @@ const starterNotes: Note[] = [
     text: 'Maybe the best part of today was doing absolutely nothing.',
     date: 'August 12, 2026',
     privacy: 'private',
+    moodId: 'peaceful',
     createdAt: '2026-08-12T10:00:00.000Z',
     updatedAt: '2026-08-12T10:00:00.000Z',
   },
@@ -358,6 +411,7 @@ const starterProfile: Profile = {
   cover: images.japan,
   location: 'Jamshedpur',
   currentEra: ['late night coding', '☕ coffee', '💻 cybersecurity', '📚 books', '🌙 2am thoughts'],
+  currentEraItems: starterEraItems,
 }
 
 const starterSavedItems: SavedItem[] = [
@@ -380,22 +434,27 @@ const starterSavedItems: SavedItem[] = [
 const uid = () => Math.random().toString(36).slice(2, 9)
 
 export default function UniverseApp() {
-  const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'board' | 'memory' | 'archive' | 'saved'>('home')
+  const [page, setPage] = useState<'home' | 'search' | 'inbox' | 'profile' | 'board' | 'memory' | 'archive' | 'saved' | 'timeline' | 'place'>('home')
   const [boards, setBoards] = useState<Board[]>(starterBoards)
   const [boardBlocks, setBoardBlocks] = useState<BoardBlock[]>(starterBoardBlocks)
   const [memories, setMemories] = useState<Memory[]>(starterMemories)
   const [notes, setNotes] = useState<Note[]>(starterNotes)
   const [profile, setProfile] = useState<Profile>(starterProfile)
   const [savedItems, setSavedItems] = useState<SavedItem[]>(starterSavedItems)
+  const [places, setPlaces] = useState<Place[]>(starterPlaces)
+  const [moods, setMoods] = useState<Mood[]>(starterMoods)
+  const [eraItems, setEraItems] = useState<EraItem[]>(starterEraItems)
 
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [sheet, setSheet] = useState<string | null>(null)
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null)
   const [editingBoard, setEditingBoard] = useState<Board | null>(null)
+  const [editingPlace, setEditingPlace] = useState<Place | null>(null)
   const [parentForNewChild, setParentForNewChild] = useState<Board | null>(null)
   const [confirmDialog, setConfirmDialog] = useState<{
-    type: 'memory' | 'board' | 'note'
+    type: 'memory' | 'board' | 'note' | 'place'
     id: string
     title: string
     message: string
@@ -415,6 +474,9 @@ export default function UniverseApp() {
         if (data.notes) setNotes(data.notes)
         if (data.profile) setProfile({ ...starterProfile, ...data.profile })
         if (data.savedItems) setSavedItems(data.savedItems)
+        if (data.places) setPlaces(data.places)
+        if (data.moods) setMoods(data.moods)
+        if (data.eraItems) setEraItems(data.eraItems)
       }
     } catch {}
   }, [])
@@ -423,9 +485,9 @@ export default function UniverseApp() {
   useEffect(() => {
     localStorage.setItem(
       'little-universe-v2',
-      JSON.stringify({ boards, boardBlocks, memories, notes, profile, savedItems })
+      JSON.stringify({ boards, boardBlocks, memories, notes, profile, savedItems, places, moods, eraItems })
     )
-  }, [boards, boardBlocks, memories, notes, profile, savedItems])
+  }, [boards, boardBlocks, memories, notes, profile, savedItems, places, moods, eraItems])
 
   // Clear toast automatically
   useEffect(() => {
@@ -461,6 +523,11 @@ export default function UniverseApp() {
   const openMemory = (memory: Memory) => {
     setSelectedMemory(memory)
     setPage('memory')
+  }
+
+  const openPlace = (place: Place) => {
+    setSelectedPlace(place)
+    setPage('place')
   }
 
   // Saved / Favorites toggle
@@ -527,7 +594,6 @@ export default function UniverseApp() {
   }
 
   const performDeleteBoard = (boardId: string) => {
-    // Unassign child items to prevent content loss
     setMemories(prev => prev.map(m => (m.boardId === boardId ? { ...m, boardId: '' } : m)))
     setBoards(prev =>
       prev
@@ -609,6 +675,70 @@ export default function UniverseApp() {
     }
     setConfirmDialog(null)
     setToast('Memory deleted')
+  }
+
+  // Place CRUD operations
+  const addPlace = (placeData: Omit<Place, 'id'>) => {
+    const now = new Date().toISOString()
+    const newPlace: Place = {
+      ...placeData,
+      id: uid(),
+      createdAt: now,
+      updatedAt: now,
+    }
+    setPlaces(prev => [newPlace, ...prev])
+    setSheet(null)
+    setToast('Place created in your archive 📍')
+  }
+
+  const updatePlaceDetails = (placeId: string, updates: Partial<Place>) => {
+    const now = new Date().toISOString()
+    setPlaces(prev =>
+      prev.map(p => (p.id === placeId ? { ...p, ...updates, updatedAt: now } : p))
+    )
+    if (selectedPlace && selectedPlace.id === placeId) {
+      setSelectedPlace(prev => (prev ? { ...prev, ...updates, updatedAt: now } : null))
+    }
+    setEditingPlace(null)
+    setSheet(null)
+    setToast('Place updated ✦')
+  }
+
+  const requestDeletePlace = (place: Place) => {
+    const containedMemories = memories.filter(m => m.placeId === place.id).length
+    const containedNotes = notes.filter(n => n.placeId === place.id).length
+    setConfirmDialog({
+      type: 'place',
+      id: place.id,
+      title: `Delete place "${place.name}"?`,
+      message: `This place has ${containedMemories} memories and ${containedNotes} notes linked to it. Deleting this place will remove the link, keeping your memories and notes safely in your Archive.`,
+    })
+  }
+
+  const performDeletePlace = (placeId: string) => {
+    setMemories(prev => prev.map(m => (m.placeId === placeId ? { ...m, placeId: undefined } : m)))
+    setNotes(prev => prev.map(n => (n.placeId === placeId ? { ...n, placeId: undefined } : n)))
+    setBoards(prev => prev.map(b => (b.placeId === placeId ? { ...b, placeId: undefined } : b)))
+    setPlaces(prev => prev.filter(p => p.id !== placeId))
+    if (selectedPlace?.id === placeId) {
+      setSelectedPlace(null)
+      setPage('home')
+    }
+    setConfirmDialog(null)
+    setToast('Place deleted. Contents kept safely in Archive.')
+  }
+
+  // Current Era updates
+  const updateEraItems = (items: EraItem[]) => {
+    setEraItems(items)
+    const currentEraLabels = items.map(item => (item.icon ? `${item.icon} ${item.label}` : item.label))
+    setProfile(prev => ({
+      ...prev,
+      currentEra: currentEraLabels,
+      currentEraItems: items,
+    }))
+    setSheet(null)
+    setToast('Current Era updated ✦')
   }
 
   const addNote = (text: string, boardId?: string) => {
@@ -712,6 +842,7 @@ export default function UniverseApp() {
             onCreate={() => setSheet('menu')}
             onOpenArchive={() => setPage('archive')}
             onOpenSaved={() => setPage('saved')}
+            onOpenTimeline={() => setPage('timeline')}
             isSaved={isSaved}
             onToggleSave={toggleSave}
           />
@@ -722,8 +853,11 @@ export default function UniverseApp() {
             boards={boards}
             memories={memories}
             notes={notes}
+            places={places}
+            moods={moods}
             onBoard={openBoard}
             onMemory={openMemory}
+            onPlace={openPlace}
             isSaved={isSaved}
             onToggleSave={toggleSave}
           />
@@ -737,11 +871,15 @@ export default function UniverseApp() {
             boards={boards}
             memories={memories}
             notes={notes}
+            places={places}
+            eraItems={eraItems}
             onBoard={openBoard}
             onMemory={openMemory}
             onEditProfile={() => setSheet('profile')}
+            onEditEra={() => setSheet('current-era')}
             onOpenArchive={() => setPage('archive')}
             onOpenSaved={() => setPage('saved')}
+            onOpenTimeline={() => setPage('timeline')}
             isSaved={isSaved}
             onToggleSave={toggleSave}
           />
@@ -752,8 +890,10 @@ export default function UniverseApp() {
             boards={boards}
             memories={memories}
             notes={notes}
+            places={places}
             onBoard={openBoard}
             onMemory={openMemory}
+            onPlace={openPlace}
             onBack={() => setPage('home')}
             isSaved={isSaved}
             onToggleSave={toggleSave}
@@ -774,6 +914,41 @@ export default function UniverseApp() {
             onBoard={openBoard}
             onMemory={openMemory}
             onBack={() => setPage('home')}
+            isSaved={isSaved}
+            onToggleSave={toggleSave}
+          />
+        )}
+
+        {page === 'timeline' && (
+          <TimelinePage
+            memories={memories}
+            notes={notes}
+            boards={boards}
+            places={places}
+            onMemory={openMemory}
+            onBoard={openBoard}
+            onPlace={openPlace}
+            onBack={() => setPage('home')}
+            onCreate={() => setSheet('memory')}
+            isSaved={isSaved}
+            onToggleSave={toggleSave}
+          />
+        )}
+
+        {page === 'place' && selectedPlace && (
+          <PlacePage
+            place={selectedPlace}
+            memories={memories}
+            notes={notes}
+            boards={boards}
+            onBack={() => setPage('home')}
+            onMemory={openMemory}
+            onBoard={openBoard}
+            onEditPlace={p => {
+              setEditingPlace(p)
+              setSheet('edit-place')
+            }}
+            onDeletePlace={requestDeletePlace}
             isSaved={isSaved}
             onToggleSave={toggleSave}
           />
@@ -820,6 +995,7 @@ export default function UniverseApp() {
           <MemoryPage
             memory={selectedMemory}
             board={boards.find(b => b.id === selectedMemory.boardId)}
+            place={places.find(p => p.id === selectedMemory.placeId)}
             onBack={() => setPage('home')}
             onEdit={() => {
               setEditingMemory(selectedMemory)
@@ -835,9 +1011,9 @@ export default function UniverseApp() {
         )}
 
         {/* Floating 5-Item Bottom Navigation */}
-        {page !== 'board' && page !== 'memory' && (
+        {page !== 'board' && page !== 'memory' && page !== 'place' && (
           <BottomNav
-            activeTab={page === 'archive' || page === 'saved' ? 'home' : page}
+            activeTab={page === 'archive' || page === 'saved' || page === 'timeline' ? 'home' : page}
             onTabSelect={setPage}
             onCreateSelect={() => setSheet('menu')}
           />
@@ -849,21 +1025,29 @@ export default function UniverseApp() {
         <CreationSheet
           type={sheet}
           boards={boards}
+          places={places}
+          moods={moods}
           profile={profile}
+          eraItems={eraItems}
           editingMemory={editingMemory}
           editingBoard={editingBoard}
+          editingPlace={editingPlace}
           parentBoard={parentForNewChild}
           onClose={() => {
             setSheet(null)
             setEditingMemory(null)
             setEditingBoard(null)
+            setEditingPlace(null)
             setParentForNewChild(null)
           }}
           onBoard={addBoard}
           onUpdateBoard={updateBoardDetails}
           onMemory={addMemory}
           onUpdateMemory={updateMemory}
+          onPlace={addPlace}
+          onUpdatePlace={updatePlaceDetails}
           onNote={addNote}
+          onEraSave={updateEraItems}
           onProfile={p => {
             setProfile(p)
             setSheet(null)
@@ -880,6 +1064,7 @@ export default function UniverseApp() {
           onConfirm={() => {
             if (confirmDialog.type === 'memory') performDeleteMemory(confirmDialog.id)
             if (confirmDialog.type === 'board') performDeleteBoard(confirmDialog.id)
+            if (confirmDialog.type === 'place') performDeletePlace(confirmDialog.id)
           }}
           onCancel={() => setConfirmDialog(null)}
         />
@@ -978,6 +1163,7 @@ function HomePage({
   onCreate,
   onOpenArchive,
   onOpenSaved,
+  onOpenTimeline,
   isSaved,
   onToggleSave,
 }: {
@@ -992,6 +1178,7 @@ function HomePage({
   onCreate: () => void
   onOpenArchive: () => void
   onOpenSaved: () => void
+  onOpenTimeline: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
@@ -1013,7 +1200,11 @@ function HomePage({
             Good evening,<br />
             <span className="font-normal text-white">@{profile.username}</span>
           </h1>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <button onClick={onOpenTimeline} className="text-xs text-[#c7a6ff] hover:underline flex items-center gap-1">
+              <Calendar size={12} /> View Timeline
+            </button>
+            <span className="text-[#66636c]">·</span>
             <button onClick={onOpenArchive} className="text-xs text-[#c7a6ff] hover:underline flex items-center gap-1">
               <Archive size={12} /> View Archive
             </button>
@@ -1327,21 +1518,78 @@ function BoardCard({
   )
 }
 
+/* PLACE CARD COMPONENT */
+function PlaceCard({
+  place,
+  allMemories,
+  allNotes,
+  allBoards,
+  onClick,
+}: {
+  place: Place
+  allMemories?: Memory[]
+  allNotes?: Note[]
+  allBoards?: Board[]
+  onClick: () => void
+}) {
+  const memoryCount = allMemories ? allMemories.filter(m => m.placeId === place.id).length : 0
+  const noteCount = allNotes ? allNotes.filter(n => n.placeId === place.id).length : 0
+
+  return (
+    <button className="board-card glass-card group text-left w-full" onClick={onClick}>
+      <div className="board-cover relative overflow-hidden">
+        {place.image ? (
+          <GlassImage src={place.image} alt={place.name} />
+        ) : (
+          <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-white/30">
+            <MapPin size={24} />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div className="absolute top-3 left-3">
+          <span className="text-[10px] bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-[#c7a6ff] flex items-center gap-1 font-medium">
+            <MapPin size={10} /> PLACE
+          </span>
+        </div>
+      </div>
+      <div className="board-card-body">
+        <div className="flex items-center justify-between text-[10px] text-[#8b8991] uppercase tracking-wider">
+          <span>{memoryCount} memories</span>
+          {noteCount > 0 && <span>{noteCount} notes</span>}
+        </div>
+        <strong className="group-hover:text-[#c7a6ff] transition-colors block text-white font-medium">{place.name}</strong>
+        {place.location && (
+          <small className="text-[#66636c] text-xs flex items-center gap-1 mt-0.5">
+            <MapPin size={10} className="text-[#c7a6ff]" /> {place.location}
+          </small>
+        )}
+      </div>
+      <span className="corner-line-tl" />
+    </button>
+  )
+}
+
 /* SEARCH & DISCOVERY PAGE — PREMIUM EDITORIAL SEARCH */
 function SearchPage({
   boards,
   memories,
   notes,
+  places,
+  moods,
   onBoard,
   onMemory,
+  onPlace,
   isSaved,
   onToggleSave,
 }: {
   boards: Board[]
   memories: Memory[]
   notes: Note[]
+  places: Place[]
+  moods: Mood[]
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
+  onPlace: (p: Place) => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
@@ -1350,7 +1598,6 @@ function SearchPage({
   const [isFocused, setIsFocused] = useState(false)
 
   const filterOptions = ['ALL', 'BOARDS', 'MEMORIES', 'PLACES', 'NOTES', 'TAGS']
-  const feelingTags = ['nostalgic', 'cozy', 'dreamy', 'rainy', 'peaceful', 'late night', 'wanderlust']
 
   const filteredResults = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -1371,13 +1618,23 @@ function SearchPage({
           m.title.toLowerCase().includes(q) ||
           m.description.toLowerCase().includes(q) ||
           m.location?.toLowerCase().includes(q) ||
+          m.mood?.toLowerCase().includes(q) ||
           m.tags.some(t => t.toLowerCase().includes(q)))
     )
 
-    return { boards: matchingBoards, memories: matchingMemories }
-  }, [query, activeFilter, boards, memories])
+    const matchingPlaces = places.filter(
+      p =>
+        (activeFilter === 'ALL' || activeFilter === 'PLACES') &&
+        (!q ||
+          p.name.toLowerCase().includes(q) ||
+          p.location.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q))
+    )
 
-  const totalResultsCount = filteredResults.boards.length + filteredResults.memories.length
+    return { boards: matchingBoards, memories: matchingMemories, places: matchingPlaces }
+  }, [query, activeFilter, boards, memories, places])
+
+  const totalResultsCount = filteredResults.boards.length + filteredResults.memories.length + filteredResults.places.length
 
   return (
     <section className="screen space-y-6">
@@ -1426,7 +1683,7 @@ function SearchPage({
             <div>
               <span className="text-[10px] text-[#66636c] font-semibold uppercase tracking-wider block mb-2">RECENT SEARCHES</span>
               <div className="flex flex-wrap gap-2">
-                {['Tokyo', 'Cafés', 'Japan', 'Books'].map(item => (
+                {['Tokyo', 'Cafés', 'Japan', 'Books', 'Nostalgic'].map(item => (
                   <button
                     key={item}
                     onClick={() => setQuery(item)}
@@ -1457,19 +1714,19 @@ function SearchPage({
         ))}
       </div>
 
-      {/* "Search By Feeling" */}
+      {/* "Search By Feeling / Mood" */}
       {!query && (
         <div>
-          <span className="eyebrow block mb-3 text-[10px]">SEARCH BY FEELING</span>
+          <span className="eyebrow block mb-3 text-[10px]">SEARCH BY FEELING & MOOD</span>
           <div className="flex flex-wrap gap-2">
-            {feelingTags.map(tag => (
+            {moods.map(m => (
               <button
-                key={tag}
-                onClick={() => setQuery(tag)}
+                key={m.id}
+                onClick={() => setQuery(m.name)}
                 className="px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-[#b1afb8] hover:border-white/25 hover:text-white transition-all flex items-center gap-2"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" />
-                {tag}
+                <span>{m.icon}</span>
+                <span>{m.name}</span>
               </button>
             ))}
           </div>
@@ -1481,6 +1738,28 @@ function SearchPage({
         <div className="flex items-center justify-between text-xs text-[#8b8991]">
           <span>RESULTS FOR "{query}"</span>
           <span>{totalResultsCount} items found</span>
+        </div>
+      )}
+
+      {/* Place Results */}
+      {filteredResults.places.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Places</h3>
+            <span className="text-[10px] text-[#66636c]">{filteredResults.places.length} results</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredResults.places.map(p => (
+              <PlaceCard
+                key={p.id}
+                place={p}
+                allMemories={memories}
+                allNotes={notes}
+                allBoards={boards}
+                onClick={() => onPlace(p)}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -1529,7 +1808,7 @@ function SearchPage({
       )}
 
       {/* Empty State */}
-      {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && (
+      {filteredResults.boards.length === 0 && filteredResults.memories.length === 0 && filteredResults.places.length === 0 && (
         <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8">
           <Compass size={32} className="mx-auto mb-3 text-[#8b8991]" />
           <h3 className="text-sm font-medium text-white mb-1">NOTHING HERE YET</h3>
@@ -1583,11 +1862,15 @@ function ProfilePage({
   boards,
   memories,
   notes,
+  places,
+  eraItems,
   onBoard,
   onMemory,
   onEditProfile,
+  onEditEra,
   onOpenArchive,
   onOpenSaved,
+  onOpenTimeline,
   isSaved,
   onToggleSave,
 }: {
@@ -1595,11 +1878,15 @@ function ProfilePage({
   boards: Board[]
   memories: Memory[]
   notes: Note[]
+  places: Place[]
+  eraItems?: EraItem[]
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
   onEditProfile: () => void
+  onEditEra: () => void
   onOpenArchive: () => void
   onOpenSaved: () => void
+  onOpenTimeline: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
@@ -1632,10 +1919,13 @@ function ProfilePage({
           </span>
         </h1>
         <p className="text-xs sm:text-sm text-[#b1afb8]">{profile.bio}</p>
-        <div className="flex items-center gap-4 text-xs text-[#b1afb8] pt-1">
+        <div className="flex items-center gap-4 text-xs text-[#b1afb8] pt-1 flex-wrap">
           <span className="flex items-center gap-1">
             <MapPin size={12} className="text-[#c7a6ff]" /> {profile.location}
           </span>
+          <button onClick={onOpenTimeline} className="text-[#c7a6ff] hover:underline flex items-center gap-1">
+            <Calendar size={12} /> Timeline
+          </button>
           <button onClick={onOpenArchive} className="text-[#c7a6ff] hover:underline flex items-center gap-1">
             <Archive size={12} /> Archive
           </button>
@@ -1646,33 +1936,60 @@ function ProfilePage({
       </div>
 
       {/* Dynamic Stats Counter */}
-      <div className="grid grid-cols-3 gap-4 p-5 rounded-2xl glass-card text-center">
+      <div className="grid grid-cols-4 gap-3 p-4 rounded-2xl glass-card text-center">
         <div>
-          <strong className="text-xl text-white block font-normal">{memories.length}</strong>
-          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Memories</span>
+          <strong className="text-lg text-white block font-normal">{memories.length}</strong>
+          <span className="text-[9px] sm:text-[10px] text-[#66636c] uppercase tracking-wider">Memories</span>
         </div>
         <div>
-          <strong className="text-xl text-white block font-normal">{boards.length}</strong>
-          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Collections</span>
+          <strong className="text-lg text-white block font-normal">{boards.length}</strong>
+          <span className="text-[9px] sm:text-[10px] text-[#66636c] uppercase tracking-wider">Collections</span>
         </div>
         <div>
-          <strong className="text-xl text-white block font-normal">{notes.length}</strong>
-          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Notes</span>
+          <strong className="text-lg text-white block font-normal">{notes.length}</strong>
+          <span className="text-[9px] sm:text-[10px] text-[#66636c] uppercase tracking-wider">Notes</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block font-normal">{places.length}</strong>
+          <span className="text-[9px] sm:text-[10px] text-[#66636c] uppercase tracking-wider">Places</span>
         </div>
       </div>
 
       {/* CURRENT ERA Section */}
       <div className="era-card glass-card">
-        <span className="eyebrow flex items-center gap-2 text-[10px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURRENT ERA
-        </span>
-        <div className="era-tags">
-          {profile.currentEra.map((item, idx) => (
-            <span key={idx} className="era-tag">
-              {item}
-            </span>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <span className="eyebrow flex items-center gap-2 text-[10px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURRENT ERA
+          </span>
+          <button onClick={onEditEra} className="text-xs text-[#c7a6ff] hover:underline flex items-center gap-1">
+            <Pencil size={11} /> Edit Era
+          </button>
         </div>
+        {eraItems && eraItems.length > 0 ? (
+          <div className="era-tags">
+            {eraItems.slice().sort((a, b) => a.order - b.order).map(item => (
+              <span key={item.id} className="era-tag flex items-center gap-1">
+                {item.icon && <span>{item.icon}</span>}
+                <span>{item.label}</span>
+              </span>
+            ))}
+          </div>
+        ) : profile.currentEra && profile.currentEra.length > 0 ? (
+          <div className="era-tags">
+            {profile.currentEra.map((item, idx) => (
+              <span key={idx} className="era-tag">
+                {item}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="py-4 text-center text-xs text-[#b1afb8] border border-dashed border-white/10 rounded-2xl">
+            "What's your world feeling like lately?"
+            <button onClick={onEditEra} className="block mx-auto mt-2 btn-secondary text-xs px-3 py-1">
+              + Add something
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Pinned Collections */}
@@ -1724,8 +2041,10 @@ function ArchivePage({
   boards,
   memories,
   notes,
+  places,
   onBoard,
   onMemory,
+  onPlace,
   onBack,
   isSaved,
   onToggleSave,
@@ -1736,8 +2055,10 @@ function ArchivePage({
   boards: Board[]
   memories: Memory[]
   notes: Note[]
+  places: Place[]
   onBoard: (b: Board) => void
   onMemory: (m: Memory) => void
+  onPlace: (p: Place) => void
   onBack: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
@@ -1745,11 +2066,11 @@ function ArchivePage({
   onDeleteMemory: (m: Memory) => void
   onToggleMemoryPrivacy: (id: string) => void
 }) {
-  const [filter, setFilter] = useState<'ALL' | 'PHOTOS' | 'BOARDS' | 'NOTES' | 'PUBLIC' | 'PRIVATE'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PHOTOS' | 'BOARDS' | 'PLACES' | 'NOTES' | 'PUBLIC' | 'PRIVATE'>('ALL')
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
 
   const items = useMemo(() => {
-    let list: Array<{ type: 'memory' | 'board' | 'note'; date: string; data: any }> = []
+    let list: Array<{ type: 'memory' | 'board' | 'note' | 'place'; date: string; data: any }> = []
 
     if (filter === 'ALL' || filter === 'PHOTOS' || filter === 'PUBLIC' || filter === 'PRIVATE') {
       memories.forEach(m => {
@@ -1767,6 +2088,12 @@ function ArchivePage({
       })
     }
 
+    if (filter === 'ALL' || filter === 'PLACES') {
+      places.forEach(p => {
+        list.push({ type: 'place', date: p.createdAt || '2026-08-01', data: p })
+      })
+    }
+
     if (filter === 'ALL' || filter === 'NOTES' || filter === 'PRIVATE') {
       notes.forEach(n => {
         if (filter === 'PRIVATE' && n.privacy !== 'private') return
@@ -1781,103 +2108,500 @@ function ArchivePage({
     })
 
     return list
-  }, [memories, boards, notes, filter, sortOrder])
+  }, [memories, boards, notes, places, filter, sortOrder])
 
   return (
     <section className="screen space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between pt-2">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#b1afb8] hover:text-white transition-colors">
-          <ArrowLeft size={16} /> Back to Home
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to My Universe
         </button>
-
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[#8b8991]">Sort:</span>
-          <button
-            onClick={() => setSortOrder(s => (s === 'newest' ? 'oldest' : 'newest'))}
-            className="btn-secondary text-xs px-3 py-1.5"
-          >
-            {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
-          </button>
-        </div>
+        <button
+          onClick={() => setSortOrder(prev => (prev === 'newest' ? 'oldest' : 'newest'))}
+          className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5"
+        >
+          <SlidersHorizontal size={12} />
+          {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+        </button>
       </div>
 
       <div>
         <span className="eyebrow block mb-2 text-[10px]">PERSONAL HISTORY</span>
-        <h1 className="title-large">Visual Memory Archive</h1>
-        <p className="lede mt-2 mb-0">Your complete personal collection of moments, boards, and thoughts.</p>
+        <h1 className="title-large">Full Archive</h1>
+        <p className="lede mt-1 mb-0">Every moment, collection, place, and note you have saved.</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-4 overflow-x-auto pb-2 border-b border-white/10">
-        {(['ALL', 'PHOTOS', 'BOARDS', 'NOTES', 'PUBLIC', 'PRIVATE'] as const).map(f => (
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-white/10">
+        {(['ALL', 'PHOTOS', 'BOARDS', 'PLACES', 'NOTES', 'PUBLIC', 'PRIVATE'] as const).map(tab => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`pb-2 text-xs font-medium tracking-wider transition-all relative ${
-              filter === f ? 'text-white' : 'text-[#8b8991] hover:text-white'
+            key={tab}
+            onClick={() => setFilter(tab)}
+            className={`px-4 py-1.5 rounded-full text-xs transition-all border ${
+              filter === tab ? 'bg-white/10 border-white text-white font-medium' : 'bg-white/[0.03] border-white/10 text-[#8b8991] hover:text-white'
             }`}
           >
-            {f}
-            {filter === f && <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#c7a6ff]" />}
+            {tab}
           </button>
         ))}
       </div>
 
-      {/* Archive Grid */}
+      {/* Content Grid */}
       {items.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map(item => {
             if (item.type === 'memory') {
-              const m: Memory = item.data
               return (
                 <MemoryCard
-                  key={m.id}
-                  memory={m}
-                  onClick={() => onMemory(m)}
-                  isSaved={isSaved('moment', m.id)}
-                  onToggleSave={e => onToggleSave('moment', m.id, e)}
+                  key={item.data.id}
+                  memory={item.data}
+                  onClick={() => onMemory(item.data)}
+                  isSaved={isSaved('moment', item.data.id)}
+                  onToggleSave={e => onToggleSave('moment', item.data.id, e)}
                 />
               )
             }
             if (item.type === 'board') {
-              const b: Board = item.data
               return (
                 <BoardCard
-                  key={b.id}
-                  board={b}
+                  key={item.data.id}
+                  board={item.data}
                   allBoards={boards}
                   allMemories={memories}
-                  onClick={() => onBoard(b)}
-                  isSaved={isSaved('board', b.id)}
-                  onToggleSave={e => onToggleSave('board', b.id, e)}
+                  onClick={() => onBoard(item.data)}
+                  isSaved={isSaved('board', item.data.id)}
+                  onToggleSave={e => onToggleSave('board', item.data.id, e)}
                 />
               )
             }
-            if (item.type === 'note') {
-              const n: Note = item.data
+            if (item.type === 'place') {
               return (
-                <div key={n.id} className="note-card glass-card">
-                  <span className="text-[#c7a6ff] text-xs font-semibold block mb-1">✦ NOTE</span>
-                  <p>"{n.text}"</p>
-                  <span>{n.date}</span>
-                </div>
+                <PlaceCard
+                  key={item.data.id}
+                  place={item.data}
+                  allMemories={memories}
+                  allNotes={notes}
+                  allBoards={boards}
+                  onClick={() => onPlace(item.data)}
+                />
               )
             }
-            return null
+            return (
+              <div key={item.data.id} className="note-card glass-card">
+                <span className="text-[#c7a6ff] text-xs font-semibold block mb-1">✦ Personal Note</span>
+                <p>"{item.data.text}"</p>
+                <span>{item.data.date}</span>
+              </div>
+            )
           })}
         </div>
       ) : (
-        <div className="py-20 text-center glass-card border border-dashed border-white/10 rounded-3xl p-8">
+        /* Empty State */
+        <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8">
           <Archive size={32} className="mx-auto mb-3 text-[#8b8991]" />
-          <h3 className="text-sm font-medium text-white mb-1">Your archive is empty</h3>
-          <p className="text-xs text-[#b1afb8]">Create your first moment to start filling your archive.</p>
+          <h3 className="text-sm font-medium text-white mb-1">YOUR ARCHIVE IS EMPTY</h3>
+          <p className="text-xs text-[#b1afb8]">Create your first moment or collection to start filling your archive.</p>
         </div>
       )}
     </section>
   )
 }
 
-/* SAVED PAGE — FAVORITES SECTION */
+/* TIMELINE PAGE — CHRONOLOGICAL HISTORY VIEW */
+function TimelinePage({
+  memories,
+  notes,
+  boards,
+  places,
+  onMemory,
+  onBoard,
+  onPlace,
+  onBack,
+  onCreate,
+  isSaved,
+  onToggleSave,
+}: {
+  memories: Memory[]
+  notes: Note[]
+  boards: Board[]
+  places: Place[]
+  onMemory: (m: Memory) => void
+  onBoard: (b: Board) => void
+  onPlace: (p: Place) => void
+  onBack: () => void
+  onCreate: () => void
+  isSaved: (type: 'board' | 'moment', id: string) => boolean
+  onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
+}) {
+  const [filter, setFilter] = useState<'ALL' | 'MOMENTS' | 'NOTES' | 'BOARDS' | 'PLACES'>('ALL')
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
+
+  const groupedTimeline = useMemo(() => {
+    type TimelineItem = {
+      id: string
+      type: 'moment' | 'note' | 'board' | 'place'
+      title: string
+      date: string
+      rawDate: string
+      data: any
+    }
+
+    let items: TimelineItem[] = []
+
+    if (filter === 'ALL' || filter === 'MOMENTS') {
+      memories.forEach(m => {
+        items.push({
+          id: m.id,
+          type: 'moment',
+          title: m.title,
+          date: m.date || 'August 2026',
+          rawDate: m.createdAt || m.date || '2026-08-01',
+          data: m,
+        })
+      })
+    }
+
+    if (filter === 'ALL' || filter === 'NOTES') {
+      notes.forEach(n => {
+        items.push({
+          id: n.id,
+          type: 'note',
+          title: n.text.slice(0, 40) + '...',
+          date: n.date || 'August 2026',
+          rawDate: n.createdAt || n.date || '2026-08-01',
+          data: n,
+        })
+      })
+    }
+
+    if (filter === 'ALL' || filter === 'BOARDS') {
+      boards.forEach(b => {
+        items.push({
+          id: b.id,
+          type: 'board',
+          title: b.name,
+          date: b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'August 2026',
+          rawDate: b.createdAt || '2026-08-01',
+          data: b,
+        })
+      })
+    }
+
+    if (filter === 'ALL' || filter === 'PLACES') {
+      places.forEach(p => {
+        items.push({
+          id: p.id,
+          type: 'place',
+          title: p.name,
+          date: p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'August 2026',
+          rawDate: p.createdAt || '2026-08-01',
+          data: p,
+        })
+      })
+    }
+
+    items.sort((a, b) => {
+      const tA = new Date(a.rawDate).getTime() || 0
+      const tB = new Date(b.rawDate).getTime() || 0
+      return sortOrder === 'newest' ? tB - tA : tA - tB
+    })
+
+    const groups: { [key: string]: TimelineItem[] } = {}
+    items.forEach(item => {
+      const groupKey = item.date.toUpperCase()
+      if (!groups[groupKey]) groups[groupKey] = []
+      groups[groupKey].push(item)
+    })
+
+    return Object.entries(groups).map(([group, groupItems]) => ({
+      group,
+      items: groupItems,
+    }))
+  }, [memories, notes, boards, places, filter, sortOrder])
+
+  return (
+    <section className="screen space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between pt-2">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to My Universe
+        </button>
+        <button
+          onClick={() => setSortOrder(prev => (prev === 'newest' ? 'oldest' : 'newest'))}
+          className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5"
+        >
+          <SlidersHorizontal size={12} />
+          {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+        </button>
+      </div>
+
+      <div>
+        <span className="eyebrow block mb-2 text-[10px]">CHRONOLOGICAL HISTORY</span>
+        <h1 className="title-large">Your Timeline</h1>
+        <p className="lede mt-1 mb-0">What was happening in your life across moments, places and notes.</p>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-white/10">
+        {(['ALL', 'MOMENTS', 'NOTES', 'BOARDS', 'PLACES'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setFilter(tab)}
+            className={`px-4 py-1.5 rounded-full text-xs transition-all border ${
+              filter === tab ? 'bg-white/10 border-white text-white font-medium' : 'bg-white/[0.03] border-white/10 text-[#8b8991] hover:text-white'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Timeline Groups */}
+      {groupedTimeline.length > 0 ? (
+        <div className="space-y-10 relative pt-2">
+          <div className="absolute top-4 bottom-4 left-4 sm:left-6 w-px bg-white/10 pointer-events-none" />
+
+          {groupedTimeline.map(({ group, items }) => (
+            <div key={group} className="space-y-4 relative z-10">
+              <div className="flex items-center gap-3 pl-2">
+                <span className="w-3 h-3 rounded-full bg-[#c7a6ff] border-2 border-black flex-shrink-0" />
+                <h2 className="text-sm font-semibold text-white tracking-widest uppercase">{group}</h2>
+              </div>
+
+              <div className="pl-8 sm:pl-12 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {items.map(item => {
+                    if (item.type === 'moment') {
+                      return (
+                        <MemoryCard
+                          key={item.id}
+                          memory={item.data}
+                          onClick={() => onMemory(item.data)}
+                          isSaved={isSaved('moment', item.id)}
+                          onToggleSave={e => onToggleSave('moment', item.id, e)}
+                        />
+                      )
+                    }
+                    if (item.type === 'board') {
+                      return (
+                        <BoardCard
+                          key={item.id}
+                          board={item.data}
+                          allBoards={boards}
+                          allMemories={memories}
+                          onClick={() => onBoard(item.data)}
+                          isSaved={isSaved('board', item.id)}
+                          onToggleSave={e => onToggleSave('board', item.id, e)}
+                        />
+                      )
+                    }
+                    if (item.type === 'place') {
+                      return (
+                        <PlaceCard
+                          key={item.id}
+                          place={item.data}
+                          allMemories={memories}
+                          allNotes={notes}
+                          allBoards={boards}
+                          onClick={() => onPlace(item.data)}
+                        />
+                      )
+                    }
+                    return (
+                      <div key={item.id} className="note-card glass-card">
+                        <span className="text-[#c7a6ff] text-xs font-semibold block mb-1">✦ Personal Note</span>
+                        <p>"{item.data.text}"</p>
+                        <span>{item.data.date}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8 space-y-4">
+          <Calendar size={32} className="mx-auto text-[#8b8991]" />
+          <div>
+            <h3 className="text-base font-normal text-white">YOUR TIMELINE IS QUIET</h3>
+            <p className="text-xs text-[#b1afb8] mt-1 max-w-sm mx-auto">
+              Create a moment and your story will begin to take shape.
+            </p>
+          </div>
+          <button onClick={onCreate} className="btn-primary text-xs px-5 py-2.5 inline-flex items-center gap-2">
+            <Plus size={14} /> Add Moment
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/* PLACE PAGE — PLACE DETAIL VIEW */
+function PlacePage({
+  place,
+  memories,
+  notes,
+  boards,
+  onBack,
+  onMemory,
+  onBoard,
+  onEditPlace,
+  onDeletePlace,
+  isSaved,
+  onToggleSave,
+}: {
+  place: Place
+  memories: Memory[]
+  notes: Note[]
+  boards: Board[]
+  onBack: () => void
+  onMemory: (m: Memory) => void
+  onBoard: (b: Board) => void
+  onEditPlace: (p: Place) => void
+  onDeletePlace: (p: Place) => void
+  isSaved: (type: 'board' | 'moment', id: string) => boolean
+  onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
+}) {
+  const linkedMemories = memories.filter(m => m.placeId === place.id)
+  const linkedNotes = notes.filter(n => n.placeId === place.id)
+  const linkedBoards = boards.filter(b => b.placeId === place.id)
+
+  return (
+    <section className="screen space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between pt-2">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to My Universe
+        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => onEditPlace(place)} className="btn-secondary text-xs px-3 py-1.5">
+            <Pencil size={12} /> Edit Place
+          </button>
+          <button
+            onClick={() => onDeletePlace(place)}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all"
+            title="Delete Place"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Banner */}
+      <div className="relative h-52 sm:h-64 rounded-3xl overflow-hidden glass-card border border-white/12">
+        {place.image ? (
+          <GlassImage src={place.image} alt={place.name} />
+        ) : (
+          <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-white/20">
+            <MapPin size={48} />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute bottom-6 left-6 right-6 space-y-1 z-10">
+          <span className="eyebrow flex items-center gap-1.5 text-[10px] text-[#c7a6ff]">
+            <MapPin size={11} /> PLACE MEMORY
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-normal text-white">{place.name}</h1>
+          <p className="text-xs text-[#b1afb8] flex items-center gap-1 pt-0.5">
+            <MapPin size={12} className="text-[#c7a6ff]" /> {place.location}
+          </p>
+          {place.description && <p className="text-xs text-[#8b8991] max-w-xl pt-1">{place.description}</p>}
+        </div>
+        <span className="corner-line-tl" />
+      </div>
+
+      {/* Dynamic Stats Counter */}
+      <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl glass-card text-center">
+        <div>
+          <strong className="text-lg text-white block font-normal">{linkedMemories.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Memories</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block font-normal">{linkedNotes.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Notes</span>
+        </div>
+        <div>
+          <strong className="text-lg text-white block font-normal">{linkedBoards.length}</strong>
+          <span className="text-[10px] text-[#66636c] uppercase tracking-wider">Collections</span>
+        </div>
+      </div>
+
+      {/* Linked Memories */}
+      {linkedMemories.length > 0 && (
+        <div>
+          <div className="section-header">
+            <h2>MEMORIES AT THIS PLACE</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {linkedMemories.map(m => (
+              <MemoryCard
+                key={m.id}
+                memory={m}
+                onClick={() => onMemory(m)}
+                isSaved={isSaved('moment', m.id)}
+                onToggleSave={e => onToggleSave('moment', m.id, e)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Linked Boards */}
+      {linkedBoards.length > 0 && (
+        <div>
+          <div className="section-header">
+            <h2>COLLECTIONS AT THIS PLACE</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {linkedBoards.map(b => (
+              <BoardCard
+                key={b.id}
+                board={b}
+                allBoards={boards}
+                allMemories={memories}
+                onClick={() => onBoard(b)}
+                isSaved={isSaved('board', b.id)}
+                onToggleSave={e => onToggleSave('board', b.id, e)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Linked Notes */}
+      {linkedNotes.length > 0 && (
+        <div>
+          <div className="section-header">
+            <h2>NOTES AT THIS PLACE</h2>
+          </div>
+          <div className="space-y-3">
+            {linkedNotes.map(n => (
+              <div key={n.id} className="note-card glass-card">
+                <span className="text-[#c7a6ff] text-xs font-semibold block mb-1">✦</span>
+                <p>"{n.text}"</p>
+                <span>{n.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {linkedMemories.length === 0 && linkedNotes.length === 0 && linkedBoards.length === 0 && (
+        <div className="py-16 text-center glass-card border border-white/10 rounded-3xl p-8">
+          <MapPin size={32} className="mx-auto mb-3 text-[#8b8991]" />
+          <h3 className="text-sm font-medium text-white mb-1">NO MEMORIES LINKED YET</h3>
+          <p className="text-xs text-[#b1afb8]">Assign moments or notes to this place to see them here.</p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/* SAVED / FAVORITES PAGE */
 function SavedPage({
   savedItems,
   boards,
@@ -1909,95 +2633,91 @@ function SavedPage({
     return memories.filter(m => ids.includes(m.id))
   }, [savedItems, memories])
 
-  const isEmpty =
-    (filter === 'ALL' && savedBoards.length === 0 && savedMemories.length === 0) ||
-    (filter === 'BOARDS' && savedBoards.length === 0) ||
-    (filter === 'MOMENTS' && savedMemories.length === 0)
-
   return (
     <section className="screen space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between pt-2">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#b1afb8] hover:text-white transition-colors">
-          <ArrowLeft size={16} /> Back to Home
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Back to My Universe
         </button>
       </div>
 
       <div>
-        <span className="eyebrow block mb-2 text-[10px]">SAVED & FAVORITES</span>
-        <h1 className="title-large">Saved Items</h1>
-        <p className="lede mt-2 mb-0">Your bookmarked collections and favorite moments.</p>
+        <span className="eyebrow block mb-2 text-[10px]">CURATED SELECTIONS</span>
+        <h1 className="title-large">Saved Favorites</h1>
+        <p className="lede mt-1 mb-0">Public and private moments you have bookmarked.</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-6 border-b border-white/10 pb-2">
-        {(['ALL', 'BOARDS', 'MOMENTS'] as const).map(f => (
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-white/10">
+        {(['ALL', 'BOARDS', 'MOMENTS'] as const).map(tab => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`pb-2 text-xs font-medium tracking-wider transition-all relative ${
-              filter === f ? 'text-white' : 'text-[#8b8991] hover:text-white'
+            key={tab}
+            onClick={() => setFilter(tab)}
+            className={`px-4 py-1.5 rounded-full text-xs transition-all border ${
+              filter === tab ? 'bg-white/10 border-white text-white font-medium' : 'bg-white/[0.03] border-white/10 text-[#8b8991] hover:text-white'
             }`}
           >
-            {f}
-            {filter === f && <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#c7a6ff]" />}
+            {tab}
           </button>
         ))}
       </div>
 
-      {!isEmpty ? (
-        <div className="space-y-8">
-          {(filter === 'ALL' || filter === 'BOARDS') && savedBoards.length > 0 && (
-            <div>
-              <div className="section-header">
-                <h2>SAVED COLLECTIONS ({savedBoards.length})</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedBoards.map(b => (
-                  <BoardCard
-                    key={b.id}
-                    board={b}
-                    allBoards={boards}
-                    allMemories={memories}
-                    onClick={() => onBoard(b)}
-                    isSaved={true}
-                    onToggleSave={e => onToggleSave('board', b.id, e)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {(filter === 'ALL' || filter === 'MOMENTS') && savedMemories.length > 0 && (
-            <div>
-              <div className="section-header">
-                <h2>SAVED MOMENTS ({savedMemories.length})</h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {savedMemories.map(m => (
-                  <MemoryCard
-                    key={m.id}
-                    memory={m}
-                    onClick={() => onMemory(m)}
-                    isSaved={true}
-                    onToggleSave={e => onToggleSave('moment', m.id, e)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Content Grid */}
+      {(filter === 'ALL' || filter === 'BOARDS') && savedBoards.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Saved Collections</h3>
+            <span className="text-[10px] text-[#66636c]">{savedBoards.length} saved</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedBoards.map(b => (
+              <BoardCard
+                key={b.id}
+                board={b}
+                allBoards={boards}
+                allMemories={memories}
+                onClick={() => onBoard(b)}
+                isSaved={isSaved('board', b.id)}
+                onToggleSave={e => onToggleSave('board', b.id, e)}
+              />
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="py-20 text-center glass-card border border-dashed border-white/10 rounded-3xl p-8">
+      )}
+
+      {(filter === 'ALL' || filter === 'MOMENTS') && savedMemories.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Saved Moments</h3>
+            <span className="text-[10px] text-[#66636c]">{savedMemories.length} saved</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {savedMemories.map(m => (
+              <MemoryCard
+                key={m.id}
+                memory={m}
+                onClick={() => onMemory(m)}
+                isSaved={isSaved('moment', m.id)}
+                onToggleSave={e => onToggleSave('moment', m.id, e)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {savedBoards.length === 0 && savedMemories.length === 0 && (
+        <div className="py-20 text-center glass-card border border-white/10 rounded-3xl p-8">
           <Bookmark size={32} className="mx-auto mb-3 text-[#8b8991]" />
-          <h3 className="text-sm font-medium text-white mb-1">Nothing saved yet</h3>
-          <p className="text-xs text-[#b1afb8]">Explore and save something you love to view it here.</p>
+          <h3 className="text-sm font-medium text-white mb-1">NO SAVED ITEMS</h3>
+          <p className="text-xs text-[#b1afb8]">Bookmark your favorite memories or collections to easily find them here.</p>
         </div>
       )}
     </section>
   )
 }
 
-/* BOARD / COLLECTION PAGE */
+/* EDITORIAL BOARD PAGE WITH CHILD BOARDS */
 function BoardPage({
   board,
   allBoards,
@@ -2025,35 +2745,26 @@ function BoardPage({
   onBack: () => void
   onMemory: (m: Memory) => void
   onBoard: (b: Board) => void
-  onAddBlock: (blockData: Omit<BoardBlock, 'id' | 'order'>) => void
+  onAddBlock: (b: any) => void
   onEditBoard: () => void
   onDeleteBoard: () => void
   onAddChildBoard: () => void
-  onDeleteBlock: (blockId: string) => void
-  onReorderBlock: (blockId: string, direction: 'up' | 'down') => void
+  onDeleteBlock: (id: string) => void
+  onReorderBlock: (id: string, dir: 'up' | 'down') => void
   onShareBoard: () => void
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
-  const [boardSheet, setBoardSheet] = useState<string | null>(null)
-
-  // Calculate dynamic counts
-  const childBoards = useMemo(() => allBoards.filter(b => b.parentBoardId === board.id), [allBoards, board.id])
-  const parentBoard = useMemo(
-    () => (board.parentBoardId ? allBoards.find(b => b.id === board.parentBoardId) : null),
-    [allBoards, board.parentBoardId]
-  )
-
-  const heroMemory = allMemories[0]
-  const remainingMemories = allMemories.slice(1)
+  const childBoards = allBoards.filter(b => b.parentBoardId === board.id)
+  const parentBoard = board.parentBoardId ? allBoards.find(b => b.id === board.parentBoardId) : null
 
   return (
-    <section className="screen space-y-6">
-      {/* Header Controls & Breadcrumbs */}
+    <section className="screen space-y-8">
+      {/* Breadcrumbs & Navigation Header */}
       <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2 text-xs text-[#b1afb8]">
-          <button onClick={onBack} className="flex items-center gap-1.5 hover:text-white transition-colors">
-            <ArrowLeft size={16} /> Back
+        <div className="flex items-center gap-2 text-xs text-[#8b8991]">
+          <button onClick={onBack} className="hover:text-white transition-colors flex items-center gap-1">
+            <ArrowLeft size={14} /> Back
           </button>
           {parentBoard && (
             <>
@@ -2068,56 +2779,54 @@ function BoardPage({
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={e => onToggleSave('board', board.id, e)} className="btn-secondary text-xs px-3 py-1.5">
-            <Bookmark size={13} className={isSaved('board', board.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
-            {isSaved('board', board.id) ? 'Saved' : 'Save'}
+          <button onClick={onShareBoard} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white transition-all">
+            <Share2 size={14} />
           </button>
-          <button onClick={onShareBoard} className="btn-secondary text-xs px-3 py-1.5">
-            <Share2 size={13} /> Share
+          <button onClick={e => onToggleSave('board', board.id, e)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white transition-all">
+            <Bookmark size={14} className={isSaved('board', board.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
           </button>
-          <button onClick={onEditBoard} className="btn-secondary text-xs px-3 py-1.5" title="Edit collection">
-            <Pencil size={13} /> Edit
+          <button onClick={onEditBoard} className="btn-secondary text-xs px-3 py-1.5">
+            <Pencil size={12} /> Edit
           </button>
-          <button onClick={onDeleteBoard} className="btn-secondary text-xs px-3 py-1.5 text-rose-400/80 hover:text-rose-400" title="Delete collection">
-            <Trash2 size={13} />
-          </button>
-          <button onClick={() => setBoardSheet('add')} className="btn-secondary text-xs px-3 py-1.5">
-            <Plus size={14} /> Add Block
+          <button onClick={onDeleteBoard} className="p-2 rounded-xl bg-white/5 border border-white/10 text-rose-400 hover:bg-rose-950/40 transition-all">
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
 
-      {/* Cinematic Board Header */}
-      <div className="relative h-72 sm:h-80 rounded-3xl overflow-hidden border border-white/10 glass-card">
-        <img src={board.image} alt={board.name} className="w-full h-full object-cover opacity-65" />
+      {/* Cinematic Hero Header */}
+      <div className="relative h-64 sm:h-80 rounded-3xl overflow-hidden glass-card border border-white/12">
+        <GlassImage src={board.image} alt={board.name} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute top-5 right-5 z-10">
+        <div className="absolute top-6 left-6 flex items-center gap-2">
           <span className={`badge-privacy ${board.privacy === 'public' ? 'is-public' : ''}`}>
-            {board.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
-            {board.privacy.toUpperCase()}
+            {board.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
+            {board.privacy}
           </span>
+          {parentBoard && (
+            <span className="text-[10px] bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/12 text-[#c7a6ff]">
+              Child Board
+            </span>
+          )}
         </div>
         <div className="absolute bottom-6 left-6 right-6 space-y-2 z-10">
-          <span className="eyebrow flex items-center gap-2 text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c7a6ff]" /> CURATED COLLECTION
-          </span>
           <h1 className="text-3xl sm:text-4xl font-normal text-white">{board.name}</h1>
-          {board.description && (
-            <p className="text-xs sm:text-sm text-[#b1afb8] max-w-2xl font-serif italic leading-relaxed">
-              "{board.description}"
-            </p>
-          )}
-          <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#8b8991] pt-1">
+          <p className="text-xs sm:text-sm text-[#b1afb8] max-w-2xl">{board.description}</p>
+          <div className="flex items-center gap-4 text-xs text-[#8b8991] pt-1">
             <span>{allMemories.length} memories</span>
-            <span>· {childBoards.length} child boards</span>
-            <span>· {allNotes.length} notes</span>
+            <span>·</span>
+            <span>{childBoards.length} child boards</span>
             {board.location && (
-              <span className="flex items-center gap-1">
-                · <MapPin size={10} className="text-[#c7a6ff]" /> {board.location}
-              </span>
+              <>
+                <span>·</span>
+                <span className="flex items-center gap-1 text-[#c7a6ff]">
+                  <MapPin size={10} /> {board.location}
+                </span>
+              </>
             )}
           </div>
         </div>
+        <span className="corner-line-tl" />
       </div>
 
       {/* Child Boards Section */}
@@ -2129,173 +2838,63 @@ function BoardPage({
           </button>
         </div>
         {childBoards.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {childBoards.map((child, idx) => (
-              <div
-                key={child.id}
-                onClick={() => onBoard(child)}
-                className="glass-card p-4 flex flex-col justify-between group cursor-pointer hover:border-white/25 transition-all min-h-[110px]"
-              >
-                <div className="flex items-center justify-between text-[10px] text-[#c7a6ff]">
-                  <span>Child #{idx + 1}</span>
-                  <ChevronRight size={14} className="text-[#8b8991] group-hover:text-white" />
-                </div>
-                <div>
-                  <strong className="text-xs sm:text-sm text-white font-medium block group-hover:text-[#c7a6ff] transition-colors">
-                    {child.name}
-                  </strong>
-                  <small className="text-[10px] text-[#66636c] block mt-0.5">Explore sub-collection →</small>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {childBoards.map(cb => (
+              <BoardCard
+                key={cb.id}
+                board={cb}
+                allBoards={allBoards}
+                allMemories={allMemories}
+                onClick={() => onBoard(cb)}
+                isSaved={isSaved('board', cb.id)}
+                onToggleSave={e => onToggleSave('board', cb.id, e)}
+              />
             ))}
           </div>
         ) : (
-          <div className="py-6 px-4 rounded-2xl glass-card border border-dashed border-white/10 flex items-center justify-between">
-            <span className="text-xs text-[#b1afb8]">No child boards yet in this collection.</span>
-            <button onClick={onAddChildBoard} className="btn-secondary text-xs px-3 py-1">
-              + Create Child Board
-            </button>
-          </div>
+          <button
+            onClick={onAddChildBoard}
+            className="w-full py-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-[#b1afb8] text-xs font-medium flex items-center justify-center gap-2 hover:border-white/30 hover:text-white transition-all"
+          >
+            <FolderPlus size={14} /> Create nested child board inside {board.name}
+          </button>
         )}
       </div>
 
-      {/* Controlled Asymmetric Visual Layout */}
+      {/* Asymmetric / Scrapbook Board Blocks Layout */}
       <div>
         <div className="section-header">
-          <h2>CURATED MOODBOARD ({allMemories.length} MEMORIES)</h2>
+          <h2>COLLECTION MEMORIES & BLOCKS</h2>
         </div>
-
-        {allMemories.length > 0 ? (
-          <div className="space-y-6">
-            {heroMemory && (
-              <div
-                onClick={() => onMemory(heroMemory)}
-                className="glass-card relative h-80 sm:h-[400px] rounded-3xl overflow-hidden group cursor-pointer border border-white/12 shadow-2xl"
-              >
-                {heroMemory.image ? (
-                  <GlassImage src={heroMemory.image} alt={heroMemory.title} />
-                ) : (
-                  <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-white/30" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                <div className="absolute top-5 left-5 right-5 flex items-center justify-between z-10">
-                  <span className="text-[10px] bg-black/70 px-3 py-1 rounded-full border border-white/15 text-white/90 font-medium">
-                    ✦ FEATURED OPENER
-                  </span>
-                  <span className={`badge-privacy ${heroMemory.privacy === 'public' ? 'is-public' : ''}`}>
-                    {heroMemory.privacy === 'private' ? <LockKeyhole size={9} /> : <Globe2 size={9} />}
-                    {heroMemory.privacy}
-                  </span>
-                </div>
-                <div className="absolute bottom-6 left-6 right-6 space-y-1 z-10">
-                  <h3 className="text-xl sm:text-2xl font-normal text-white group-hover:text-[#c7a6ff] transition-colors">
-                    {heroMemory.title}
-                  </h3>
-                  <p className="text-xs text-[#b1afb8] line-clamp-2 max-w-xl">{heroMemory.description}</p>
-                </div>
-              </div>
-            )}
-
-            {/* EDITORIAL QUOTE NOTE BLOCK */}
-            <div className="glass-card p-6 border-l-2 border-l-[#c7a6ff]">
-              <span className="eyebrow block mb-2 text-[10px]">EDITORIAL NOTE</span>
-              <p className="editorial-note-text text-sm sm:text-base">
-                "Some places are worth remembering for reasons you can't explain. We collect pieces of moments to hold onto what time moves past."
-              </p>
-              <span className="text-[11px] text-[#66636c] block mt-3">— Archive Thought · {board.name}</span>
-            </div>
-
-            {/* REMAINING MEMORIES MASONRY GRID */}
-            {remainingMemories.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {remainingMemories.map(m => (
-                  <MemoryCard
-                    key={m.id}
-                    memory={m}
-                    onClick={() => onMemory(m)}
-                    isSaved={isSaved('moment', m.id)}
-                    onToggleSave={e => onToggleSave('moment', m.id, e)}
-                  />
-                ))}
-              </div>
-            )}
+        {allMemories.length > 0 || blocks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allMemories.map(m => (
+              <MemoryCard
+                key={m.id}
+                memory={m}
+                onClick={() => onMemory(m)}
+                isSaved={isSaved('moment', m.id)}
+                onToggleSave={e => onToggleSave('moment', m.id, e)}
+              />
+            ))}
           </div>
         ) : (
-          <div className="py-16 text-center border border-dashed border-white/12 rounded-3xl glass-card p-8">
-            <Archive size={32} className="mx-auto mb-3 text-[#8b8991]" />
-            <p className="text-sm font-medium text-white mb-1">No moments in this board yet</p>
-            <p className="text-xs text-[#b1afb8] mb-6 max-w-xs mx-auto">
-              Start assembling your moodboard with moments, photos, notes, and sub-boards.
-            </p>
-            <button onClick={() => setBoardSheet('add')} className="btn-primary max-w-xs mx-auto">
-              + Add First Moment
-            </button>
+          <div className="py-16 text-center glass-card border border-white/10 rounded-3xl p-8">
+            <LayoutGrid size={32} className="mx-auto mb-3 text-[#8b8991]" />
+            <h3 className="text-sm font-medium text-white mb-1">NO CONTENT IN THIS COLLECTION YET</h3>
+            <p className="text-xs text-[#b1afb8]">Add moments or child boards to populate this space.</p>
           </div>
         )}
       </div>
-
-      {/* Creation Bottom Sheet inside Board */}
-      {boardSheet && (
-        <div className="sheet-backdrop" onClick={() => setBoardSheet(null)}>
-          <div className="creation-sheet glass-card" onClick={e => e.stopPropagation()}>
-            <div className="sheet-handle" />
-            <div className="flex justify-between items-center mb-6">
-              <span className="eyebrow">ADD BLOCK TO {board.name.toUpperCase()}</span>
-              <button onClick={() => setBoardSheet(null)} className="text-[#8b8991] hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => {
-                  setBoardSheet(null)
-                  onAddBlock({
-                    boardId: board.id,
-                    type: 'photo',
-                    title: 'New Visual Moment',
-                    image: images.cafe,
-                    date: 'August 2026',
-                  })
-                }}
-                className="glass-card p-5 text-left hover:border-white/25 transition-all"
-              >
-                <div className="p-2.5 rounded-xl bg-white/5 text-white w-fit mb-3">
-                  <ImagePlus size={18} />
-                </div>
-                <strong className="text-xs text-white block font-medium">Pin / Photo</strong>
-                <small className="text-[10px] text-[#66636c]">Visual photo moment</small>
-              </button>
-
-              <button
-                onClick={() => {
-                  setBoardSheet(null)
-                  onAddBlock({
-                    boardId: board.id,
-                    type: 'note',
-                    content: 'A quiet thought for this collection.',
-                    date: 'August 2026',
-                  })
-                }}
-                className="glass-card p-5 text-left hover:border-white/25 transition-all"
-              >
-                <div className="p-2.5 rounded-xl bg-white/5 text-white w-fit mb-3">
-                  <FileText size={18} />
-                </div>
-                <strong className="text-xs text-white block font-medium">Note</strong>
-                <small className="text-[10px] text-[#66636c]">Editorial text fragment</small>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }
 
-/* MEMORY VIEWER PAGE */
+/* MEMORY PAGE — DETAILED MOMENT VIEW */
 function MemoryPage({
   memory,
   board,
+  place,
   onBack,
   onEdit,
   onDelete,
@@ -2306,7 +2905,8 @@ function MemoryPage({
   onToggleSave,
 }: {
   memory: Memory
-  board?: Board
+  board?: Board | null
+  place?: Place | null
   onBack: () => void
   onEdit: () => void
   onDelete: () => void
@@ -2316,87 +2916,74 @@ function MemoryPage({
   isSaved: (type: 'board' | 'moment', id: string) => boolean
   onToggleSave: (type: 'board' | 'moment', id: string, e?: React.MouseEvent) => void
 }) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') onNext()
-      if (e.key === 'ArrowLeft') onPrev()
-      if (e.key === 'Escape') onBack()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onNext, onPrev, onBack])
-
   return (
-    <section className="screen min-h-svh flex flex-col space-y-6">
+    <section className="screen space-y-6">
+      {/* Top Header */}
       <div className="flex items-center justify-between pt-2">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#b1afb8] hover:text-white transition-colors">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-[#8b8991] hover:text-white transition-colors">
           <ArrowLeft size={16} /> Back
         </button>
-
         <div className="flex items-center gap-2">
-          <button onClick={e => onToggleSave('moment', memory.id, e)} className="btn-secondary text-xs px-3 py-1">
-            <Bookmark size={12} className={isSaved('moment', memory.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
-            {isSaved('moment', memory.id) ? 'Saved' : 'Save'}
+          <button onClick={onNext} className="btn-secondary text-xs px-3 py-1.5" title="Next Memory">
+            Next <ChevronRight size={14} />
           </button>
-          <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1">
+          <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1.5">
             <Pencil size={12} /> Edit
           </button>
-          <button onClick={onPrev} className="btn-secondary text-xs px-3 py-1">
-            ← Prev
-          </button>
-          <button onClick={onNext} className="btn-secondary text-xs px-3 py-1">
-            Next →
+          <button onClick={e => onToggleSave('moment', memory.id, e)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white transition-all">
+            <Bookmark size={14} className={isSaved('moment', memory.id) ? 'fill-[#c7a6ff] text-[#c7a6ff]' : ''} />
           </button>
         </div>
       </div>
 
-      {memory.image && (
-        <div className="relative w-full h-[380px] sm:h-[500px] rounded-3xl overflow-hidden border border-white/10 bg-black">
-          <img src={memory.image} alt={memory.title} className="w-full h-full object-cover" />
-        </div>
-      )}
+      {/* Main Full-Size Image Container */}
+      <div className="relative rounded-3xl overflow-hidden glass-card border border-white/15 shadow-2xl max-h-[520px] flex items-center justify-center bg-black">
+        {memory.image ? (
+          <img src={memory.image} alt={memory.title} className="max-h-[520px] w-full object-contain" />
+        ) : (
+          <div className="py-24 text-white/30 flex items-center justify-center">No Image</div>
+        )}
+      </div>
 
-      <div className="flex-1 space-y-6 max-w-3xl">
+      {/* Memory Content Details */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <button onClick={onTogglePrivacy} className={`badge-privacy ${memory.privacy === 'public' ? 'is-public' : ''}`}>
-            {memory.privacy === 'private' ? <LockKeyhole size={11} /> : <Globe2 size={11} />}
+          <div className="flex items-center gap-2">
+            {memory.mood && (
+              <span className="text-xs bg-white/10 border border-white/15 px-3 py-1 rounded-full text-white font-medium">
+                {memory.mood}
+              </span>
+            )}
+            {board && (
+              <span className="text-xs text-[#c7a6ff] bg-[#c7a6ff]/10 border border-[#c7a6ff]/20 px-3 py-1 rounded-full">
+                {board.name}
+              </span>
+            )}
+            {place && (
+              <span className="text-xs text-[#c7a6ff] bg-white/5 border border-white/10 px-3 py-1 rounded-full flex items-center gap-1">
+                <MapPin size={10} /> {place.name}
+              </span>
+            )}
+          </div>
+
+          <button onClick={onTogglePrivacy} className={`badge-privacy cursor-pointer ${memory.privacy === 'public' ? 'is-public' : ''}`}>
+            {memory.privacy === 'private' ? <LockKeyhole size={10} /> : <Globe2 size={10} />}
             {memory.privacy.toUpperCase()}
           </button>
-          {memory.mood && (
-            <span className="text-xs bg-white/5 text-[#b1afb8] border border-white/10 px-3 py-1 rounded-full">
-              {memory.mood}
-            </span>
-          )}
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-normal text-white">{memory.title}</h1>
-        <p className="text-sm text-[#b1afb8] leading-relaxed">{memory.description}</p>
+        <h1 className="text-2xl sm:text-3xl font-normal text-white">{memory.title}</h1>
+        <p className="text-sm text-[#b1afb8] leading-relaxed max-w-2xl">{memory.description}</p>
 
-        <div className="flex items-center gap-4 text-xs text-[#8b8991] border-t border-b border-white/10 py-4">
+        <div className="flex items-center gap-4 text-xs text-[#8b8991] pt-2 border-t border-white/10">
           {memory.location && (
-            <span className="flex items-center gap-1.5">
-              <MapPin size={13} className="text-[#c7a6ff]" /> {memory.location}
+            <span className="flex items-center gap-1 text-[#c7a6ff]">
+              <MapPin size={12} /> {memory.location}
             </span>
           )}
-          <span className="flex items-center gap-1.5">
-            <Calendar size={13} /> {memory.date}
-          </span>
+          <span>·</span>
+          <span>{memory.date}</span>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          {memory.tags.map(t => (
-            <span key={t} className="text-xs bg-white/5 border border-white/10 text-[#b1afb8] px-3 py-1 rounded-full">
-              #{t}
-            </span>
-          ))}
-        </div>
-
-        {board && (
-          <div className="glass-card p-4 flex items-center justify-between">
-            <span className="text-xs text-[#8b8991]">COLLECTION</span>
-            <strong className="text-xs text-white font-medium">{board.name}</strong>
-          </div>
-        )}
 
         <button onClick={onDelete} className="flex items-center gap-2 text-xs text-rose-400/80 hover:text-rose-400 pt-4">
           <Trash2 size={14} /> Delete memory from archive
@@ -2410,30 +2997,44 @@ function MemoryPage({
 function CreationSheet({
   type,
   boards,
+  places,
+  moods,
   profile,
+  eraItems,
   editingMemory,
   editingBoard,
+  editingPlace,
   parentBoard,
   onClose,
   onBoard,
   onUpdateBoard,
   onMemory,
   onUpdateMemory,
+  onPlace,
+  onUpdatePlace,
   onNote,
+  onEraSave,
   onProfile,
 }: {
   type: string
   boards: Board[]
+  places: Place[]
+  moods: Mood[]
   profile: Profile
+  eraItems?: EraItem[]
   editingMemory?: Memory | null
   editingBoard?: Board | null
+  editingPlace?: Place | null
   parentBoard?: Board | null
   onClose: () => void
   onBoard: (b: any) => void
   onUpdateBoard: (id: string, b: any) => void
   onMemory: (m: any) => void
   onUpdateMemory: (id: string, m: any) => void
+  onPlace: (p: any) => void
+  onUpdatePlace: (id: string, p: any) => void
   onNote: (n: string) => void
+  onEraSave: (items: EraItem[]) => void
   onProfile: (p: Profile) => void
 }) {
   const [mode, setMode] = useState<string>(
@@ -2450,6 +3051,8 @@ function CreationSheet({
             {mode
               ? mode === 'profile'
                 ? 'EDIT PROFILE'
+                : mode === 'current-era'
+                ? 'EDIT CURRENT ERA'
                 : mode === 'edit-memory'
                 ? 'EDIT MOMENT'
                 : mode === 'memory'
@@ -2460,6 +3063,8 @@ function CreationSheet({
                 ? `NEW CHILD BOARD IN ${parentBoard?.name.toUpperCase() || 'BOARD'}`
                 : mode === 'board'
                 ? 'CREATE COLLECTION'
+                : mode === 'place' || mode === 'edit-place'
+                ? mode === 'edit-place' ? 'EDIT PLACE' : 'CREATE PLACE'
                 : mode === 'story'
                 ? 'CREATE STORY'
                 : 'WRITE NOTE'
@@ -2501,6 +3106,20 @@ function CreationSheet({
             </button>
 
             <button
+              onClick={() => setMode('place')}
+              className="w-full glass-card p-4 flex items-center gap-4 text-left hover:border-white/25 transition-all"
+            >
+              <div className="p-2.5 rounded-xl bg-white/5 text-white">
+                <MapPin size={20} />
+              </div>
+              <div className="flex-1">
+                <strong className="text-sm text-white block font-medium">Create Place</strong>
+                <small className="text-xs text-[#b1afb8]">Save a real location for memories</small>
+              </div>
+              <ChevronRight size={16} className="text-[#8b8991]" />
+            </button>
+
+            <button
               onClick={() => setMode('note')}
               className="w-full glass-card p-4 flex items-center gap-4 text-left hover:border-white/25 transition-all"
             >
@@ -2531,6 +3150,8 @@ function CreationSheet({
         ) : mode === 'memory' || mode === 'edit-memory' ? (
           <MemoryForm
             boards={boards}
+            places={places}
+            moods={moods}
             initial={editingMemory}
             onSave={m => {
               if (editingMemory) {
@@ -2542,6 +3163,7 @@ function CreationSheet({
           />
         ) : mode === 'board' || mode === 'edit-board' || mode === 'create-child-board' ? (
           <BoardForm
+            places={places}
             initial={editingBoard}
             parentBoard={parentBoard}
             onSave={b => {
@@ -2552,9 +3174,24 @@ function CreationSheet({
               }
             }}
           />
+        ) : mode === 'place' || mode === 'edit-place' ? (
+          <PlaceForm
+            initial={editingPlace}
+            onSave={p => {
+              if (editingPlace) {
+                onUpdatePlace(editingPlace.id, p)
+              } else {
+                onPlace(p)
+              }
+            }}
+          />
+        ) : mode === 'current-era' ? (
+          <EraSheet items={eraItems || starterEraItems} onSave={onEraSave} />
         ) : mode === 'story' ? (
           <MemoryForm
             boards={boards}
+            places={places}
+            moods={moods}
             isStory={true}
             onSave={m => onMemory(m)}
           />
@@ -2662,11 +3299,15 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
 /* Memory Creation / Edit Form */
 function MemoryForm({
   boards,
+  places,
+  moods,
   initial,
   isStory,
   onSave,
 }: {
   boards: Board[]
+  places: Place[]
+  moods: Mood[]
   initial?: Memory | null
   isStory?: boolean
   onSave: (m: any) => void
@@ -2675,13 +3316,13 @@ function MemoryForm({
   const [description, setDescription] = useState(initial?.description || '')
   const [image, setImage] = useState(initial?.image || '')
   const [boardId, setBoardId] = useState(initial?.boardId || boards[0]?.id || '')
+  const [placeId, setPlaceId] = useState(initial?.placeId || '')
   const [date, setDate] = useState(initial?.date || 'August 2026')
   const [location, setLocation] = useState(initial?.location || '')
-  const [mood, setMood] = useState(initial?.mood || '☁ nostalgic')
+  const [mood, setMood] = useState(initial?.mood || '☁ Nostalgic')
+  const [moodId, setMoodId] = useState(initial?.moodId || 'nostalgic')
   const [tags, setTags] = useState(initial?.tags ? initial.tags.join(', ') : 'memory, quiet')
   const [privacy, setPrivacy] = useState<PrivacyStatus>(initial?.privacy || 'private')
-
-  const moods = ['☁ nostalgic', '☕ cozy', '✨ serene', '📚 peaceful', '🌙 quiet', '🍃 fresh']
 
   return (
     <form
@@ -2693,9 +3334,11 @@ function MemoryForm({
             description,
             image: image || (isStory ? images.library : images.rain),
             boardId,
+            placeId,
             date,
             location,
             mood,
+            moodId,
             privacy,
             tags: tags.split(',').map(t => t.trim()).filter(Boolean),
           })
@@ -2744,14 +3387,15 @@ function MemoryForm({
         </div>
 
         <div className="form-group">
-          <label>Location</label>
-          <input
-            type="text"
-            value={location}
-            onChange={e => setLocation(e.target.value)}
-            placeholder="e.g. Jamshedpur"
-            className="form-input"
-          />
+          <label>Place</label>
+          <select value={placeId} onChange={e => setPlaceId(e.target.value)} className="form-select">
+            <option value="" className="bg-black text-white">No place selected</option>
+            {places.map(p => (
+              <option key={p.id} value={p.id} className="bg-black text-white">
+                📍 {p.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -2768,32 +3412,53 @@ function MemoryForm({
         </div>
 
         <div className="form-group">
-          <label>Tags (comma separated)</label>
+          <label>Location text</label>
           <input
             type="text"
-            value={tags}
-            onChange={e => setTags(e.target.value)}
-            placeholder="e.g. rain, quiet"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            placeholder="e.g. Jamshedpur"
             className="form-input"
           />
         </div>
       </div>
 
       <div className="form-group">
+        <label>Tags (comma separated)</label>
+        <input
+          type="text"
+          value={tags}
+          onChange={e => setTags(e.target.value)}
+          placeholder="e.g. rain, quiet"
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
         <label>Mood</label>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {moods.map(m => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMood(m)}
-              className={`px-3 py-1 rounded-full text-xs transition-all border ${
-                mood === m ? 'bg-white/10 border-white text-white' : 'bg-white/5 border-white/10 text-[#8b8991]'
-              }`}
-            >
-              {m}
-            </button>
-          ))}
+          {moods.map(m => {
+            const moodLabel = `${m.icon} ${m.name}`
+            const isSelected = moodId === m.id || mood === moodLabel
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => {
+                  setMoodId(m.id)
+                  setMood(moodLabel)
+                }}
+                className={`px-3 py-1 rounded-full text-xs transition-all border flex items-center gap-1 ${
+                  isSelected
+                    ? 'bg-white/10 border-white text-white font-medium'
+                    : 'bg-white/5 border-white/10 text-[#8b8991]'
+                }`}
+              >
+                <span>{m.icon}</span>
+                <span>{m.name}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -2825,10 +3490,12 @@ function MemoryForm({
 
 /* Collection Creation / Edit Form */
 function BoardForm({
+  places,
   initial,
   parentBoard,
   onSave,
 }: {
+  places: Place[]
   initial?: Board | null
   parentBoard?: Board | null
   onSave: (b: any) => void
@@ -2837,6 +3504,7 @@ function BoardForm({
   const [description, setDescription] = useState(initial?.description || '')
   const [image, setImage] = useState(initial?.image || '')
   const [location, setLocation] = useState(initial?.location || '')
+  const [placeId, setPlaceId] = useState(initial?.placeId || '')
   const [privacy, setPrivacy] = useState<PrivacyStatus>(initial?.privacy || 'private')
 
   return (
@@ -2849,6 +3517,7 @@ function BoardForm({
             description,
             image: image || images.cafe,
             location,
+            placeId,
             privacy,
             parentBoardId: initial?.parentBoardId || parentBoard?.id,
           })
@@ -2903,16 +3572,238 @@ function BoardForm({
         </div>
 
         <div className="form-group">
-          <label>Visibility</label>
-          <select value={privacy} onChange={e => setPrivacy(e.target.value as PrivacyStatus)} className="form-select">
-            <option value="private" className="bg-black text-white">Private</option>
-            <option value="public" className="bg-black text-white">Public</option>
+          <label>Place</label>
+          <select value={placeId} onChange={e => setPlaceId(e.target.value)} className="form-select">
+            <option value="" className="bg-black text-white">No place selected</option>
+            {places.map(p => (
+              <option key={p.id} value={p.id} className="bg-black text-white">
+                📍 {p.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
+      <div className="form-group">
+        <label>Visibility</label>
+        <select value={privacy} onChange={e => setPrivacy(e.target.value as PrivacyStatus)} className="form-select">
+          <option value="private" className="bg-black text-white">Private</option>
+          <option value="public" className="bg-black text-white">Public</option>
+        </select>
+      </div>
+
       <button type="submit" className="btn-primary mt-2">
         {initial ? 'Update Collection' : 'Create collection'}
+      </button>
+    </form>
+  )
+}
+
+/* Place Creation / Edit Form */
+function PlaceForm({
+  initial,
+  onSave,
+}: {
+  initial?: Place | null
+  onSave: (p: any) => void
+}) {
+  const [name, setName] = useState(initial?.name || '')
+  const [location, setLocation] = useState(initial?.location || '')
+  const [description, setDescription] = useState(initial?.description || '')
+  const [image, setImage] = useState(initial?.image || '')
+
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        if (name.trim()) {
+          onSave({
+            name,
+            location,
+            description,
+            image: image || images.cafe,
+          })
+        }
+      }}
+      className="space-y-4"
+    >
+      <div>
+        <h3 className="text-lg font-normal text-white">{initial ? 'EDIT PLACE' : 'CREATE NEW PLACE'}</h3>
+        <p className="text-xs text-[#b1afb8]">Save a real location associated with memories or notes.</p>
+      </div>
+
+      <div className="form-group">
+        <label>Place Name</label>
+        <input
+          required
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="e.g. Blue Door Café"
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Location / City</label>
+        <input
+          type="text"
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+          placeholder="e.g. Jamshedpur or Tokyo, Japan"
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Description</label>
+        <textarea
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          placeholder="e.g. Warm coffee spot near Gion..."
+          className="form-textarea"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Cover Image</label>
+        <ImageUpload value={image} onChange={setImage} />
+      </div>
+
+      <button type="submit" className="btn-primary">
+        {initial ? 'Update Place' : 'Save Place'}
+      </button>
+    </form>
+  )
+}
+
+/* Current Era Management Form */
+function EraSheet({
+  items,
+  onSave,
+}: {
+  items: EraItem[]
+  onSave: (updated: EraItem[]) => void
+}) {
+  const [list, setList] = useState<EraItem[]>(items)
+  const [newLabel, setNewLabel] = useState('')
+  const [newIcon, setNewIcon] = useState('✦')
+
+  const icons = ['💻', '☕', '📚', '🌙', '🎧', '📷', '✈️', '🎨', '✨', '✦']
+
+  const handleAdd = () => {
+    if (newLabel.trim()) {
+      const newItem: EraItem = {
+        id: uid(),
+        label: newLabel.trim(),
+        icon: newIcon,
+        order: list.length + 1,
+      }
+      setList(prev => [...prev, newItem])
+      setNewLabel('')
+    }
+  }
+
+  const handleDelete = (id: string) => {
+    setList(prev => prev.filter(item => item.id !== id))
+  }
+
+  const handleMove = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= list.length) return
+    const updated = [...list]
+    const temp = updated[index]
+    updated[index] = updated[targetIndex]
+    updated[targetIndex] = temp
+    updated.forEach((item, idx) => {
+      item.order = idx + 1
+    })
+    setList(updated)
+  }
+
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        onSave(list)
+      }}
+      className="space-y-5"
+    >
+      <div>
+        <h3 className="text-lg font-normal text-white">EDIT CURRENT ERA</h3>
+        <p className="text-xs text-[#b1afb8]">What is your world feeling like right now?</p>
+      </div>
+
+      {list.length > 0 ? (
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+          {list.map((item, idx) => (
+            <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{item.icon || '✦'}</span>
+                <span className="text-xs text-white">{item.label}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleMove(idx, 'up')}
+                  disabled={idx === 0}
+                  className="p-1 rounded bg-white/5 hover:bg-white/15 disabled:opacity-30 text-white"
+                  title="Move Up"
+                >
+                  <ArrowUp size={12} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMove(idx, 'down')}
+                  disabled={idx === list.length - 1}
+                  className="p-1 rounded bg-white/5 hover:bg-white/15 disabled:opacity-30 text-white"
+                  title="Move Down"
+                >
+                  <ArrowDown size={12} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(item.id)}
+                  className="p-1 rounded bg-rose-950/40 text-rose-300 hover:bg-rose-900/60"
+                  title="Delete Item"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-6 text-center rounded-2xl border border-dashed border-white/15 text-xs text-[#b1afb8]">
+          "What's your world feeling like lately?"
+        </div>
+      )}
+
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <label className="text-xs text-[#b1afb8]">Add Era Item</label>
+        <div className="flex gap-2">
+          <select value={newIcon} onChange={e => setNewIcon(e.target.value)} className="form-select w-20">
+            {icons.map(ic => (
+              <option key={ic} value={ic} className="bg-black text-white">
+                {ic}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={newLabel}
+            onChange={e => setNewLabel(e.target.value)}
+            placeholder="e.g. photography, rainy evenings..."
+            className="form-input flex-1"
+          />
+          <button type="button" onClick={handleAdd} className="btn-secondary text-xs px-3">
+            Add
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" className="btn-primary mt-2">
+        Save Current Era
       </button>
     </form>
   )
